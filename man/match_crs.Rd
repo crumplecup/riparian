@@ -4,10 +4,10 @@
 \alias{match_crs}
 \title{MATCH CRS}
 \usage{
-match_crs(poly_list, crs_ref)
+match_crs(polys, crs_ref)
 }
 \arguments{
-\item{poly_list}{is a list of spatial polygon objects}
+\item{polys}{is a spatial polygons objects}
 
 \item{crs_ref}{is a character string representing the crs}
 }
@@ -15,6 +15,6 @@ match_crs(poly_list, crs_ref)
 a list of spatial polygons projected in the common crs
 }
 \description{
-Make sure your extents overlap by converting all polygons in a list
+Make sure your extents overlap by converting polygons
 into a common reference crs.
 }

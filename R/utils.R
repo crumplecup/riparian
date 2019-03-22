@@ -28,6 +28,48 @@ bisecter <- function(ext, vertical=TRUE)	{
 
 
 
+#' Build Cover Change Table
+#'
+#'
+#'
+#' @param csv is a csv file with cols(sample_id, year, type, obs(1:50))
+#' @param year1 is a number matching a value in csv$year
+#' @param year2 is a number matching a value in csv$year
+#' @param polys is a spatial polygons object (sampling boxes)
+#' @param lots is a spatial polygons object (riparian taxlots)
+#' @param permits is a csv file with cols(maptaxlot, record_no)
+#' @return prints a csv file with cols(id, change, maptaxlot, permits) to the working directory
+#' @import data.table
+#' @export
+
+
+build_change_table <- function(csv,
+                               year1,
+                               year2,
+                               polys,
+                               lots,
+                               permits)  {
+  dt <- setDT(csv)
+  yr1 <- csv[year == year1]
+  yr2 <- csv[year == year2]
+  chng <- rep(NA,nrow(yr2))
+  for (i in 1:nrow(yr2))  {
+    try(chng[i] <- yr2$mn[i] - yr1$mn[yr1$sample_id == yr2$sample_id[i]], silent=T)
+  }
+  ids <- 1:length(polys)
+  change <- array(0,length(polys))
+  for (i in seq_along(change))  {
+    change[i] <- chng[yr2$sample_id %in% as.character(ids[i])]
+  }
+  mtls <- lookup_lots(polys, lots)
+  perms <- lookup_permits(polys, lots, permits)
+  dt <- setDT(data.frame(id = ids, change = change, maptaxlot = mtls[ids], permits = perms[ids]))
+  write.csv(dt[order(change)], file = paste0('change_table_', year1, '-', year2,'.csv'))
+}
+
+
+
+
 #' COORDINATE LIST FROM SPATIALPOLYGONS
 #'
 #'
@@ -41,56 +83,6 @@ coord_lis <- function(poly)  {
                    function(x) lapply(slot(x,'Polygons'),
                           function(y) slot(y, 'coords')))
   coords[[1]]
-}
-
-
-
-#' Cover Change Report
-#'
-#' Prints a graph of cover change.
-#'
-#' @param year1 is a matrix with cols (sample_id,year,type,results(1:50))
-#' @param year2 is a matrix same format as year1
-#' @return prints a graph of mean cover change into the working directory
-#' @import data.table
-#' @export
-
-change_report <- function(csv,
-                          year1,
-                          year2,
-                          title='cover_change.png',
-                          heading='% Cover Change',
-                          leg_pos='topleft',
-                          y_lab = 'No. of Sample Sites with Cover Change of X')  {
-  dt <- setDT(csv)
-  year1 <- csv[year == year1]
-  year2 <- csv[year == year2]
-  chng <- rep(NA,nrow(year2))
-  for (i in 1:nrow(year2))  {
-    try(chng[i] <- year2$mn[i] - year1$mn[year1$sample_id == year2$sample_id[i]], silent=T)
-  }
-  mn_chng <- mean(chng[!is.na(chng)])
-  sd_chng <- sd(chng[!is.na(chng)])
-  n_chng <- length(chng[!is.na(chng)])
-  upr_chng <- mn_chng + 1.96 * (sd_chng / sqrt(n_chng))
-  lwr_chng <- mn_chng - 1.96 * (sd_chng / sqrt(n_chng))
-  pmf_chng <- density(chng[!is.na(chng)])
-
-  png(title, width=9, height=6, units='in', res=300)
-  pmf_chng %>% plot(lwd=2,col='forestgreen',
-                    main=heading, ylab=y_lab, axes=F)
-  axis(1, at=seq(-1,1,.1),
-       labels=c('-100%','-90%','-80%', '-70%', '-60%', '-50%', '-40%', '-30%', '-20%', '-10%', '0%',
-                '10%', '20%', '30%', '40%','50%','60%','70%','80%','90%','100%'))
-  axis(2)
-  abline(v=upr_chng,col='steelblue',lty=2)
-  abline(v=lwr_chng,col='steelblue',lty=2)
-  abline(v=mn_chng,col='slategrey')
-  legend(leg_pos,legend=c('No. of Samples at X% Change','Mean Cover Change',
-                            'Upper & Lower 95% CI on Mean Change'),
-         fill = c('forestgreen','slategrey','steelblue'))
-  dev.off()
-
 }
 
 
@@ -147,6 +139,7 @@ fill_extent <- function(poly,dir,band)  {
 
 in_extent <- function(pt, so, is_in=FALSE)	{
   ext <- raster::extent(so)
+
   if (class(pt) == 'numeric')	{
     if (pt[1] >= ext[1] &
         pt[1] <= ext[2] &
@@ -161,29 +154,57 @@ in_extent <- function(pt, so, is_in=FALSE)	{
         pt[4] <= ext[4])	{ is_in <- TRUE }
   }
 
+
   return(is_in)
 }
 
 
 
-#' Look up MapTaxLot`
+#' Look up MapTaxlot`
 #'
-#' Given a polygon, returns the MapTaxlot number of the centroid.
+#' Given a list of polygons, returns character vector of all maptaxlot numbers
+#' within each polygon.
 #'
-#' @param poly is a polygon (sampling box)
+#' @param polys is a list of polygons (sampling boxes)
 #' @param lots is an spdf of polygons (bc taxlots)
-#' @return the MapTaxlot of the centroid of the input polygon
+#' @return the MapTaxlot numbers of each input polygon in a character vector
 #' @export
 
 
-lookup_lot <- function(poly, lots)  {
-  spot <- rgeos::gCentroid(poly)
-  for (i in seq_along(lots))  {
-    if(in_extent(spot, lots[i])) {
-      lots$MapTaxlot
-    }
+lookup_lots <- function(polys, lots)  {
+  mtls <- vector(length = length(polys), mode = 'character')
+  box <- match_crs(samples, lots)
+  for (i in seq_along(samples)) {
+    lot <- crop(lots, box[i,])
+    mtls[i] <- squash(levels(factor(lot$MapTaxlot)))
   }
+  mtls
 }
+
+
+
+#' Look up permits
+#'
+#'
+#'
+#' @param polys is a spatial polygons object (sampling boxes)
+#' @param lots is a spatial polygons object (taxlots)
+#' @param permits is a csv file with cols(maptaxlot, record_no)
+#' @return a character vector listing permit record numbers for taxlots in polys
+
+
+lookup_permits <- function(polys, lots, permits){
+  perms <- vector(length = length(polys), mode = 'character')
+  box <- match_crs(samples, raster::crs(lots))
+  for (i in seq_along(samples)) {
+    lot <- crop(lots, box[i,])
+    map_nos <- levels(factor(lot$MapTaxlot))
+    perms[i] <- squash(permits$record_no[permits$maptaxlot %in% map_nos])
+  }
+  perms
+}
+
+
 
 
 #' Convert coordinates to SpatialLines
@@ -214,18 +235,18 @@ make_line <- function(coords,crs_ref)  {
 
 #' MATCH CRS
 #'
-#' Make sure your extents overlap by converting all polygons in a list
+#' Make sure your extents overlap by converting polygons
 #' into a common reference crs.
 #'
-#' @param poly_list is a list of spatial polygon objects
+#' @param polys is a spatial polygons objects
 #' @param crs_ref is a character string representing the crs
 #' @return a list of spatial polygons projected in the common crs
 #' @export
 
 
 
-match_crs <- function(poly_list, crs_ref)  {
-  lapply(poly_list, function(x) sp::spTransform(x, raster::crs(crs_ref)))
+match_crs <- function(polys, crs_ref)  {
+  polys <- sp::spTransform(polys, raster::crs(crs_ref))
 }
 
 
@@ -248,6 +269,62 @@ quadcut <- function(ras)	{
 }
 
 
+
+#' Plot Cover Change
+#'
+#' Prints a graph of cover change.
+#'
+#' @param csv is a csv with cols (sample_id, year, type, results(1:50))
+#' @param year1 is a number matching csv$year
+#' @param year2 is a number matching csv$year
+#' @param title is the character vector to name the output file (png)
+#' @param heading is the character vector used as the main title of the plot
+#' @param leg_pos is the legend position argument (character)
+#' @param y_lab is the label for the y axis (character)
+#' @return prints a graph of mean cover change into the working directory
+#' @import data.table
+#' @export
+
+plot_change <- function(csv,
+                        year1,
+                        year2,
+                        title='cover_change.png',
+                        heading='% Cover Change',
+                        leg_pos='topleft',
+                        y_lab = 'No. of Sample Sites with Cover Change of X')  {
+  dt <- setDT(csv)
+  year1 <- csv[year == year1]
+  year2 <- csv[year == year2]
+  chng <- rep(NA,nrow(year2))
+  for (i in 1:nrow(year2))  {
+    try(chng[i] <- year2$mn[i] - year1$mn[year1$sample_id == year2$sample_id[i]], silent=T)
+  }
+  mn_chng <- mean(chng[!is.na(chng)])
+  sd_chng <- sd(chng[!is.na(chng)])
+  n_chng <- length(chng[!is.na(chng)])
+  upr_chng <- mn_chng + 1.96 * (sd_chng / sqrt(n_chng))
+  lwr_chng <- mn_chng - 1.96 * (sd_chng / sqrt(n_chng))
+  pmf_chng <- density(chng[!is.na(chng)])
+
+  png(title, width=9, height=6, units='in', res=300)
+  pmf_chng %>% plot(lwd=2,col='forestgreen',
+                    main=heading, ylab=y_lab, axes=F)
+  axis(1, at=seq(-1,1,.1),
+       labels=c('-100%','-90%','-80%', '-70%', '-60%', '-50%', '-40%', '-30%', '-20%', '-10%', '0%',
+                '10%', '20%', '30%', '40%','50%','60%','70%','80%','90%','100%'))
+  axis(2)
+  abline(v=upr_chng,col='steelblue',lty=2)
+  abline(v=lwr_chng,col='steelblue',lty=2)
+  abline(v=mn_chng,col='slategrey')
+  legend(leg_pos,legend=c('No. of Samples at X% Change','Mean Cover Change',
+                          'Upper & Lower 95% CI on Mean Change'),
+         fill = c('forestgreen','slategrey','steelblue'))
+  dev.off()
+
+}
+
+
+
 #' Convert SpatialPolygon to coordinate matrix
 #'
 #' Wrapper to convert polygons to coordinate matrices.
@@ -261,6 +338,26 @@ pull_coords <- function(poly)  {
                    function(x) lapply(methods::slot(x, 'Polygons'),
                                       function(y) methods::slot(y, 'coords')))
   coords[[1]][[1]]
+}
+
+
+
+#' Squash Characters Vectors
+#'
+#' Takes a character vector and returns it as a string.
+#'
+#' @param vec is a character vector
+#' @return vector contents as a string (length 1 char vector)
+
+
+squash <- function(vec)  {
+  char <- vec[1]
+  if(length(vec) > 1) {
+    for (i in 2:length(vec))  {
+      char <- paste(char, vec[i], sep = ' ')
+    }
+  }
+  char
 }
 
 
