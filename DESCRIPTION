@@ -6,10 +6,10 @@ Author: Erik Rose
 Maintainer: Erik Rose <erik.w.rose@gmail.com>
 Description: Analyzing the extent of riparian cover.
 Imports: magrittr,
-	methods,
-	raster,
-	rgeos,
-	sp
+ methods,
+ raster,
+ rgeos,
+ sp
 License: CC0
 Encoding: UTF-8
 LazyData: true
