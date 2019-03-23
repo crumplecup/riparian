@@ -7,10 +7,10 @@
 coord_lis(poly)
 }
 \arguments{
-\item{poly}{is a \code{SpatialPolygons} object}
+\item{poly}{is a `SpatialPolygons` object}
 }
 \value{
-a list coordinates for vertices of polygons in \code{poly}
+a list coordinates for vertices of polygons in `poly`
 }
 \description{
 COORDINATE LIST FROM SPATIALPOLYGONS

@@ -74,8 +74,8 @@ build_change_table <- function(csv,
 #'
 #'
 #'
-#' @param poly is a \code{SpatialPolygons} object
-#' @return a list coordinates for vertices of polygons in \code{poly}
+#' @param poly is a `SpatialPolygons` object
+#' @return a list coordinates for vertices of polygons in `poly`
 #' @export
 
 coord_lis <- function(poly)  {
@@ -100,11 +100,12 @@ coord_lis <- function(poly)  {
 
 
 
-fill_extent <- function(poly,dir,band)  {
-  ext <- extent(poly)
+fill_extent <- function(poly, dir, band)  {
   og_dir <- getwd()
   setwd(dir)
   files <- dir()
+  poly <- match_crs(poly, raster::raster(files[1]))
+  ext <- raster::extent(poly)
   hit <- 0
 
   for(i in seq_along(files))  {
@@ -120,8 +121,50 @@ fill_extent <- function(poly,dir,band)  {
     }
   }
   setwd(og_dir)
-  crop(ras,ext)
+  raster::crop(ras, ext)
 }
+
+
+
+#' Get colors from 4 band raster
+#' 
+#' Returns data.table of mean ndvi and rgb values for a sampling box
+#' 
+#' @param poly is the sampling box
+#' @param dir is the path to the rasters
+#' @return a dt with cols (ndvi, red, grn, blu)
+#' @export
+
+
+get_cols_4band <- function(poly, dir)  {
+  red <- read_sample(poly, dir, 1)
+  grn <- read_sample(poly, dir, 2)
+  blu <- read_sample(poly, dir, 3)
+  nir <- read_sample(poly, dir, 4)
+  ndvi <- (nir - red) / (nir + red)
+  setDT(ndvi = ndvi, red = red, grn = grn, blu = blu)
+}
+
+
+
+#' Get CRS
+#' 
+#' Get a reference CRS from rasters in a directory
+#' 
+#' @param dir is a path to a directory of rasters
+#' @return the CRS character string
+#' @export
+
+
+get_crs <- function(dir)  {
+  og_dir <- getwd()
+  setwd(dir)
+  files <- dir()
+  crs <- raster::crs(raster::raster(files[1]))
+  setwd(og_dir)
+  crs
+}
+
 
 
 
@@ -133,11 +176,11 @@ fill_extent <- function(poly,dir,band)  {
 #'
 #' @param pt is a coordinate vector or extent class object
 #' @param so is a spatial object
-#' @param is_in is a logical binary set to FALSE
 #' @return TRUE if pt is within extent of ras, else FALSE
 #' @export
 
-in_extent <- function(pt, so, is_in=FALSE)	{
+in_extent <- function(pt, so)	{
+  is_in=FALSE
   ext <- raster::extent(so)
 
   if (class(pt) == 'numeric')	{
@@ -342,6 +385,49 @@ pull_coords <- function(poly)  {
 
 
 
+#' Read band
+#' 
+#' Returns the mean value of a given raster band across a polygon.
+#' 
+#' @param poly is a spatial polygon object
+#' @param dir is a directory of raster files
+#' @param band is a number specifying the desired raster band
+#' @return the mean values of the raster band masked by the polygon
+#' @export
+
+read_band <- function(poly, dir, band)  {
+  og_dir <- getwd()
+  setwd(dir)
+  files <- dir()
+  poly <- match_crs(poly, raster::raster(files[1]))
+  ras <- fill_extent(poly, dir, band)
+  setwd(og_dir)
+  vals <- raster::values(raster::mask(ras, poly))
+  mean(vals[!is.na(vals)])
+}
+
+
+
+#' Read sample
+#' 
+#' Get mean values of a raster band from each slice of a sampling box
+#' 
+#' @param poly is a spatial polygons object
+#' @param dir is a path to a directory of raster files
+#' @param band is the desired band of the raster to pull
+#' @return the mean values of the raster band across each slice of a sampling box
+#' @export
+
+read_sample <- function(poly, dir, band)  {
+  crs_ref <- get_crs(dir)
+  coords <- coord_lis(poly)
+  unlist(
+    lapply(coords, function(a, b, c) read_band(spatialize(a, crs_ref), b, c),
+         b = dir, c = band))
+}
+
+
+
 #' Squash Characters Vectors
 #'
 #' Takes a character vector and returns it as a string.
@@ -376,7 +462,7 @@ squash <- function(vec)  {
 #' @export
 
 
-spatialize <- function(mat,crs_ref)	{
+spatialize <- function(mat, crs_ref)	{
   sp::SpatialPolygons(
     list(
       sp::Polygons(

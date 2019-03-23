@@ -4,14 +4,12 @@
 \alias{in_extent}
 \title{IN EXTENT LOGICAL TEST}
 \usage{
-in_extent(pt, so, is_in = FALSE)
+in_extent(pt, so)
 }
 \arguments{
 \item{pt}{is a coordinate vector or extent class object}
 
 \item{so}{is a spatial object}
-
-\item{is_in}{is a logical binary set to FALSE}
 }
 \value{
 TRUE if pt is within extent of ras, else FALSE
