@@ -7,16 +7,16 @@
 fill_extent(poly, dir, band)
 }
 \arguments{
-\item{poly}{is a \code{SpatialPolygons} object}
+\item{poly}{is a `SpatialPolygons` object}
 
 \item{dir}{is a directory filepath character string}
 
 \item{band}{is the band to extract from multiband imagery}
 }
 \value{
-merged rasters from \code{dir} over extent of \code{poly}
+merged rasters from `dir` over extent of `poly`
 }
 \description{
-Given a \code{SpatialPolygons} object and a directory filepath character string,
-returns merged rasters from \code{dir} over extent of \code{poly}.
+Given a `SpatialPolygons` object and a directory filepath character string,
+returns merged rasters from `dir` over extent of `poly`.
 }

@@ -89,13 +89,13 @@ coord_lis <- function(poly)  {
 
 #' MERGE RASTERS TO FILL EXTENT
 #'
-#' Given a \code{SpatialPolygons} object and a directory filepath character string,
-#' returns merged rasters from \code{dir} over extent of \code{poly}.
+#' Given a `SpatialPolygons` object and a directory filepath character string,
+#' returns merged rasters from `dir` over extent of `poly`.
 #'
-#' @param poly is a \code{SpatialPolygons} object
+#' @param poly is a `SpatialPolygons` object
 #' @param dir is a directory filepath character string
 #' @param band is the band to extract from multiband imagery
-#' @return merged rasters from \code{dir} over extent of \code{poly}
+#' @return merged rasters from `dir` over extent of `poly`
 #' @export
 
 
@@ -103,11 +103,36 @@ coord_lis <- function(poly)  {
 fill_extent <- function(poly, dir, band)  {
   og_dir <- getwd()
   setwd(dir)
-  files <- dir()
+  files <- get_rasters(dir)
   poly <- match_crs(poly, raster::raster(files[1]))
   ext <- raster::extent(poly)
   hit <- 0
 
+  for(i in seq_along(files))  {
+    ras <- raster::raster(files[i])
+    if (!is.null(ras[poly,]))  {
+      hit <- c(hit,i)
+    }
+  }
+  hit <- hit[-1]
+  ras <- raster::raster(files[hit[1]], band=band)
+  if (length(hit)>1)  {
+    for (i in 2:length(hit)) {
+      ras <- raster::mosaic(ras,raster::raster(files[hit[i]], band=band),fun=max, tolerance = .1)
+    }
+  }
+  setwd(og_dir)
+  raster::crop(ras, ext)
+}
+
+fill_extent1 <- function(poly, dir, band)  {
+  og_dir <- getwd()
+  setwd(dir)
+  files <- dir()
+  poly <- match_crs(poly, raster::raster(files[1]))
+  ext <- raster::extent(poly)
+  hit <- 0
+  
   for(i in seq_along(files))  {
     if (in_extent(ext,raster::raster(files[i])))  {
       hit <- c(hit,i)
@@ -117,12 +142,14 @@ fill_extent <- function(poly, dir, band)  {
   ras <- raster::raster(files[hit[1]], band=band)
   if (length(hit)>1)  {
     for (i in 2:length(hit)) {
-      ras <- raster::mosaic(ras,raster::raster(files[hit[i]], band=band),fun=max)
+      ras <- raster::mosaic(ras,raster::raster(files[hit[i]], band=band),fun=max, tolerance = .1)
     }
   }
   setwd(og_dir)
   raster::crop(ras, ext)
 }
+
+
 
 
 
@@ -142,7 +169,7 @@ get_cols_4band <- function(poly, dir)  {
   blu <- read_sample(poly, dir, 3)
   nir <- read_sample(poly, dir, 4)
   ndvi <- (nir - red) / (nir + red)
-  setDT(ndvi = ndvi, red = red, grn = grn, blu = blu)
+  setDT(data.frame(ndvi = ndvi, red = red, grn = grn, blu = blu))
 }
 
 
@@ -163,6 +190,31 @@ get_crs <- function(dir)  {
   crs <- raster::crs(raster::raster(files[1]))
   setwd(og_dir)
   crs
+}
+
+
+
+#' get raster names
+#' 
+#' scan a path directory for raster file names, includes .tif, .hdr
+#' 
+#' @param path is a character string specifying a file path to a directory of rasters
+#' @return a character vector of raster file names
+#' @export
+
+
+
+get_rasters <- function(path)  {
+  og_dir <- getwd()
+  setwd(path)
+  files <- dir()
+  files <- files[!grepl('.xml', files)]
+  files <- files[!grepl('.ovr', files)]
+  files <- files[!grepl('.ini', files)]
+  tifs <- files[grepl('.tif', files)]
+  hdrs <- files[grepl('.hdr', files)]
+  setwd(og_dir)
+  c(tifs,hdrs)
 }
 
 
@@ -342,29 +394,111 @@ plot_change <- function(csv,
   for (i in 1:nrow(year2))  {
     try(chng[i] <- year2$mn[i] - year1$mn[year1$sample_id == year2$sample_id[i]], silent=T)
   }
-  mn_chng <- mean(chng[!is.na(chng)])
-  sd_chng <- sd(chng[!is.na(chng)])
-  n_chng <- length(chng[!is.na(chng)])
-  upr_chng <- mn_chng + 1.96 * (sd_chng / sqrt(n_chng))
-  lwr_chng <- mn_chng - 1.96 * (sd_chng / sqrt(n_chng))
+  vars <- matrix(0, ncol=5)
+  colnames(vars) <- c('mean', 'sd', 'n', 'upr', 'lwr')
+  vars[1,1] <- mean(chng[!is.na(chng)])
+  vars[1,2] <- sd(chng[!is.na(chng)])
+  vars[1,3] <- length(chng[!is.na(chng)])
+  vars[1,4] <- vars[1,1] + 1.96 * (vars[1,2] / sqrt(vars[1,3]))
+  vars[1,5] <- vars[1,1] - 1.96 * (vars[1,2] / sqrt(vars[1,3]))
   pmf_chng <- density(chng[!is.na(chng)])
 
   png(title, width=9, height=6, units='in', res=300)
-  pmf_chng %>% plot(lwd=2,col='forestgreen',
+  plot(pmf_chng, lwd=2, col='forestgreen',
                     main=heading, ylab=y_lab, axes=F)
   axis(1, at=seq(-1,1,.1),
        labels=c('-100%','-90%','-80%', '-70%', '-60%', '-50%', '-40%', '-30%', '-20%', '-10%', '0%',
                 '10%', '20%', '30%', '40%','50%','60%','70%','80%','90%','100%'))
   axis(2)
-  abline(v=upr_chng,col='steelblue',lty=2)
-  abline(v=lwr_chng,col='steelblue',lty=2)
-  abline(v=mn_chng,col='slategrey')
+  abline(v=vars[1,4],col='steelblue',lty=2)
+  abline(v=vars[1,5],col='steelblue',lty=2)
+  abline(v=vars[1,1],col='slategrey')
   legend(leg_pos,legend=c('No. of Samples at X% Change','Mean Cover Change',
                           'Upper & Lower 95% CI on Mean Change'),
          fill = c('forestgreen','slategrey','steelblue'))
   dev.off()
-
+  print(vars)
 }
+
+
+#' Plot Cover Extent
+#'
+#' Prints a graph of cover extent.
+#'
+#' @param csv is a csv with cols (sample_id, year, type, results(1:50))
+#' @param title is the character vector to name the output file (png)
+#' @param heading is the character vector used as the main title of the plot
+#' @param leg_pos is the legend position argument (character)
+#' @param y_lab is the label for the y axis (character)
+#' @return prints a graph of mean cover extent into the working directory
+#' @import data.table
+#' @export
+plot_cover <- function(csv,
+                       title='cover_change.png',
+                       heading='% Cover Change',
+                       leg_pos='topleft',
+                       y_lab = 'Proportion of Samples at or below X% Cover')  {
+  dt <- setDT(csv)
+  vars <- matrix(0, ncol=5)
+  colnames(vars) <- c('mean', 'sd', 'n', 'upr', 'lwr')
+  vars[1,1] <- mean(dt$mn[!is.na(dt$mn)])
+  vars[1,2] <- sd(dt$mn[!is.na(dt$mn)])
+  vars[1,3] <- length(dt$mn[!is.na(dt$mn)])
+  vars[1,4] <- vars[1,1] + 1.96 * (vars[1,2] / sqrt(vars[1,3]))
+  vars[1,5] <- vars[1,1] - 1.96 * (vars[1,2] / sqrt(vars[1,3]))
+  
+  png(title, width=9, height=6, units='in', res=300)
+  plot(staTools::cdf(dt$mn), lwd=2, col='forestgreen', type = 'l',
+       main=heading, xlab='Cover Extent', ylab=y_lab, axes=F)
+  axis(1, at=seq(0,1,.1),
+       labels=c('0%', '10%', '20%', '30%', '40%','50%','60%','70%','80%','90%','100%'))
+  axis(2)
+  abline(v=vars[1,4],col='steelblue',lty=2)
+  abline(v=vars[1,5],col='steelblue',lty=2)
+  abline(v=vars[1,1],col='slategrey')
+  legend(leg_pos,legend=c('No. of Samples at X% Change','Mean Cover Extent',
+                          'Upper & Lower 95% CI on Mean Extent'),
+         fill = c('forestgreen','slategrey','steelblue'))
+  dev.off()
+  print(vars)
+}
+
+
+
+#' plot predicted cover
+#' 
+#' Predicts cover extent within a polygon and returns the results as a raster plot
+#' 
+#' @param poly is a spatial polygons object (taxlot or sampling box)
+#' @param path is a character string indicating the path to a directory to rasters
+#' @param title is the name of the png plot printed to the working directory
+#' @return a raster plot of predicted cover masked by `poly`
+#' @export
+
+plot_pred_cover <- function(poly, path, title = 'pred_change.png')  {
+  files <- get_rasters(path)
+  og_dir <- getwd()
+  setwd(path)
+  nir <- fill_extent(poly, path, 4)
+  red <- fill_extent(poly, path, 1)
+  grn <- fill_extent(poly, path, 2)
+  blu <- fill_extent(poly, path, 3)
+  ndvi <- (nir - red) / (nir + red)
+  dt <- setDT(
+    data.frame(ndvi = raster::values(ndvi),
+               red = raster::values(red),
+               grn = raster::values(grn),
+               blue = raster::values(blu)))
+  pred <- predict(mod, newdata = dt)
+  ras <- ndvi
+  raster::values(ras) <- pred
+  ras <- raster::mask(ras, poly)
+  png(title, width=9, height=6, units='in', res=300)
+  plot(ras)
+  dev.off()
+  
+}
+
 
 
 
