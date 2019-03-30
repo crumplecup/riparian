@@ -81,7 +81,7 @@ build_change_table <- function(csv,
 coord_lis <- function(poly)  {
   coords <- lapply(slot(poly,'polygons'),
                    function(x) lapply(slot(x,'Polygons'),
-                          function(y) slot(y, 'coords')))
+                                      function(y) slot(y, 'coords')))
   coords[[1]]
 }
 
@@ -107,7 +107,7 @@ fill_extent <- function(poly, dir, band)  {
   poly <- match_crs(poly, raster::raster(files[1]))
   ext <- raster::extent(poly)
   hit <- 0
-
+  
   for(i in seq_along(files))  {
     ras <- raster::raster(files[i])
     if (!is.null(ras[poly,]))  {
@@ -128,7 +128,7 @@ fill_extent <- function(poly, dir, band)  {
 fill_extent1 <- function(poly, dir, band)  {
   og_dir <- getwd()
   setwd(dir)
-  files <- dir()
+  files <- get_rasters(dir)
   poly <- match_crs(poly, raster::raster(files[1]))
   ext <- raster::extent(poly)
   hit <- 0
@@ -143,35 +143,6 @@ fill_extent1 <- function(poly, dir, band)  {
   if (length(hit)>1)  {
     for (i in 2:length(hit)) {
       ras <- raster::mosaic(ras,raster::raster(files[hit[i]], band=band),fun=max, tolerance = .1)
-<<<<<<< HEAD
-=======
-    }
-  }
-  setwd(og_dir)
-  raster::crop(ras, ext)
-}
-
-
-#' Simple fill extent
-#' 
-#' Returns last raster to match in_extent
-#' 
-#' @param poly is a spatial polygon object
-#' @param dir is a path to a directory of rasters
-#' @param band is the desired raster band
-#' @return the last raster to match in_extent
-#' @export
-
-simple_fill <- function(poly, dir, band)  {
-  og_dir <- getwd()
-  setwd(dir)
-  files <- dir()
-  poly <- match_crs(poly, raster::raster(files[1]))
-  ext <- raster::extent(poly)
-  for(i in seq_along(files))  {
-    if (in_extent(ext,raster::raster(files[i])))  {
-       ras <- raster::raster(files[i], band=band)
->>>>>>> bc5ebe2ce8f3a3016dbaf0aa4ef60c89ff1d7734
     }
   }
   setwd(og_dir)
@@ -182,14 +153,10 @@ simple_fill <- function(poly, dir, band)  {
 
 
 
-<<<<<<< HEAD
-=======
-
->>>>>>> bc5ebe2ce8f3a3016dbaf0aa4ef60c89ff1d7734
 #' Get colors from 4 band raster
-#' 
+#'
 #' Returns data.table of mean ndvi and rgb values for a sampling box
-#' 
+#'
 #' @param poly is the sampling box
 #' @param dir is the path to the rasters
 #' @return a dt with cols (ndvi, red, grn, blu)
@@ -208,9 +175,9 @@ get_cols_4band <- function(poly, dir)  {
 
 
 #' Get CRS
-#' 
+#'
 #' Get a reference CRS from rasters in a directory
-#' 
+#'
 #' @param dir is a path to a directory of rasters
 #' @return the CRS character string
 #' @export
@@ -219,7 +186,7 @@ get_cols_4band <- function(poly, dir)  {
 get_crs <- function(dir)  {
   og_dir <- getwd()
   setwd(dir)
-  files <- dir()
+  files <- get_rasters(dir)
   crs <- raster::crs(raster::raster(files[1]))
   setwd(og_dir)
   crs
@@ -228,9 +195,9 @@ get_crs <- function(dir)  {
 
 
 #' get raster names
-#' 
+#'
 #' scan a path directory for raster file names, includes .tif, .hdr
-#' 
+#'
 #' @param path is a character string specifying a file path to a directory of rasters
 #' @return a character vector of raster file names
 #' @export
@@ -267,22 +234,22 @@ get_rasters <- function(path)  {
 in_extent <- function(pt, so)	{
   is_in=FALSE
   ext <- raster::extent(so)
-
+  
   if (class(pt) == 'numeric')	{
     if (pt[1] >= ext[1] &
         pt[1] <= ext[2] &
         pt[2] >= ext[3] &
         pt[2] <= ext[4])	{ is_in <- TRUE }
   }
-
+  
   if (class(pt) == 'Extent')	{
     if (pt[1] >= ext[1] &
         pt[2] <= ext[2] &
         pt[3] >= ext[3] &
         pt[4] <= ext[4])	{ is_in <- TRUE }
   }
-
-
+  
+  
   return(is_in)
 }
 
@@ -435,10 +402,10 @@ plot_change <- function(csv,
   vars[1,4] <- vars[1,1] + 1.96 * (vars[1,2] / sqrt(vars[1,3]))
   vars[1,5] <- vars[1,1] - 1.96 * (vars[1,2] / sqrt(vars[1,3]))
   pmf_chng <- density(chng[!is.na(chng)])
-
+  
   png(title, width=9, height=6, units='in', res=300)
   plot(pmf_chng, lwd=2, col='forestgreen',
-                    main=heading, ylab=y_lab, axes=F)
+       main=heading, ylab=y_lab, axes=F)
   axis(1, at=seq(-1,1,.1),
        labels=c('-100%','-90%','-80%', '-70%', '-60%', '-50%', '-40%', '-30%', '-20%', '-10%', '0%',
                 '10%', '20%', '30%', '40%','50%','60%','70%','80%','90%','100%'))
@@ -452,13 +419,8 @@ plot_change <- function(csv,
   dev.off()
   print(vars)
 }
-<<<<<<< HEAD
 
 
-=======
-
-
->>>>>>> bc5ebe2ce8f3a3016dbaf0aa4ef60c89ff1d7734
 #' Plot Cover Extent
 #'
 #' Prints a graph of cover extent.
@@ -499,15 +461,14 @@ plot_cover <- function(csv,
          fill = c('forestgreen','slategrey','steelblue'))
   dev.off()
   print(vars)
-<<<<<<< HEAD
 }
 
 
 
 #' plot predicted cover
-#' 
+#'
 #' Predicts cover extent within a polygon and returns the results as a raster plot
-#' 
+#'
 #' @param poly is a spatial polygons object (taxlot or sampling box)
 #' @param path is a character string indicating the path to a directory to rasters
 #' @param title is the name of the png plot printed to the working directory
@@ -536,8 +497,6 @@ plot_pred_cover <- function(poly, path, title = 'pred_change.png')  {
   plot(ras)
   dev.off()
   
-=======
->>>>>>> bc5ebe2ce8f3a3016dbaf0aa4ef60c89ff1d7734
 }
 
 
@@ -561,9 +520,9 @@ pull_coords <- function(poly)  {
 
 
 #' Read band
-#' 
+#'
 #' Returns the mean value of a given raster band across a polygon.
-#' 
+#'
 #' @param poly is a spatial polygon object
 #' @param dir is a directory of raster files
 #' @param band is a number specifying the desired raster band
@@ -573,7 +532,7 @@ pull_coords <- function(poly)  {
 read_band <- function(poly, dir, band)  {
   og_dir <- getwd()
   setwd(dir)
-  files <- dir()
+  files <- get_rasters()
   poly <- match_crs(poly, raster::raster(files[1]))
   ras <- fill_extent(poly, dir, band)
   setwd(og_dir)
@@ -584,9 +543,9 @@ read_band <- function(poly, dir, band)  {
 
 
 #' Read sample
-#' 
+#'
 #' Get mean values of a raster band from each slice of a sampling box
-#' 
+#'
 #' @param poly is a spatial polygons object
 #' @param dir is a path to a directory of raster files
 #' @param band is the desired band of the raster to pull
@@ -598,7 +557,7 @@ read_sample <- function(poly, dir, band)  {
   coords <- coord_lis(poly)
   unlist(
     lapply(coords, function(a, b, c) read_band(spatialize(a, crs_ref), b, c),
-         b = dir, c = band))
+           b = dir, c = band))
 }
 
 
@@ -643,10 +602,10 @@ spatialize <- function(mat, crs_ref)	{
       sp::Polygons(
         list(
           sp::Polygon(mat)
-          ), ID=1
-        )
-      ), proj4string = crs_ref
-    )
+        ), ID=1
+      )
+    ), proj4string = crs_ref
+  )
 }
 
 
@@ -672,7 +631,7 @@ streamsnap <- function(pt,mat)	{
   }
   if(above) new <- mat[1:nebrid,] %>% rbind(pt %>% rbind(mat[(nebrid+1):nrow(mat),]))
   if(!above) new <- mat[1:(nebrid-1),] %>% rbind(pt %>% rbind(mat[nebrid:nrow(mat),]))
-
+  
   return(new)
 }
 
@@ -684,22 +643,22 @@ tri_length <- function(pt,bear,dist,north=TRUE)	{
   #given hypotenuse length of right triangle
   #and coords of start point
   #returns coords of end point along hypotenuse
-
+  
   if(bear>=90 & bear<270)	{
     C <- abs(bear-180)
     north <- FALSE
   }
-
+  
   if(bear<90) C <- bear
   if(bear>=270) C <- 360-bear
   a <- (dist*sin((90-C)*pi/180))/sin(90*pi/180)
   if(north) y <- pt[2] + a
   if(!north) y <- pt[2] - a
-
+  
   c <- (dist*sin(C*pi/180))/sin(90*pi/180)
   if(bear<=180) x <- pt[1] + c
   if(bear>180) x <- pt[1] - c
-
+  
   pt <- c(x,y)
   return(pt)
 }
@@ -715,16 +674,16 @@ get_bear <- function(coords)	{
 set_flag <- function(pt,mat,dist=75%>%FtoM,us=F,k=0)	{
   #given a matrix of coords from start point past end point
   #returns end point along path at distance dist
-
+  
   mat <- pt %>% streamsnap(mat)
   difs <- pt %>% pointDistance(mat,lonlat=F)
   for (i in 1:nrow(mat))	{
     if (difs[i]==min(difs)) ptid <- i
   }
-
+  
   if (us) mat <- mat[ptid:nrow(mat),]
   if (!us) mat <- mat[ptid:1,]
-
+  
   so_far <- 0
   while (so_far <= dist)	{
     k <- k + 1
@@ -737,7 +696,7 @@ set_flag <- function(pt,mat,dist=75%>%FtoM,us=F,k=0)	{
   if (nrow(mat)==k)	{
     bear <- mat[(k-1):k,] %>% get_bear
   }
-
+  
   pt <- mat[k,] %>% tri_length(bear,rem)
   return(pt)
 }
@@ -757,7 +716,7 @@ logindex <- function(log,ids=0)	{
       if(log[i,1] & log[i,2]) ids <- c(ids,i)
     }
   }
-
+  
   ids <- ids[-1]
   return(ids)
 }
@@ -765,15 +724,15 @@ logindex <- function(log,ids=0)	{
 set_pt <- function(pt,mat,dist,k=0)	{
   #given a matrix of coords from start point past end point
   #returns end point along path at distance dist
-
+  
   mat <- pt %>% snap_pt(mat)
   difs <- pt %>% pointDistance(mat,lonlat=F)
   for (i in 1:nrow(mat))	{
     if (difs[i]==min(difs)) ptid <- i
   }
-
+  
   mat <- mat[ptid:nrow(mat),]
-
+  
   so_far <- 0
   while (so_far <= dist)	{
     k <- k + 1
@@ -786,7 +745,7 @@ set_pt <- function(pt,mat,dist,k=0)	{
   if (nrow(mat)==k)	{
     bear <- mat[(k-1):k,] %>% get_bear
   }
-
+  
   pt <- mat[k,] %>% tri_length(bear,rem)
   return(pt)
 }
@@ -804,7 +763,7 @@ snap_pt <- function(pt,mat)	{
   }
   if(above) new <- mat[1:nebrid,] %>% rbind(pt %>% rbind(mat[(nebrid+1):nrow(mat),]))
   if(!above) new <- mat[1:(nebrid-1),] %>% rbind(pt %>% rbind(mat[nebrid:nrow(mat),]))
-
+  
   return(new)
 }
 
@@ -833,27 +792,27 @@ snap_pt <- function(pt,mat)	{
 plot_samples <- function(samples, in_path, out_path, rgb_test=TRUE, ndvi_test=TRUE)  {
   og_wd <- getwd()
   setwd(in_path)
-  files <- dir()
+  files <- get_rasters(in_path)
   crs_ref <- raster::crs(raster::raster(files[1]))
   samples <- match_crs(list(samples), crs_ref)
   samples <- samples[[1]]
-
+  
   for (i in seq_along(samples))	{
     setwd(in_path)
     frame <- raster::extent(samples[i,])
     hit <- 0
-
+    
     for (j in seq_along(files))	{
-        if (in_extent(frame, raster::raster(files[j])))	{
+      if (in_extent(frame, raster::raster(files[j])))	{
         hit <- c(hit,j)
       }
     }
     hit <- hit[-1]
-
+    
     if (length(hit) == 0)  {
       print(paste0('Failed to find raster in extent for sample ',i))
     }
-
+    
     if (length(hit) > 0)  {
       if (rgb_test) rgb <- raster::brick(files[hit[1]])
       if (ndvi_test) {
@@ -861,7 +820,7 @@ plot_samples <- function(samples, in_path, out_path, rgb_test=TRUE, ndvi_test=TR
         red <- raster::raster(files[hit[1]], band = 1)
       }
     }
-
+    
     if (length(hit) > 1)	{
       for (j in 2:length(hit))	{
         if (rgb_test) rgb <- raster::mosaic(rgb, raster::brick(files[hit[j]]), fun = max)
@@ -871,22 +830,22 @@ plot_samples <- function(samples, in_path, out_path, rgb_test=TRUE, ndvi_test=TR
         }
       }
     }
-
+    
     if (rgb_test) rgb <- raster::crop(rgb, frame)
     if (ndvi_test)  {
       nir <- raster::crop(nir, frame)
       red <- raster::crop(red, frame)
       ndvi <- (nir - red) / (nir + red)
     }
-
+    
     setwd(out_path)
-
+    
     if (rgb_test)  {
       png(paste0('rgb_',i,'.png'))
       raster::plotRGB(rgb, main = paste0('Sample Site ',i))
       area <- lapply(methods::slot(samples[i,], 'polygons'),
                      function(x) lapply(methods::slot(x, 'Polygons'),
-                            function(y) methods::slot(y, 'coords')))
+                                        function(y) methods::slot(y, 'coords')))
       area <- area[[1]]
       for (j in 1:50)  {
         lines(area[[j]])
@@ -896,14 +855,14 @@ plot_samples <- function(samples, in_path, out_path, rgb_test=TRUE, ndvi_test=TR
       labcords <- matrix(0, nrow = 50, ncol = 2)
       for (j in 1:50)	{
         labcords[j,] <- methods::slot(
-                          rgeos::gCentroid(
-                            spatialize(area[[j]], crs_ref)
-                          ), 'coords')
+          rgeos::gCentroid(
+            spatialize(area[[j]], crs_ref)
+          ), 'coords')
       }
       text(labcords, as.character(1:50))
       dev.off()
     }
-
+    
     if (ndvi_test)  {
       png(paste0('ndvi_',i,'.png'))
       plot(ndvi, main = paste0('Sample Site ',i))
