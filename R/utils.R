@@ -143,6 +143,35 @@ fill_extent1 <- function(poly, dir, band)  {
   if (length(hit)>1)  {
     for (i in 2:length(hit)) {
       ras <- raster::mosaic(ras,raster::raster(files[hit[i]], band=band),fun=max, tolerance = .1)
+<<<<<<< HEAD
+=======
+    }
+  }
+  setwd(og_dir)
+  raster::crop(ras, ext)
+}
+
+
+#' Simple fill extent
+#' 
+#' Returns last raster to match in_extent
+#' 
+#' @param poly is a spatial polygon object
+#' @param dir is a path to a directory of rasters
+#' @param band is the desired raster band
+#' @return the last raster to match in_extent
+#' @export
+
+simple_fill <- function(poly, dir, band)  {
+  og_dir <- getwd()
+  setwd(dir)
+  files <- dir()
+  poly <- match_crs(poly, raster::raster(files[1]))
+  ext <- raster::extent(poly)
+  for(i in seq_along(files))  {
+    if (in_extent(ext,raster::raster(files[i])))  {
+       ras <- raster::raster(files[i], band=band)
+>>>>>>> bc5ebe2ce8f3a3016dbaf0aa4ef60c89ff1d7734
     }
   }
   setwd(og_dir)
@@ -153,6 +182,10 @@ fill_extent1 <- function(poly, dir, band)  {
 
 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> bc5ebe2ce8f3a3016dbaf0aa4ef60c89ff1d7734
 #' Get colors from 4 band raster
 #' 
 #' Returns data.table of mean ndvi and rgb values for a sampling box
@@ -419,8 +452,13 @@ plot_change <- function(csv,
   dev.off()
   print(vars)
 }
+<<<<<<< HEAD
 
 
+=======
+
+
+>>>>>>> bc5ebe2ce8f3a3016dbaf0aa4ef60c89ff1d7734
 #' Plot Cover Extent
 #'
 #' Prints a graph of cover extent.
@@ -461,6 +499,7 @@ plot_cover <- function(csv,
          fill = c('forestgreen','slategrey','steelblue'))
   dev.off()
   print(vars)
+<<<<<<< HEAD
 }
 
 
@@ -497,6 +536,8 @@ plot_pred_cover <- function(poly, path, title = 'pred_change.png')  {
   plot(ras)
   dev.off()
   
+=======
+>>>>>>> bc5ebe2ce8f3a3016dbaf0aa4ef60c89ff1d7734
 }
 
 

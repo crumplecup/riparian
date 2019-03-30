@@ -13,12 +13,16 @@ export(make_line)
 export(match_crs)
 export(plot_change)
 export(plot_cover)
+<<<<<<< HEAD
 export(plot_pred_cover)
+=======
+>>>>>>> bc5ebe2ce8f3a3016dbaf0aa4ef60c89ff1d7734
 export(plot_samples)
 export(pull_coords)
 export(quadcut)
 export(read_band)
 export(read_sample)
+export(simple_fill)
 export(spatialize)
 import(data.table)
 import(magrittr)

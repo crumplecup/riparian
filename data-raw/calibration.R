@@ -3,7 +3,10 @@ write("TMP = 'E:/Riparian/temp'", file=file.path(Sys.getenv('R_USER'), '.Renviro
 library(riparian)
 library(rgdal)
 library(data.table)
+<<<<<<< HEAD
 library(magrittr)
+=======
+>>>>>>> bc5ebe2ce8f3a3016dbaf0aa4ef60c89ff1d7734
 
 samples <- readOGR('samples_nad83.shp')
 res <- fread('samples2018.csv')                  #results of sampling observations
@@ -17,8 +20,11 @@ res09 <- res[year == 2009]
 
 # divide into sampling groups
 
+<<<<<<< HEAD
 res18_p <- res18[sample_id %in% 1:54]
 
+=======
+>>>>>>> bc5ebe2ce8f3a3016dbaf0aa4ef60c89ff1d7734
 res18_a <- res18[1:81]
 res18_b <- res18[82:116]
 res18_c <- res18[117:170]
@@ -42,6 +48,7 @@ res16_a <- res16_a[!res16_a$poly_id %in% c(1,5:7,10:12,15,19,23,28:29,31:33,41:4
 res16_b <- res16_b[!res16_b$poly_id %in% c(8,10,15,22,24:26,33:34)]
 res16_c <- res16_c[!res16_c$poly_id %in% c(3,8,11,14,16,18:19,21,25,29:30,32,37,39,44:45,47:48,50:51,53)]
 
+<<<<<<< HEAD
 #reshape values into vector for insertion in to data.table
 
 vals18_p <- res18_p[,4:53] %>% unlist %>% 
@@ -66,6 +73,9 @@ dt18_p <- data.frame(rip = vals18_p) %>% cbind(dt)
 mat <- matrix(c(rep(1,10), rep(2,10), rep(3,10)), ncol=3)
 dt <- setDT(data.frame(mat))
 unlist(dt)
+=======
+
+>>>>>>> bc5ebe2ce8f3a3016dbaf0aa4ef60c89ff1d7734
 
 for (i in seq_along(samples))  {
   if (i == 1)  {
@@ -76,9 +86,13 @@ for (i in seq_along(samples))  {
   }
 }
 
+<<<<<<< HEAD
 dt18_p <- data.frame(rip = vals18_p) %>% cbind(dt)
 
 usethis::use_data(dt18_p)
+=======
+usethis::use_data(dt)
+>>>>>>> bc5ebe2ce8f3a3016dbaf0aa4ef60c89ff1d7734
 
 
 samples_09 <- readOGR('samples_ortho2009.shp')
@@ -93,6 +107,7 @@ for (i in seq_along(samples_09))  {
 }
 
 usethis::use_data(dt_09)
+<<<<<<< HEAD
 
 
 groupA <- readOGR('groupA_ortho2018.shp')
@@ -132,13 +147,38 @@ for (i in seq_along(selB))  {
     dtB_18 <- rbind(dtB_18, get_cols_4band(groupB[selB[i],], 'E:/ortho2018'))
   }
 }
+=======
+>>>>>>> bc5ebe2ce8f3a3016dbaf0aa4ef60c89ff1d7734
 
 usethis::use_data(dtB_18)
 
+<<<<<<< HEAD
+=======
+groupA <- readOGR('groupA_ortho2018.shp')
+groupA <- sp::geometry(groupA)
+groupB <- readOGR('groupB_ortho2018.shp')
+groupB <- sp::geometry(groupB)
+groupC <- readOGR('groupC_ortho2018.shp')
+groupC <- sp::geometry(groupC)
+>>>>>>> bc5ebe2ce8f3a3016dbaf0aa4ef60c89ff1d7734
 
+selA <- 1:81
+selA <- selA[!selA %in% c(1,5:7,10:12,15,19,23,28:29,31:33,41:42,61,63,66,71:72,75:78)]
 
+for (i in seq_along(selA))  {
+  if (i == 1)  {
+    dtA_18 <- get_cols_4band(groupA[selA[i],], 'E:/ortho2018')
+  }
+  if (i >1)  {
+    dtA_18 <- rbind(dtA_18, get_cols_4band(groupA[selA[i],], 'E:/ortho2018'))
+  }
+}
 
+<<<<<<< HEAD
 # load data and model objects
+=======
+usethis::use_data(dtA_18)
+>>>>>>> bc5ebe2ce8f3a3016dbaf0aa4ef60c89ff1d7734
 
 ndvis <- read.csv('ndvi_samp.csv')
 nirs <- read.csv('nir_samp.csv')
@@ -146,15 +186,23 @@ reds <- read.csv('red_samp.csv')
 greens <- read.csv('grn_samp.csv')
 blues <- read.csv('blu_samp.csv')
 
+<<<<<<< HEAD
 ndvis <- ndvis[,-1] %>% as.matrix
 nirs <- nirs[,-1] %>% as.matrix
 reds <- reds[,-1] %>% as.matrix
 greens <- greens[,-1] %>% as.matrix
 blues <- blues[,-1] %>% as.matrix
+=======
+for (i in seq_along(selA))  {
+  print(i)
+  print(selA[i])
+}
+>>>>>>> bc5ebe2ce8f3a3016dbaf0aa4ef60c89ff1d7734
 
 sampnos <- res_16[,1] %>% as.numeric
 res_16 <- res_16[,-c(1:2)] %>% as.matrix
 
+<<<<<<< HEAD
 ndvi <- ndvis[1,]
 nir <- nirs[1,]
 red <- reds[1,]
@@ -170,6 +218,11 @@ for (i in 2:nrow(ndvis))	{
   blue <- c(blue,blues[i,])
   rip <- c(rip,res_16[i,])
 }
+=======
+selA[i]
+
+names(groupA)
+>>>>>>> bc5ebe2ce8f3a3016dbaf0aa4ef60c89ff1d7734
 
 dt16 <- data.frame(rip=unlist(rip),ndvi=ndvi,red=red,grn=green,blu=blue) %>% setDT
 
