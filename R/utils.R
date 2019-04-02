@@ -532,7 +532,7 @@ pull_coords <- function(poly)  {
 read_band <- function(poly, dir, band)  {
   og_dir <- getwd()
   setwd(dir)
-  files <- get_rasters()
+  files <- get_rasters(dir)
   poly <- match_crs(poly, raster::raster(files[1]))
   ras <- fill_extent(poly, dir, band)
   setwd(og_dir)
