@@ -133,7 +133,7 @@ sub18 <- samples2018[year == 2018]
 sub18[ , .N, by = year]
 ```
 
-The `type` variable is a catch-all for you define and compare groups within the sample.  The 2018 dataset includes a type value `permit`, which refers to sites with active permits we selected for random monitoring.  We can split the dataset into two groups by using `==` and `!=` (not equal) to divide the data by `type`:
+The `type` variable is a catch-all for you to define and compare groups within the sample.  The 2018 dataset includes a type value `permit`, which refers to sites with active permits we selected for random monitoring.  We can split the dataset into two groups by using `==` and `!=` (not equal) to divide the data by `type`:
 
 ```{r}
 # print table of obs by type
@@ -148,7 +148,23 @@ permit_sites[ , .N, by = type]
 nopermit_sites[ , .N, by = type]
 ```
 
+To subset by multiples criteria, you can subset sequentially or use logical operators `&` and `|` to nest multiple logical tests.
 
+```{r}
+
+# subset 2018 sites with type trib or permit
+sub <- samples2018[year == 2018]
+sub <- sub[type == 'trib' | type == 'permit']
+
+# very subset has correct number of obs
+sub[, .N, by = type]
+
+# subset 2016 sites with type trib or permit
+sub <- samples2018[year == 2016 & type == 'trib' | type == 'permit']
+
+# very subset has correct number of obs
+sub[, .N, by = c(year, type)]
+```
 
 
 
