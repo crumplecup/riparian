@@ -82,18 +82,26 @@ usethis::use_data(dt18_p)
 usethis::use_data(dt)
 
 
-samples_09 <- readOGR('samples_ortho2009.shp')
 
-for (i in seq_along(samples_09))  {
+for (i in seq_along(polys))  {
+  print(i)
   if (i == 1)  {
-    dt_09 <- get_cols_4band(samples_09[i,], 'E:/Riparian/ortho2009')
+    dt_09 <- get_cols_4band(polys[i,], wd)
   }
   if (i >1)  {
-    dt_09 <- rbind(dt_09, get_cols_4band(samples_09[i,], 'E:/Riparian/ortho2009'))
+    dt_09 <- rbind(dt_09, get_cols_4band(polys[i,], wd))
   }
 }
 
-usethis::use_data(dt_09)
+
+vals09_p <- res09[,4:53] %>% unlist %>% 
+  matrix(ncol=50) %>% t %>% 
+  data.frame %>% setDT %>% unlist
+
+
+dt09 <- data.frame(rip = vals09_p) %>% cbind(dt_09)
+
+usethis::use_data(dt09)
 
 
 groupA <- readOGR('groupA_ortho2018.shp')

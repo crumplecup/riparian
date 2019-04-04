@@ -110,7 +110,7 @@ fill_extent <- function(poly, dir, band)  {
   
   for(i in seq_along(files))  {
     ras <- raster::raster(files[i])
-    if (!is.null(ras[poly,]))  {
+    if (!is.null(unlist(ras[poly,])))  {
       hit <- c(hit,i)
     }
   }
@@ -118,7 +118,7 @@ fill_extent <- function(poly, dir, band)  {
   ras <- raster::raster(files[hit[1]], band=band)
   if (length(hit)>1)  {
     for (i in 2:length(hit)) {
-      ras <- raster::mosaic(ras,raster::raster(files[hit[i]], band=band),fun=max, tolerance = .1)
+      ras <- raster::mosaic(ras,raster::raster(files[hit[i]], band=band),fun=max, tolerance = 1)
     }
   }
   setwd(og_dir)
