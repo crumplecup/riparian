@@ -16,15 +16,17 @@ knitr::opts_chunk$set(
 )
 ```
 
-Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
+Welcome to the `vignette` for the package `riparian`, a suite of tools designed to help Benton County Community Development staff analyze riparian cover extent and change in cover over time.  This document models the workflow of producing an annual monitoring report for the SRP program, and demonstrates how functions in the `riparian` package can make monitoring faster and more efficient for the researcher.
 
-- Never uses retina figures
-- Has a smaller default figure size
-- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
+## Step One:  Site Plots
 
-## Vignette Info
+The SRP program conducts annual riparian monitoring whenever new high resolution (1-foot) orthographic imagery becomes available.  Likely, your bosses have hired you because new imagery has just arrived.  In my year, the County collected collected imagery in S:/maps/OrthoPhotos, which each year of imagery in a separate folder.  If you are planning on doing a lot of operations on large raster data, then I suggest copying the folder containing the imagery onto an external drive.  This minimizes network traffic for others and speeds performance at your workstation.
 
-Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
+The SRP program currently monitors 54 randomly selected sites along priority corridors, and may add additional sites based upon future permit approvals.  The reason we look at the same 54 sites every year is because we are trying to detect change in cover.  If we looked at a different slew of sites each year, it would be hard to know whether an increase or decrease in cover were due to variation between the sites we selected, or whether vegetation removal or accrual occurred.  Using this method, we can circle individual trees that have gone missing from one year to the next.  Because the sites are randomly selected and representative of conditions in the priority corridor generally, we can be reasonably confident that changes in cover within the sample reflect conditions in the broader SRP overlay.
+
+
+
+
 
 ## Styles
 
