@@ -33,6 +33,19 @@ data(samples, package = 'riparian')
 raster::plot(samples[1,])
 ```
 
+The function for printing plots of sample sites using new orthographic imagery is called `plot_samples()`, and it takes three main arguments.  The first argument is called `in_path` and it is the path to the directory of orthographic imagery.  R uses the convention of forward slashes in path names (for instance the path to my working folder for this project is 'E:/Riparian' and the path to the 2018 imagery is 'E:/ortho2018').  The function expects a character string, so the path name needs to have single or double quotes around it.  The second argument is `out_path`, and specifies where the function will print the sample plots into.  The third argument, `samples` is the polygon shapefile of sampling boxes.  By default the function looks for an object called `samples` in the current environment, so if you have loaded the data `samples`, then you can omit the third argument.
+
+```{r, eval=FALSE}
+library(riparian)
+
+# not run
+# change the path names to use
+plot_samples('E:/ortho2018', 'E:/Riparian')
+
+knitr::include_graphics('extdata/images/eg_1.png')
+```
+
+
 
 
 

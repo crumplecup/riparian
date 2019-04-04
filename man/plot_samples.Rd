@@ -4,15 +4,15 @@
 \alias{plot_samples}
 \title{Print Sample Plots}
 \usage{
-plot_samples(samples, in_path, out_path, rgb_test = TRUE,
+plot_samples(in_path, out_path, samples = samples, rgb_test = TRUE,
   ndvi_test = TRUE)
 }
 \arguments{
-\item{samples}{is a SpatialPolygonsDataFrame object (the sample boxes shapefile)}
-
 \item{in_path}{is a character vector containing the path to the orthoimagery}
 
 \item{out_path}{is a character vector specifying the output directory for the plots}
+
+\item{samples}{is a SpatialPolygonsDataFrame object (the sample boxes shapefile)}
 
 \item{rgb}{is a logical indicator, prints rgb plots if true}
 

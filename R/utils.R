@@ -501,6 +501,124 @@ plot_pred_cover <- function(poly, path, title = 'pred_change.png')  {
 
 
 
+#' Print Sample Plots
+#'
+#' Given a shapefile of sampling boxes, and a path to a directory of 4-band ortho-imagery
+#' prints rgb and/or ndvi plots of the sampling area with numbered boxes superimposed.
+#' While the function prints both rgb and ndvi by default, the user can turn either off
+#' by setting either the \code{rgb} or \code{ndvi} arguments to \code{FALSE}.
+#'
+#' @param in_path is a character vector containing the path to the orthoimagery
+#' @param out_path is a character vector specifying the output directory for the plots
+#' @param samples is a SpatialPolygonsDataFrame object (the sample boxes shapefile)
+#' @param rgb is a logical indicator, prints rgb plots if true
+#' @param ndvi is a logical indicator, prints ndvi plots if true
+#' @return prints an rgb and/or ndvi plot into the \code{out_path} directory
+#' @export
+
+
+plot_samples <- function(in_path, out_path, samples=samples, rgb_test=TRUE, ndvi_test=TRUE)  {
+  og_wd <- getwd()
+  setwd(in_path)
+  files <- get_rasters(in_path)
+  crs_ref <- raster::crs(raster::raster(files[1]))
+  samples <- match_crs(list(samples), crs_ref)
+  samples <- samples[[1]]
+  
+  for (i in seq_along(samples))	{
+    setwd(in_path)
+    frame <- raster::extent(samples[i,])
+    hit <- 0
+    
+    for (j in seq_along(files))	{
+      if (in_extent(frame, raster::raster(files[j])))	{
+        hit <- c(hit,j)
+      }
+    }
+    hit <- hit[-1]
+    
+    if (length(hit) == 0)  {
+      print(paste0('Failed to find raster in extent for sample ',i))
+    }
+    
+    if (length(hit) > 0)  {
+      if (rgb_test) rgb <- raster::brick(files[hit[1]])
+      if (ndvi_test) {
+        nir <- raster::raster(files[hit[1]], band = 4)
+        red <- raster::raster(files[hit[1]], band = 1)
+      }
+    }
+    
+    if (length(hit) > 1)	{
+      for (j in 2:length(hit))	{
+        if (rgb_test) rgb <- raster::mosaic(rgb, raster::brick(files[hit[j]]), fun = max)
+        if (ndvi_test)  {
+          nir <- raster::mosaic(nir, raster::raster(files[hit[j]], band = 4), fun = max)
+          red <- raster::mosaic(red, raster::raster(files[hit[j]], band = 1), fun = max)
+        }
+      }
+    }
+    
+    if (rgb_test) rgb <- raster::crop(rgb, frame)
+    if (ndvi_test)  {
+      nir <- raster::crop(nir, frame)
+      red <- raster::crop(red, frame)
+      ndvi <- (nir - red) / (nir + red)
+    }
+    
+    setwd(out_path)
+    
+    if (rgb_test)  {
+      png(paste0('rgb_',i,'.png'))
+      raster::plotRGB(rgb, main = paste0('Sample Site ',i))
+      area <- lapply(methods::slot(samples[i,], 'polygons'),
+                     function(x) lapply(methods::slot(x, 'Polygons'),
+                                        function(y) methods::slot(y, 'coords')))
+      area <- area[[1]]
+      for (j in 1:50)  {
+        lines(area[[j]])
+      }
+      lines(area[[1]], col = 'pink', lwd = 3)
+      lines(area[[50]], col = 'red', lwd = 3)
+      labcords <- matrix(0, nrow = 50, ncol = 2)
+      for (j in 1:50)	{
+        labcords[j,] <- methods::slot(
+          rgeos::gCentroid(
+            spatialize(area[[j]], crs_ref)
+          ), 'coords')
+      }
+      text(labcords, as.character(1:50))
+      dev.off()
+    }
+    
+    if (ndvi_test)  {
+      png(paste0('ndvi_',i,'.png'))
+      plot(ndvi, main = paste0('Sample Site ',i))
+      area <- lapply(methods::slot(samples[i,], 'polygons'),
+                     function(x) lapply(methods::slot(x, 'Polygons'),
+                                        function(y) methods::slot(y, 'coords')))
+      area <- area[[1]]
+      for (j in 1:50)  {
+        lines(area[[j]])
+      }
+      lines(area[[1]], col = 'pink', lwd = 3)
+      lines(area[[50]], col = 'red', lwd = 3)
+      labcords <- matrix(0, nrow = 50, ncol = 2)
+      for (j in 1:50)	{
+        labcords[j,] <- methods::slot(
+          rgeos::gCentroid(
+            spatialize(area[[j]], crs_ref)
+          ), 'coords')
+      }
+      text(labcords, as.character(1:50))
+      dev.off()
+    }
+  }
+  setwd(og_wd)
+}
+
+
+
 
 #' Convert SpatialPolygon to coordinate matrix
 #'
@@ -772,122 +890,6 @@ snap_pt <- function(pt,mat)	{
 
 
 
-
-#' Print Sample Plots
-#'
-#' Given a shapefile of sampling boxes, and a path to a directory of 4-band ortho-imagery
-#' prints rgb and/or ndvi plots of the sampling area with numbered boxes superimposed.
-#' While the function prints both rgb and ndvi by default, the user can turn either off
-#' by setting either the \code{rgb} or \code{ndvi} arguments to \code{FALSE}.
-#'
-#' @param samples is a SpatialPolygonsDataFrame object (the sample boxes shapefile)
-#' @param in_path is a character vector containing the path to the orthoimagery
-#' @param out_path is a character vector specifying the output directory for the plots
-#' @param rgb is a logical indicator, prints rgb plots if true
-#' @param ndvi is a logical indicator, prints ndvi plots if true
-#' @return prints an rgb and/or ndvi plot into the \code{out_path} directory
-#' @export
-
-
-plot_samples <- function(samples, in_path, out_path, rgb_test=TRUE, ndvi_test=TRUE)  {
-  og_wd <- getwd()
-  setwd(in_path)
-  files <- get_rasters(in_path)
-  crs_ref <- raster::crs(raster::raster(files[1]))
-  samples <- match_crs(list(samples), crs_ref)
-  samples <- samples[[1]]
-  
-  for (i in seq_along(samples))	{
-    setwd(in_path)
-    frame <- raster::extent(samples[i,])
-    hit <- 0
-    
-    for (j in seq_along(files))	{
-      if (in_extent(frame, raster::raster(files[j])))	{
-        hit <- c(hit,j)
-      }
-    }
-    hit <- hit[-1]
-    
-    if (length(hit) == 0)  {
-      print(paste0('Failed to find raster in extent for sample ',i))
-    }
-    
-    if (length(hit) > 0)  {
-      if (rgb_test) rgb <- raster::brick(files[hit[1]])
-      if (ndvi_test) {
-        nir <- raster::raster(files[hit[1]], band = 4)
-        red <- raster::raster(files[hit[1]], band = 1)
-      }
-    }
-    
-    if (length(hit) > 1)	{
-      for (j in 2:length(hit))	{
-        if (rgb_test) rgb <- raster::mosaic(rgb, raster::brick(files[hit[j]]), fun = max)
-        if (ndvi_test)  {
-          nir <- raster::mosaic(nir, raster::raster(files[hit[j]], band = 4), fun = max)
-          red <- raster::mosaic(red, raster::raster(files[hit[j]], band = 1), fun = max)
-        }
-      }
-    }
-    
-    if (rgb_test) rgb <- raster::crop(rgb, frame)
-    if (ndvi_test)  {
-      nir <- raster::crop(nir, frame)
-      red <- raster::crop(red, frame)
-      ndvi <- (nir - red) / (nir + red)
-    }
-    
-    setwd(out_path)
-    
-    if (rgb_test)  {
-      png(paste0('rgb_',i,'.png'))
-      raster::plotRGB(rgb, main = paste0('Sample Site ',i))
-      area <- lapply(methods::slot(samples[i,], 'polygons'),
-                     function(x) lapply(methods::slot(x, 'Polygons'),
-                                        function(y) methods::slot(y, 'coords')))
-      area <- area[[1]]
-      for (j in 1:50)  {
-        lines(area[[j]])
-      }
-      lines(area[[1]], col = 'pink', lwd = 3)
-      lines(area[[50]], col = 'red', lwd = 3)
-      labcords <- matrix(0, nrow = 50, ncol = 2)
-      for (j in 1:50)	{
-        labcords[j,] <- methods::slot(
-          rgeos::gCentroid(
-            spatialize(area[[j]], crs_ref)
-          ), 'coords')
-      }
-      text(labcords, as.character(1:50))
-      dev.off()
-    }
-    
-    if (ndvi_test)  {
-      png(paste0('ndvi_',i,'.png'))
-      plot(ndvi, main = paste0('Sample Site ',i))
-      area <- lapply(methods::slot(samples[i,], 'polygons'),
-                     function(x) lapply(methods::slot(x, 'Polygons'),
-                                        function(y) methods::slot(y, 'coords')))
-      area <- area[[1]]
-      for (j in 1:50)  {
-        lines(area[[j]])
-      }
-      lines(area[[1]], col = 'pink', lwd = 3)
-      lines(area[[50]], col = 'red', lwd = 3)
-      labcords <- matrix(0, nrow = 50, ncol = 2)
-      for (j in 1:50)	{
-        labcords[j,] <- methods::slot(
-          rgeos::gCentroid(
-            spatialize(area[[j]], crs_ref)
-          ), 'coords')
-      }
-      text(labcords, as.character(1:50))
-      dev.off()
-    }
-  }
-  setwd(og_wd)
-}
 
 
 
