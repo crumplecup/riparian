@@ -7,7 +7,7 @@
 build_change_table(csv, year1, year2, polys, lots, permits)
 }
 \arguments{
-\item{csv}{is a csv file with cols(sample_id, year, type, obs(1:50))}
+\item{csv}{is a csv file with cols(id, year, type, obs(1:50))}
 
 \item{year1}{is a number matching a value in csv$year}
 

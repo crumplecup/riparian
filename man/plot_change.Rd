@@ -9,7 +9,7 @@ plot_change(csv, year1, year2, title = "cover_change.png",
   y_lab = "No. of Sample Sites with Cover Change of X")
 }
 \arguments{
-\item{csv}{is a csv with cols (sample_id, year, type, results(1:50))}
+\item{csv}{is a csv with cols (id, year, type, results(1:50))}
 
 \item{year1}{is a number matching csv$year}
 

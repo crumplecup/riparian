@@ -93,14 +93,21 @@ raster<span class="op">::</span><span class="kw"><a href="https://www.rdocumenta
 <span class="kw"><a href="../reference/plot_samples.html">plot_samples</a></span>(<span class="dt">in_path =</span> <span class="st">'E:/ortho2018'</span>,
              <span class="dt">out_path =</span><span class="st">'E:/Riparian/sites2018'</span>)</code></pre></div>
 <p><img src=""><!-- --></p>
-<p>The function <code><a href="../reference/plot_samples.html">plot_samples()</a></code> has additional optional arguments. By default it will print an RGB plot and an NDVI plot for each site. You can turn off one or the other by setting <code>print_rgb</code> or <code>print_ndvi</code> to FALSE, depicted below:</p>
+<p>The function <code><a href="../reference/plot_samples.html">plot_samples()</a></code> has additional optional arguments. By default it will print an RGB plot and an NDVI plot for each site. You can turn off one or the other by setting <code>print_rgb</code> or <code>print_ndvi</code> to FALSE, depicted below.</p>
+<p>If you have a new polygon object, perhaps as the result of generating new sampling sites, then set the argument <code>samples</code> to the polygon object.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># not run</span>
 
 <span class="co"># prints rgb only</span>
 <span class="kw"><a href="../reference/plot_samples.html">plot_samples</a></span>(<span class="st">'E:/ortho2018'</span>, <span class="st">'E:/Riparian/sites2018'</span>, <span class="dt">print_ndvi =</span> <span class="ot">FALSE</span>)
 
 <span class="co"># prints ndvi only</span>
-<span class="kw"><a href="../reference/plot_samples.html">plot_samples</a></span>(<span class="st">'E:/ortho2018'</span>, <span class="st">'E:/Riparian/sites2018'</span>, <span class="dt">print_rgb =</span> F)</code></pre></div>
+<span class="kw"><a href="../reference/plot_samples.html">plot_samples</a></span>(<span class="st">'E:/ortho2018'</span>, <span class="st">'E:/Riparian/sites2018'</span>, <span class="dt">print_rgb =</span> F)
+
+<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(rgdal)
+<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/getwd">setwd</a></span>(<span class="st">'path_to_shapefile'</span>)
+polys &lt;-<span class="st"> </span><span class="kw">readOGR</span>(<span class="st">'mysamples.shp'</span>)
+
+<span class="kw"><a href="../reference/plot_samples.html">plot_samples</a></span>(<span class="st">'E:/ortho2018'</span>, <span class="st">'E:/Riparian/sites2018'</span>, <span class="dt">samples =</span> polys)</code></pre></div>
 </div>
 <div id="scoring-samples" class="section level2">
 <h2 class="hasAnchor">
@@ -121,20 +128,20 @@ obs &lt;-<span class="st"> </span><span class="kw">fread</span>(csv_path)
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/data">data</a></span>(samples2018, <span class="dt">package =</span> <span class="st">'riparian'</span>)
 
 <span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/head">head</a></span>(samples2018, <span class="dv">10</span>)
-<span class="co">#&gt;    sample_id year   type o1 e1 o2 e2 o3 e3 o4 e4 o5 e5 a1 f1 a2 f2 a3 f3</span>
-<span class="co">#&gt; 1          1 2018 random  1  1  1  1  1  0  0  0  1  0  1  1  1  1  0  0</span>
-<span class="co">#&gt; 2          1 2016 random  1  1  1  1  1  0  0  0  1  0  1  1  1  1  0  0</span>
-<span class="co">#&gt; 3         o2 2018   trib  2  2  2  2  1  2  2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt; 4         o2 2016   trib  2  2  2  2  1  2  2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt; 5         o3 2018   trib  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt; 6         o3 2016   trib  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt; 7         o4 2018   trib  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt; 8         o4 2016   trib  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt; 9          2 2018 permit  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt; 10         2 2016 permit  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt;    a4 f4 a5 f5 b1 g1 b2 g2 b3 g3 b4 g4 b5 g5 c1 h1 c2 h2 c3 h3 c4 h4 c5 h5</span>
-<span class="co">#&gt; 1   2  1  2  2  2  2  0  2  1  1  0  1  0  1  0  0  0  0  0  0  0  0  0  0</span>
-<span class="co">#&gt; 2   2  1  2  2  2  2  0  2  1  1  0  1  0  1  0  0  0  0  0  0  0  0  0  0</span>
+<span class="co">#&gt;    id year   type 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22</span>
+<span class="co">#&gt; 1   1 2018 random 1 1 1 1 1 0 0 0 1  0  1  1  1  1  0  0  2  1  2  2  2  2</span>
+<span class="co">#&gt; 2   1 2016 random 1 1 1 1 1 0 0 0 1  0  1  1  1  1  0  0  2  1  2  2  2  2</span>
+<span class="co">#&gt; 3  o2 2018   trib 2 2 2 2 1 2 2 2 2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
+<span class="co">#&gt; 4  o2 2016   trib 2 2 2 2 1 2 2 2 2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
+<span class="co">#&gt; 5  o3 2018   trib 2 2 2 2 2 2 2 2 2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
+<span class="co">#&gt; 6  o3 2016   trib 2 2 2 2 2 2 2 2 2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
+<span class="co">#&gt; 7  o4 2018   trib 2 2 2 2 2 2 2 2 2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
+<span class="co">#&gt; 8  o4 2016   trib 2 2 2 2 2 2 2 2 2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
+<span class="co">#&gt; 9   2 2018 permit 2 2 2 2 2 2 2 2 2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
+<span class="co">#&gt; 10  2 2016 permit 2 2 2 2 2 2 2 2 2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
+<span class="co">#&gt;    23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46</span>
+<span class="co">#&gt; 1   0  2  1  1  0  1  0  1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0</span>
+<span class="co">#&gt; 2   0  2  1  1  0  1  0  1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0</span>
 <span class="co">#&gt; 3   2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
 <span class="co">#&gt; 4   2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
 <span class="co">#&gt; 5   2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
@@ -143,17 +150,66 @@ obs &lt;-<span class="st"> </span><span class="kw">fread</span>(csv_path)
 <span class="co">#&gt; 8   2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
 <span class="co">#&gt; 9   2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
 <span class="co">#&gt; 10  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt;    d1 i1 d2 i2 d3 i3 d4 i4 d5 i5</span>
-<span class="co">#&gt; 1   0  0  0  0  0  0  0  0  0  0</span>
-<span class="co">#&gt; 2   0  0  0  0  0  0  0  0  0  0</span>
-<span class="co">#&gt; 3   2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt; 4   2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt; 5   2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt; 6   2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt; 7   2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt; 8   2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt; 9   2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt; 10  2  2  2  2  2  2  2  2  2  2</span></code></pre></div>
+<span class="co">#&gt;    47 48 49 50</span>
+<span class="co">#&gt; 1   0  0  0  0</span>
+<span class="co">#&gt; 2   0  0  0  0</span>
+<span class="co">#&gt; 3   2  2  2  2</span>
+<span class="co">#&gt; 4   2  2  2  2</span>
+<span class="co">#&gt; 5   2  2  2  2</span>
+<span class="co">#&gt; 6   2  2  2  2</span>
+<span class="co">#&gt; 7   2  2  2  2</span>
+<span class="co">#&gt; 8   2  2  2  2</span>
+<span class="co">#&gt; 9   2  2  2  2</span>
+<span class="co">#&gt; 10  2  2  2  2</span></code></pre></div>
+<p>The spreadsheet has 53 columns, named <code>id</code>, <code>year</code>, <code>type</code> and then numbered 1:50. Your spreadsheet must adhere to this format, using 53 columns named just so. The <code>id</code> column refers to an individual site id assoiated with each site. The <code>year</code> column specifies the year of observation. The <code>type</code> column is for grouping sites into subsets, such as sites with active permits to track compared to random samples, and may be left blank without consequence. The columns numbered 1:50 correspond to the numbers on the sample plots printed by <code><a href="../reference/plot_samples.html">plot_samples()</a></code>. When you are scoring observations, enter the cover score associated with the number on the sampling plot under the column with the same number in the spreadsheet.</p>
+<p>The easiest way to adhere to the format requirement is to simply add new observations to the bottom of the 2018 spreadsheet, and save it under a new name. You can convert the R object into a csv file using the command <code><a href="https://www.rdocumentation.org/packages/utils/topics/write.table">write.csv(samples2018, 'myfile.csv')</a></code> and fill in your observations using Excel.</p>
+<p>When you are done editing your file in Excel, export it into csv format, which is a tried and true way to share data between programs. Read the csv into RStudio using the <code>data.table</code> package.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># not run</span>
+<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(data.table)
+<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/getwd">setwd</a></span>(<span class="st">'path_to_file'</span>)
+
+obs &lt;-<span class="st"> </span><span class="kw">fread</span>(<span class="st">'myobs.csv'</span>)</code></pre></div>
+<div id="subsetting-sites" class="section level3">
+<h3 class="hasAnchor">
+<a href="#subsetting-sites" class="anchor"></a>Subsetting Sites</h3>
+<p>The <code>riparian</code> package takes advantage of several features of the <code>data.table</code> package. The <code>data.table</code> is a special class of <code>data.frame</code>, with unique syntax for subsetting data.</p>
+<p>The first subsetting you will likely want to do is subset by year. Do this by selecting the column <code>year</code> and setting it equal to the target value. Place this logical test in brackets following the data.table name, and R will return only those observations that pass the test. Note that logical tests use two equal signs (eg. <code>year == 2018</code>).</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(data.table)
+<span class="co"># print summary table of obs by year</span>
+samples2018[ , .N, by =<span class="st"> </span>year]
+<span class="co">#&gt;    year   N</span>
+<span class="co">#&gt; 1: 2018 170</span>
+<span class="co">#&gt; 2: 2016 169</span>
+<span class="co">#&gt; 3: 2009  54</span>
+
+<span class="co"># subset year of interst</span>
+sub18 &lt;-<span class="st"> </span>samples2018[year <span class="op">==</span><span class="st"> </span><span class="dv">2018</span>]
+
+<span class="co"># very subset is correct</span>
+sub18[ , .N, by =<span class="st"> </span>year]
+<span class="co">#&gt;    year   N</span>
+<span class="co">#&gt; 1: 2018 170</span></code></pre></div>
+<p>The <code>type</code> variable is a catch-all for you define and compare groups within the sample. The 2018 dataset includes a type value <code>permit</code>, which refers to sites with active permits we selected for random monitoring. We can split the dataset into two groups by using <code>==</code> and <code>!=</code> (not equal) to divide the data by <code>type</code>:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># print table of obs by type</span>
+samples2018[ , .N, by =<span class="st"> </span>type]
+<span class="co">#&gt;      type   N</span>
+<span class="co">#&gt; 1: random  27</span>
+<span class="co">#&gt; 2:   trib 231</span>
+<span class="co">#&gt; 3: permit 135</span>
+
+<span class="co"># subset permit and nopermit sites</span>
+permit_sites &lt;-<span class="st"> </span>samples2018[type <span class="op">==</span><span class="st"> 'permit'</span>]
+nopermit_sites &lt;-<span class="st"> </span>samples2018[type <span class="op">!=</span><span class="st"> 'permit'</span>]
+
+<span class="co"># examine results</span>
+permit_sites[ , .N, by =<span class="st"> </span>type]
+<span class="co">#&gt;      type   N</span>
+<span class="co">#&gt; 1: permit 135</span>
+nopermit_sites[ , .N, by =<span class="st"> </span>type]
+<span class="co">#&gt;      type   N</span>
+<span class="co">#&gt; 1: random  27</span>
+<span class="co">#&gt; 2:   trib 231</span></code></pre></div>
+</div>
 </div>
   </div>
 

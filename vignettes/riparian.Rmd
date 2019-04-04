@@ -49,7 +49,10 @@ pic_path <- system.file('extdata/images', 'eg1.png', pacakge = 'riparian')
 knitr::include_graphics(pic_path)
 ```
 
-The function `plot_samples()` has additional optional arguments.  By default it will print an RGB plot and an NDVI plot for each site.  You can turn off one or the other by setting `print_rgb` or `print_ndvi` to FALSE, depicted below:
+The function `plot_samples()` has additional optional arguments.  By default it will print an RGB plot and an NDVI plot for each site.  You can turn off one or the other by setting `print_rgb` or `print_ndvi` to FALSE, depicted below.  
+
+If you have a new polygon object, perhaps as the result of generating new sampling sites, then set the argument `samples` to the polygon object.
+
 
 ```{r, eval=FALSE}
 # not run
@@ -59,7 +62,15 @@ plot_samples('E:/ortho2018', 'E:/Riparian/sites2018', print_ndvi = FALSE)
 
 # prints ndvi only
 plot_samples('E:/ortho2018', 'E:/Riparian/sites2018', print_rgb = F)
+
+library(rgdal)
+setwd('path_to_shapefile')
+polys <- readOGR('mysamples.shp')
+
+plot_samples('E:/ortho2018', 'E:/Riparian/sites2018', samples = polys)
 ```
+
+
 
 
 ## Scoring Samples
@@ -88,6 +99,58 @@ data(samples2018, package = 'riparian')
 
 head(samples2018, 10)
 ```
+
+The spreadsheet has 53 columns, named `id`, `year`, `type` and then numbered 1:50.  Your spreadsheet must adhere to this format, using 53 columns named just so.  The `id` column refers to an individual site id assoiated with each site.  The `year` column specifies the year of observation.  The `type` column is for grouping sites into subsets, such as sites with active permits to track compared to random samples, and may be left blank without consequence.  The columns numbered 1:50 correspond to the numbers on the sample plots printed by `plot_samples()`.  When you are scoring observations, enter the cover score associated with the number on the sampling plot under the column with the same number in the spreadsheet.
+
+The easiest way to adhere to the format requirement is to simply add new observations to the bottom of the 2018 spreadsheet, and save it under a new name.  You can convert the R object into a csv file using the command `write.csv(samples2018, 'myfile.csv')` and fill in your observations using Excel.
+
+When you are done editing your file in Excel, export it into csv format, which is a tried and true way to share data between programs.  Read the csv into RStudio using the `data.table` package.
+
+```{r, eval = F}
+# not run
+library(data.table)
+setwd('path_to_file')
+
+obs <- fread('myobs.csv')
+```
+
+
+### Subsetting Sites
+
+The `riparian` package takes advantage of several features of the `data.table` package.  The `data.table` is a special class of `data.frame`, with unique syntax for subsetting data.
+
+The first subsetting you will likely want to do is subset by year.  Do this by selecting the column `year` and setting it equal to the target value.  Place this logical test in brackets following the data.table name, and R will return only those observations that pass the test.  Note that logical tests use two equal signs (eg. `year == 2018`).
+
+```{r}
+library(data.table)
+# print summary table of obs by year
+samples2018[ , .N, by = year]
+
+# subset year of interst
+sub18 <- samples2018[year == 2018]
+
+# very subset is correct
+sub18[ , .N, by = year]
+```
+
+The `type` variable is a catch-all for you define and compare groups within the sample.  The 2018 dataset includes a type value `permit`, which refers to sites with active permits we selected for random monitoring.  We can split the dataset into two groups by using `==` and `!=` (not equal) to divide the data by `type`:
+
+```{r}
+# print table of obs by type
+samples2018[ , .N, by = type]
+
+# subset permit and nopermit sites
+permit_sites <- samples2018[type == 'permit']
+nopermit_sites <- samples2018[type != 'permit']
+
+# examine results
+permit_sites[ , .N, by = type]
+nopermit_sites[ , .N, by = type]
+```
+
+
+
+
 
 
 

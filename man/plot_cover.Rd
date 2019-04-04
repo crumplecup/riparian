@@ -9,7 +9,7 @@ plot_cover(csv, title = "cover_change.png",
   y_lab = "Proportion of Samples at or below X\% Cover")
 }
 \arguments{
-\item{csv}{is a csv with cols (sample_id, year, type, results(1:50))}
+\item{csv}{is a csv with cols (id, year, type, results(1:50))}
 
 \item{title}{is the character vector to name the output file (png)}
 
