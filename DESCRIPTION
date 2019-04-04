@@ -14,5 +14,5 @@ Suggests:
     knitr,
     rmarkdown
 VignetteBuilder: knitr
-URL: https://github.com/crumplecup/riparian
+URL: https://crumplecup.github.io/riparian
 BugReports: https://github.com/crumplecup/riparian/issues
