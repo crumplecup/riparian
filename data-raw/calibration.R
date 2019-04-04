@@ -10,7 +10,8 @@ usethis::use_data(samples)
 
 res <- fread('samples2018.csv')                  #results of sampling observations
 samples2018 <- fread('samples2018.csv') 
-usethis::use_data(samples2018)
+colnames(samples2018) <- c('id','year','type',1:50)
+usethis::use_data(samples2018, overwrite = T)
 
 # subset results by year
 

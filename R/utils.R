@@ -2,9 +2,9 @@
 
 #' BISECT EXTENT
 #'
-#' Given an extent \code{ext}, returns the extents of the bisections in a list.
+#' Given an extent `ext`, returns the extents of the bisections in a list.
 #'
-#' @param ext is an object of class \code{extent}
+#' @param ext is an object of class `extent`
 #' @param logical indictor of vertical or horizontal bisection, default TRUE
 #' @return a list of the extents of the bisections
 #' @export
@@ -32,7 +32,7 @@ bisecter <- function(ext, vertical=TRUE)	{
 #'
 #'
 #'
-#' @param csv is a csv file with cols(sample_id, year, type, obs(1:50))
+#' @param csv is a csv file with cols(id, year, type, obs(1:50))
 #' @param year1 is a number matching a value in csv$year
 #' @param year2 is a number matching a value in csv$year
 #' @param polys is a spatial polygons object (sampling boxes)
@@ -54,12 +54,12 @@ build_change_table <- function(csv,
   yr2 <- csv[year == year2]
   chng <- rep(NA,nrow(yr2))
   for (i in 1:nrow(yr2))  {
-    try(chng[i] <- yr2$mn[i] - yr1$mn[yr1$sample_id == yr2$sample_id[i]], silent=T)
+    try(chng[i] <- yr2$mn[i] - yr1$mn[yr1$id == yr2$id[i]], silent=T)
   }
   ids <- 1:length(polys)
   change <- array(0,length(polys))
   for (i in seq_along(change))  {
-    change[i] <- chng[yr2$sample_id %in% as.character(ids[i])]
+    change[i] <- chng[yr2$id %in% as.character(ids[i])]
   }
   mtls <- lookup_lots(polys, lots)
   perms <- lookup_permits(polys, lots, permits)
@@ -369,7 +369,7 @@ quadcut <- function(ras)	{
 #'
 #' Prints a graph of cover change.
 #'
-#' @param csv is a csv with cols (sample_id, year, type, results(1:50))
+#' @param csv is a csv with cols (id, year, type, results(1:50))
 #' @param year1 is a number matching csv$year
 #' @param year2 is a number matching csv$year
 #' @param title is the character vector to name the output file (png)
@@ -392,7 +392,7 @@ plot_change <- function(csv,
   year2 <- csv[year == year2]
   chng <- rep(NA,nrow(year2))
   for (i in 1:nrow(year2))  {
-    try(chng[i] <- year2$mn[i] - year1$mn[year1$sample_id == year2$sample_id[i]], silent=T)
+    try(chng[i] <- year2$mn[i] - year1$mn[year1$id == year2$id[i]], silent=T)
   }
   vars <- matrix(0, ncol=5)
   colnames(vars) <- c('mean', 'sd', 'n', 'upr', 'lwr')
@@ -425,7 +425,7 @@ plot_change <- function(csv,
 #'
 #' Prints a graph of cover extent.
 #'
-#' @param csv is a csv with cols (sample_id, year, type, results(1:50))
+#' @param csv is a csv with cols (id, year, type, results(1:50))
 #' @param title is the character vector to name the output file (png)
 #' @param heading is the character vector used as the main title of the plot
 #' @param leg_pos is the legend position argument (character)

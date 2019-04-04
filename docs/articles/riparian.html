@@ -118,12 +118,42 @@ obs &lt;-<span class="st"> </span><span class="kw">fread</span>(csv_path)
 <span class="co"># examine results</span>
 <span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/str">str</a></span>(obs)</code></pre></div>
 <p>You can also examine the data as a native R object, using the <code>data</code> function.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">obs &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/data">data</a></span>(samples2018, <span class="dt">package =</span> <span class="st">'riparian'</span>)
-<span class="co">#&gt; Warning in data(samples2018, package = "riparian"): data set 'samples2018'</span>
-<span class="co">#&gt; not found</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/data">data</a></span>(samples2018, <span class="dt">package =</span> <span class="st">'riparian'</span>)
 
-<span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/str">str</a></span>(obs)
-<span class="co">#&gt;  chr "samples2018"</span></code></pre></div>
+<span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/head">head</a></span>(samples2018, <span class="dv">10</span>)
+<span class="co">#&gt;    sample_id year   type o1 e1 o2 e2 o3 e3 o4 e4 o5 e5 a1 f1 a2 f2 a3 f3</span>
+<span class="co">#&gt; 1          1 2018 random  1  1  1  1  1  0  0  0  1  0  1  1  1  1  0  0</span>
+<span class="co">#&gt; 2          1 2016 random  1  1  1  1  1  0  0  0  1  0  1  1  1  1  0  0</span>
+<span class="co">#&gt; 3         o2 2018   trib  2  2  2  2  1  2  2  2  2  2  2  2  2  2  2  2</span>
+<span class="co">#&gt; 4         o2 2016   trib  2  2  2  2  1  2  2  2  2  2  2  2  2  2  2  2</span>
+<span class="co">#&gt; 5         o3 2018   trib  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
+<span class="co">#&gt; 6         o3 2016   trib  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
+<span class="co">#&gt; 7         o4 2018   trib  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
+<span class="co">#&gt; 8         o4 2016   trib  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
+<span class="co">#&gt; 9          2 2018 permit  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
+<span class="co">#&gt; 10         2 2016 permit  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
+<span class="co">#&gt;    a4 f4 a5 f5 b1 g1 b2 g2 b3 g3 b4 g4 b5 g5 c1 h1 c2 h2 c3 h3 c4 h4 c5 h5</span>
+<span class="co">#&gt; 1   2  1  2  2  2  2  0  2  1  1  0  1  0  1  0  0  0  0  0  0  0  0  0  0</span>
+<span class="co">#&gt; 2   2  1  2  2  2  2  0  2  1  1  0  1  0  1  0  0  0  0  0  0  0  0  0  0</span>
+<span class="co">#&gt; 3   2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
+<span class="co">#&gt; 4   2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
+<span class="co">#&gt; 5   2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
+<span class="co">#&gt; 6   2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
+<span class="co">#&gt; 7   2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
+<span class="co">#&gt; 8   2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
+<span class="co">#&gt; 9   2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
+<span class="co">#&gt; 10  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
+<span class="co">#&gt;    d1 i1 d2 i2 d3 i3 d4 i4 d5 i5</span>
+<span class="co">#&gt; 1   0  0  0  0  0  0  0  0  0  0</span>
+<span class="co">#&gt; 2   0  0  0  0  0  0  0  0  0  0</span>
+<span class="co">#&gt; 3   2  2  2  2  2  2  2  2  2  2</span>
+<span class="co">#&gt; 4   2  2  2  2  2  2  2  2  2  2</span>
+<span class="co">#&gt; 5   2  2  2  2  2  2  2  2  2  2</span>
+<span class="co">#&gt; 6   2  2  2  2  2  2  2  2  2  2</span>
+<span class="co">#&gt; 7   2  2  2  2  2  2  2  2  2  2</span>
+<span class="co">#&gt; 8   2  2  2  2  2  2  2  2  2  2</span>
+<span class="co">#&gt; 9   2  2  2  2  2  2  2  2  2  2</span>
+<span class="co">#&gt; 10  2  2  2  2  2  2  2  2  2  2</span></code></pre></div>
 </div>
   </div>
 

@@ -7,7 +7,7 @@
 bisecter(ext, vertical = TRUE)
 }
 \arguments{
-\item{ext}{is an object of class \code{extent}}
+\item{ext}{is an object of class `extent`}
 
 \item{logical}{indictor of vertical or horizontal bisection, default TRUE}
 }
@@ -15,5 +15,5 @@ bisecter(ext, vertical = TRUE)
 a list of the extents of the bisections
 }
 \description{
-Given an extent \code{ext}, returns the extents of the bisections in a list.
+Given an extent `ext`, returns the extents of the bisections in a list.
 }

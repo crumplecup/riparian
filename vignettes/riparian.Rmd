@@ -84,10 +84,11 @@ str(obs)
 You can also examine the data as a native R object, using the `data` function.
 
 ```{r}
-obs <- data(samples2018, package = 'riparian')
+data(samples2018, package = 'riparian')
 
-str(obs)
+head(samples2018, 10)
 ```
+
 
 
 
