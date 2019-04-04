@@ -83,17 +83,40 @@
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/data">data</a></span>(samples, <span class="dt">package =</span> <span class="st">'riparian'</span>)
 
 <span class="co"># use the raster package to plot spatial data</span>
-raster<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/raster/topics/plot">plot</a></span>(samples[<span class="dv">1</span>,])</code></pre></div>
+raster<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/raster/topics/plot">plot</a></span>(samples[<span class="dv">1</span>,], <span class="dt">main =</span> <span class="st">'Example Sampling Box'</span>)</code></pre></div>
 <p><img src="riparian_files/figure-html/unnamed-chunk-1-1.png" width="700"></p>
 <p>The function for printing plots of sample sites using new orthographic imagery is called <code><a href="../reference/plot_samples.html">plot_samples()</a></code>, and it takes three main arguments. The first argument is called <code>in_path</code> and it is the path to the directory of orthographic imagery. R uses the convention of forward slashes in path names (for instance the path to my working folder for this project is ‘E:/Riparian’ and the path to the 2018 imagery is ‘E:/ortho2018’). The function expects a character string, so the path name needs to have single or double quotes around it. The second argument is <code>out_path</code>, and specifies where the function will print the sample plots into. The third argument, <code>samples</code> is the polygon shapefile of sampling boxes. By default the function looks for an object called <code>samples</code> in the current environment, so if you have loaded the data <code>samples</code>, then you can omit the third argument.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(riparian)
 
 <span class="co"># not run</span>
 <span class="co"># change the path names to use</span>
-<span class="kw"><a href="../reference/plot_samples.html">plot_samples</a></span>(<span class="st">'E:/ortho2018'</span>, <span class="st">'E:/Riparian'</span>)</code></pre></div>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># example output</span>
-knitr<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/knitr/topics/include_graphics">include_graphics</a></span>(<span class="st">'extdata/images/eg_1.png'</span>)</code></pre></div>
-<p><img src="extdata/images/eg_1.png"><!-- --></p>
+<span class="kw"><a href="../reference/plot_samples.html">plot_samples</a></span>(<span class="dt">in_path =</span> <span class="st">'E:/ortho2018'</span>,
+             <span class="dt">out_path =</span><span class="st">'E:/Riparian/sites2018'</span>)</code></pre></div>
+<p><img src=""><!-- --></p>
+<p>The function <code><a href="../reference/plot_samples.html">plot_samples()</a></code> has additional optional arguments. By default it will print an RGB plot and an NDVI plot for each site. You can turn off one or the other by setting <code>print_rgb</code> or <code>print_ndvi</code> to FALSE, depicted below:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># not run</span>
+
+<span class="co"># prints rgb only</span>
+<span class="kw"><a href="../reference/plot_samples.html">plot_samples</a></span>(<span class="st">'E:/ortho2018'</span>, <span class="st">'E:/Riparian/sites2018'</span>, <span class="dt">print_ndvi =</span> <span class="ot">FALSE</span>)
+
+<span class="co"># prints ndvi only</span>
+<span class="kw"><a href="../reference/plot_samples.html">plot_samples</a></span>(<span class="st">'E:/ortho2018'</span>, <span class="st">'E:/Riparian/sites2018'</span>, <span class="dt">print_rgb =</span> F)</code></pre></div>
+</div>
+<div id="scoring-samples" class="section level2">
+<h2 class="hasAnchor">
+<a href="#scoring-samples" class="anchor"></a>Scoring Samples</h2>
+<p>Once you have printed sampling plots for all sites, it is time to score cover extent.</p>
+<p>In 2018 I created an excel file called <code>samples2018.xlsx</code> to record cover extent for the 2018 annual monitoring report and the 5-year trends and status report. In order for the functions in <code>riparian</code> to work correctly, it is important for you to format your record of observations exactly like the spreadsheet from 2018. First, let’s take a look at that spreadsheet by loading it into the workspace. The file is located in the extdata folder in csv format.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(data.table)
+
+<span class="co"># construct the file path to csv</span>
+csv_path &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/system.file">system.file</a></span>(<span class="st">'extdata'</span>, <span class="st">'samples2018.csv'</span>, <span class="dt">package =</span> <span class="st">'riparian'</span>)
+
+<span class="co"># read the csv in as a data.table</span>
+<span class="co">#obs &lt;- fread(csv_path)</span>
+
+<span class="co"># examine results</span>
+<span class="co">#str(obs)</span></code></pre></div>
 </div>
   </div>
 
@@ -103,6 +126,7 @@ knitr<span class="op">::</span><span class="kw"><a href="https://www.rdocumentat
 <a href="#tocnav" class="anchor"></a>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
 <li><a href="#step-one-site-plots">Step One: Site Plots</a></li>
+      <li><a href="#scoring-samples">Scoring Samples</a></li>
       </ul>
 </div>
       </div>

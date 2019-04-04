@@ -6,8 +6,11 @@ library(data.table)
 library(magrittr)
 
 samples <- readOGR('samples_nad83.shp')
-res <- fread('samples2018.csv')                  #results of sampling observations
+usethis::use_data(samples)
 
+res <- fread('samples2018.csv')                  #results of sampling observations
+samples2018 <- fread('samples2018.csv') 
+usethis::use_data(samples2018)
 
 # subset results by year
 

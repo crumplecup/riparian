@@ -30,7 +30,7 @@ Acces the polygon shapefile containing the 54 sampling boxes for each site by ca
 data(samples, package = 'riparian')
 
 # use the raster package to plot spatial data
-raster::plot(samples[1,])
+raster::plot(samples[1,], main = 'Example Sampling Box')
 ```
 
 The function for printing plots of sample sites using new orthographic imagery is called `plot_samples()`, and it takes three main arguments.  The first argument is called `in_path` and it is the path to the directory of orthographic imagery.  R uses the convention of forward slashes in path names (for instance the path to my working folder for this project is 'E:/Riparian' and the path to the 2018 imagery is 'E:/ortho2018').  The function expects a character string, so the path name needs to have single or double quotes around it.  The second argument is `out_path`, and specifies where the function will print the sample plots into.  The third argument, `samples` is the polygon shapefile of sampling boxes.  By default the function looks for an object called `samples` in the current environment, so if you have loaded the data `samples`, then you can omit the third argument.
@@ -40,16 +40,54 @@ library(riparian)
 
 # not run
 # change the path names to use
-plot_samples('E:/ortho2018', 'E:/Riparian')
+plot_samples(in_path = 'E:/ortho2018',
+             out_path ='E:/Riparian/sites2018')
 ```
-```{r}
+```{r, echo=FALSE}
 # example output
-knitr::include_graphics('extdata/images/eg_1.png')
+pic_path <- system.file('extdata/images', 'eg1.png', pacakge = 'riparian')
+knitr::include_graphics(pic_path)
+```
+
+The function `plot_samples()` has additional optional arguments.  By default it will print an RGB plot and an NDVI plot for each site.  You can turn off one or the other by setting `print_rgb` or `print_ndvi` to FALSE, depicted below:
+
+```{r, eval=FALSE}
+# not run
+
+# prints rgb only
+plot_samples('E:/ortho2018', 'E:/Riparian/sites2018', print_ndvi = FALSE)
+
+# prints ndvi only
+plot_samples('E:/ortho2018', 'E:/Riparian/sites2018', print_rgb = F)
 ```
 
 
+## Scoring Samples
 
+Once you have printed sampling plots for all sites, it is time to score cover extent.
 
+In 2018 I created an excel file called `samples2018.xlsx` to record cover extent for the 2018 annual monitoring report and the 5-year trends and status report.  In order for the functions in `riparian` to work correctly, it is important for you to format your record of observations exactly like the spreadsheet from 2018.  First, let's take a look at that spreadsheet by loading it into the workspace.  The file is located in the extdata folder in csv format.
+
+```{r, eval=F}
+library(data.table)
+
+# construct the file path to csv
+csv_path <- system.file('extdata', 'samples2018.csv', package = 'riparian')
+
+# read the csv in as a data.table
+obs <- fread(csv_path)
+
+# examine results
+str(obs)
+```
+
+You can also examine the data as a native R object, using the `data` function.
+
+```{r}
+obs <- data(samples2018, package = 'riparian')
+
+str(obs)
+```
 
 
 

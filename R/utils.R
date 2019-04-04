@@ -517,7 +517,7 @@ plot_pred_cover <- function(poly, path, title = 'pred_change.png')  {
 #' @export
 
 
-plot_samples <- function(in_path, out_path, samples=samples, rgb_test=TRUE, ndvi_test=TRUE)  {
+plot_samples <- function(in_path, out_path, samples=samples, print_rgb=TRUE, print_ndvi=TRUE)  {
   og_wd <- getwd()
   setwd(in_path)
   files <- get_rasters(in_path)
@@ -559,8 +559,8 @@ plot_samples <- function(in_path, out_path, samples=samples, rgb_test=TRUE, ndvi
       }
     }
     
-    if (rgb_test) rgb <- raster::crop(rgb, frame)
-    if (ndvi_test)  {
+    if (print_rgb) rgb <- raster::crop(rgb, frame)
+    if (print_ndvi)  {
       nir <- raster::crop(nir, frame)
       red <- raster::crop(red, frame)
       ndvi <- (nir - red) / (nir + red)
@@ -568,7 +568,7 @@ plot_samples <- function(in_path, out_path, samples=samples, rgb_test=TRUE, ndvi
     
     setwd(out_path)
     
-    if (rgb_test)  {
+    if (print_rgb)  {
       png(paste0('rgb_',i,'.png'))
       raster::plotRGB(rgb, main = paste0('Sample Site ',i))
       area <- lapply(methods::slot(samples[i,], 'polygons'),
@@ -591,7 +591,7 @@ plot_samples <- function(in_path, out_path, samples=samples, rgb_test=TRUE, ndvi
       dev.off()
     }
     
-    if (ndvi_test)  {
+    if (print_ndvi)  {
       png(paste0('ndvi_',i,'.png'))
       plot(ndvi, main = paste0('Sample Site ',i))
       area <- lapply(methods::slot(samples[i,], 'polygons'),
