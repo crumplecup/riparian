@@ -113,10 +113,17 @@ raster<span class="op">::</span><span class="kw"><a href="https://www.rdocumenta
 csv_path &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/system.file">system.file</a></span>(<span class="st">'extdata'</span>, <span class="st">'samples2018.csv'</span>, <span class="dt">package =</span> <span class="st">'riparian'</span>)
 
 <span class="co"># read the csv in as a data.table</span>
-<span class="co">#obs &lt;- fread(csv_path)</span>
+obs &lt;-<span class="st"> </span><span class="kw">fread</span>(csv_path)
 
 <span class="co"># examine results</span>
-<span class="co">#str(obs)</span></code></pre></div>
+<span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/str">str</a></span>(obs)</code></pre></div>
+<p>You can also examine the data as a native R object, using the <code>data</code> function.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">obs &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/data">data</a></span>(samples2018, <span class="dt">package =</span> <span class="st">'riparian'</span>)
+<span class="co">#&gt; Warning in data(samples2018, package = "riparian"): data set 'samples2018'</span>
+<span class="co">#&gt; not found</span>
+
+<span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/str">str</a></span>(obs)
+<span class="co">#&gt;  chr "samples2018"</span></code></pre></div>
 </div>
   </div>
 

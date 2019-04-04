@@ -114,16 +114,12 @@ by setting either the <code>rgb</code> or <code>ndvi</code> arguments to <code>F
     
     </div>
 
-    <pre class="usage"><span class='fu'>plot_samples</span>(<span class='no'>samples</span>, <span class='no'>in_path</span>, <span class='no'>out_path</span>, <span class='kw'>rgb_test</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>ndvi_test</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
+    <pre class="usage"><span class='fu'>plot_samples</span>(<span class='no'>in_path</span>, <span class='no'>out_path</span>, <span class='kw'>samples</span> <span class='kw'>=</span> <span class='no'>samples</span>, <span class='kw'>print_rgb</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>print_ndvi</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>samples</th>
-      <td><p>is a SpatialPolygonsDataFrame object (the sample boxes shapefile)</p></td>
-    </tr>
     <tr>
       <th>in_path</th>
       <td><p>is a character vector containing the path to the orthoimagery</p></td>
@@ -131,6 +127,10 @@ by setting either the <code>rgb</code> or <code>ndvi</code> arguments to <code>F
     <tr>
       <th>out_path</th>
       <td><p>is a character vector specifying the output directory for the plots</p></td>
+    </tr>
+    <tr>
+      <th>samples</th>
+      <td><p>is a SpatialPolygonsDataFrame object (the sample boxes shapefile)</p></td>
     </tr>
     <tr>
       <th>rgb</th>

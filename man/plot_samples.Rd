@@ -4,8 +4,8 @@
 \alias{plot_samples}
 \title{Print Sample Plots}
 \usage{
-plot_samples(in_path, out_path, samples = samples, rgb_test = TRUE,
-  ndvi_test = TRUE)
+plot_samples(in_path, out_path, samples = samples, print_rgb = TRUE,
+  print_ndvi = TRUE)
 }
 \arguments{
 \item{in_path}{is a character vector containing the path to the orthoimagery}
