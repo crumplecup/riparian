@@ -41,7 +41,9 @@ library(riparian)
 # not run
 # change the path names to use
 plot_samples('E:/ortho2018', 'E:/Riparian')
-
+```
+```{r}
+# example output
 knitr::include_graphics('extdata/images/eg_1.png')
 ```
 
