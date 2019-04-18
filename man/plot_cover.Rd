@@ -4,8 +4,8 @@
 \alias{plot_cover}
 \title{Plot Cover Extent}
 \usage{
-plot_cover(csv, title = "cover_change.png",
-  heading = "\% Cover Change", leg_pos = "topleft",
+plot_cover(csv, title = "cover_change.png", heading = " ",
+  leg_pos = "topleft",
   y_lab = "Proportion of Samples at or below X\% Cover")
 }
 \arguments{

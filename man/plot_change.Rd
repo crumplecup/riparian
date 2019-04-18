@@ -5,15 +5,15 @@
 \title{Plot Cover Change}
 \usage{
 plot_change(csv, year1, year2, title = "cover_change.png",
-  heading = "\% Cover Change", leg_pos = "topleft",
+  heading = " ", leg_pos = "topleft",
   y_lab = "No. of Sample Sites with Cover Change of X")
 }
 \arguments{
 \item{csv}{is a csv with cols (id, year, type, results(1:50))}
 
-\item{year1}{is a number matching csv$year}
+\item{year1}{is an integer matching a value in csv$year}
 
-\item{year2}{is a number matching csv$year}
+\item{year2}{is an integer matching a value in csv$year}
 
 \item{title}{is the character vector to name the output file (png)}
 

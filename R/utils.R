@@ -289,6 +289,8 @@ lookup_lots <- function(polys, lots)  {
 
 
 lookup_permits <- function(polys, lots, permits){
+  names(permits[,1]) <- c('record_no')
+  names(permits[,5]) <- c('maptaxlot')
   perms <- vector(length = length(polys), mode = 'character')
   box <- match_crs(samples, raster::crs(lots))
   for (i in seq_along(samples)) {
@@ -370,8 +372,8 @@ quadcut <- function(ras)	{
 #' Prints a graph of cover change.
 #'
 #' @param csv is a csv with cols (id, year, type, results(1:50))
-#' @param year1 is a number matching csv$year
-#' @param year2 is a number matching csv$year
+#' @param year1 is an integer matching a value in csv$year
+#' @param year2 is an integer matching a value in csv$year
 #' @param title is the character vector to name the output file (png)
 #' @param heading is the character vector used as the main title of the plot
 #' @param leg_pos is the legend position argument (character)
@@ -384,15 +386,16 @@ plot_change <- function(csv,
                         year1,
                         year2,
                         title='cover_change.png',
-                        heading='% Cover Change',
+                        heading=' ',
                         leg_pos='topleft',
                         y_lab = 'No. of Sample Sites with Cover Change of X')  {
-  dt <- setDT(csv)
-  year1 <- csv[year == year1]
-  year2 <- csv[year == year2]
-  chng <- rep(NA,nrow(year2))
-  for (i in 1:nrow(year2))  {
-    try(chng[i] <- year2$mn[i] - year1$mn[year1$id == year2$id[i]], silent=T)
+  dt <- as.data.table(csv)
+  dt$mn <- apply(dt[,4:53],1,function(x) sum(x)/100)
+  yr1 <- dt[year == year1]
+  yr2 <- dt[year == year2]
+  chng <- rep(NA,nrow(yr2))
+  for (i in 1:nrow(yr2))  {
+    try(chng[i] <- yr2$mn[i] - yr1$mn[yr1$id == yr2$id[i]], silent=T)
   }
   vars <- matrix(0, ncol=5)
   colnames(vars) <- c('mean', 'sd', 'n', 'upr', 'lwr')
@@ -435,10 +438,11 @@ plot_change <- function(csv,
 #' @export
 plot_cover <- function(csv,
                        title='cover_change.png',
-                       heading='% Cover Change',
+                       heading=' ',
                        leg_pos='topleft',
                        y_lab = 'Proportion of Samples at or below X% Cover')  {
-  dt <- setDT(csv)
+  dt <- as.data.table(csv)
+  dt$mn <- apply(dt[,4:53],1,function(x) sum(x)/100)
   vars <- matrix(0, ncol=5)
   colnames(vars) <- c('mean', 'sd', 'n', 'upr', 'lwr')
   vars[1,1] <- mean(dt$mn[!is.na(dt$mn)])
@@ -470,35 +474,63 @@ plot_cover <- function(csv,
 #' Predicts cover extent within a polygon and returns the results as a raster plot
 #'
 #' @param poly is a spatial polygons object (taxlot or sampling box)
-#' @param path is a character string indicating the path to a directory to rasters
+#' @param in_path is a character string indicating the path to a directory to rasters
+#' @param out_path is a character string indicating the path to the output directory
 #' @param title is the name of the png plot printed to the working directory
+#' @param rgb_path is the path to 3-band rgb data
+#' @param cir_path is the path to 3-band cir data
+#' @param buff is the 50-ft riparian buffer polygon for `poly`
 #' @return a raster plot of predicted cover masked by `poly`
 #' @export
 
-plot_pred_cover <- function(poly, path, title = 'pred_change.png')  {
-  files <- get_rasters(path)
-  og_dir <- getwd()
-  setwd(path)
-  nir <- fill_extent(poly, path, 4)
-  red <- fill_extent(poly, path, 1)
-  grn <- fill_extent(poly, path, 2)
-  blu <- fill_extent(poly, path, 3)
+pred_cover <- function(poly, in_path = NULL, out_path = NULL, title = 'pred_change.png',
+                       rgb_path = NULL, cir_path = NULL, buff = prc_buff)  {
+  if(!is.null(rgb_path)) {
+    red <- fill_extent(poly, rgb_path, 1)
+    grn <- fill_extent(poly, rgb_path, 2)
+    blu <- fill_extent(poly, rgb_path, 3)
+  }
+  if(!is.null(cir_path))  {
+    nir <- fill_extent(poly, cir_path, 1)
+  } else {
+    nir <- fill_extent(poly, in_path, 4)
+    red <- fill_extent(poly, in_path, 1)
+    grn <- fill_extent(poly, in_path, 2)
+    blu <- fill_extent(poly, in_path, 3)
+  }
+  
   ndvi <- (nir - red) / (nir + red)
   dt <- setDT(
     data.frame(ndvi = raster::values(ndvi),
                red = raster::values(red),
                grn = raster::values(grn),
-               blue = raster::values(blu)))
-  pred <- predict(mod, newdata = dt)
+               blu = raster::values(blu)))
+  data(mod18, package = 'riparian')
+  pred <- predict(mod18, newdata = dt)
   ras <- ndvi
-  raster::values(ras) <- pred
+  values(ras) <- pred
+  poly <- match_crs(poly, ras)
   ras <- raster::mask(ras, poly)
-  png(title, width=9, height=6, units='in', res=300)
-  plot(ras)
-  dev.off()
-  
+  buff <- match_crs(buff, ras)
+  ras <- raster::mask(ras, buff)
+  writeRaster(ras, paste0(out_path,'site_',i,'.tif'), 'GTiff')
 }
 
+
+#' assign raster
+#' 
+#' wrapper for assigning vals to raster
+#' 
+#' @param ras is a raster
+#' @param vals are vals for raster
+#' @return raster `ras` with values `vals`
+#' @import raster
+#' @export
+assign_raster <- function(ras, vals)  {
+  new <- ras
+  values(new) <- vals
+  new
+}
 
 
 #' Print Sample Plots
@@ -517,7 +549,8 @@ plot_pred_cover <- function(poly, path, title = 'pred_change.png')  {
 #' @export
 
 
-plot_samples <- function(in_path, out_path, samples=samples, print_rgb=TRUE, print_ndvi=TRUE)  {
+plot_samples <- function(in_path, out_path, samples=samples, 
+                         print_rgb = TRUE, print_ndvi = TRUE)  {
   og_wd <- getwd()
   setwd(in_path)
   files <- get_rasters(in_path)

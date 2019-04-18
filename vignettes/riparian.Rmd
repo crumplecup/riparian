@@ -97,7 +97,7 @@ You can also examine the data as a native R object, using the `data` function.
 ```{r}
 data(samples2018, package = 'riparian')
 
-head(samples2018, 10)
+colnames(samples2018)
 ```
 
 The spreadsheet has 53 columns, named `id`, `year`, `type` and then numbered 1:50.  Your spreadsheet must adhere to this format, using 53 columns named just so.  The `id` column refers to an individual site id assoiated with each site.  The `year` column specifies the year of observation.  The `type` column is for grouping sites into subsets, such as sites with active permits to track compared to random samples, and may be left blank without consequence.  The columns numbered 1:50 correspond to the numbers on the sample plots printed by `plot_samples()`.  When you are scoring observations, enter the cover score associated with the number on the sampling plot under the column with the same number in the spreadsheet.
@@ -160,11 +160,77 @@ sub <- sub[type == 'trib' | type == 'permit']
 sub[, .N, by = type]
 
 # subset 2016 sites with type trib or permit
-sub <- samples2018[year == 2016 & type == 'trib' | type == 'permit']
+sub <- samples2018[year == 2016]
+sub <- sub[type == 'trib' | type == 'permit']
 
 # very subset has correct number of obs
-sub[, .N, by = c(year, type)]
+sub[, .N, by = .(year, type)]
 ```
+
+
+## Plot Cover Extent
+
+The function `plot_cover(csv)` produces a plot of cover extent over all the samples in the object `csv`.  To produce a plot of cover extent for a given year, subset the observations in the data.table() by year in the argument to `plot_cover()`.  Optional arguments: the argument `title` sets the name of the .png file printed into the working directory.  The argument `heading` sets a title for the plot (default is blank).  The argument `leg_pos` adjusts the legend position and accepts the arguments `topright`, `topleft`, `bottomright`, `bottomleft`.
+
+```{r, fig.show = 'hold'}
+library(riparian)
+plot_cover(samples2018[year == 2018])
+plot_cover(samples2018[year == 2009])
+plot_cover(samples2018[year == 2018 & type != 'trib'])
+
+
+```
+
+## Plot Cover Change
+
+The function `plot_change(csv, year1, year2)` produces a plot of cover extent change from `year1` to `year2` across samples in `csv`.  Here the function does the subsetting for you in the case of year, but you can still subset `csv` by type.  The optional arguments are the same as for `plot_cover`.
+
+```{r, fig.show='hold'}
+plot_change(samples2018, 2016, 2018)
+plot_change(samples2018[type != 'trib'], 2016, 2018)
+plot_change(samples2018, 2016, 2009)
+```
+
+
+## Clean Permit List
+
+A staff member from the planning department will email you an Excel sheet containing all permits the County has issued since the last monitoring report.  Reading the file into R will require a little extra work preparing the data in Excel.  Open the permit list in Excel, and note that the first column should be `Record Number` and the fifth should read `MapTaxlot #`.  Likely, many of the MapTaxlot numbers will be printed in scientific notation in their cells.  That is a problem, because R will interpret the cells as character vectors, and the ending 7 digits of the MapTaxlot number will be lost.  But first, scroll down and note the first cell where the MapTaxlot number has a little green triangle in the upper left corner.  In order to avoid MapTaxlot numbers displaying in scientific notation, some planning staff display numbers as text in the Excel formatting options.  This is problematic because Excel converts them back to numbers and hence to scientific notation when exporting the file in csv format, and R then interprets it as a character string again.  
+
+Click on the first cell where a MapTaxlot number has the green triangle in the upper left corner, then scroll to the last permit on the sheet and click on its MapTaxlot number while holding the shift key so that you select the entire column below the cell with the green triangle.  Scroll back to the first cell you selected and click on the yellow exclamation point, bringing down a dropdown menu.  From the menu select `Convert to Number`, and watch all the numbers displayed as text revert to scientific notation.
+
+Now scroll to the top of the sheet and select the whole column for `MapTaxlot #`.  Right click on a cell in the highlighted column and click on `Format Cells...`.  The `number` tab should display. Select from the `Category` menu `Number`.  Change `Decimal places` from 2 to 0.  Click `OK`.  With all MapTaxlot numbers converted to number strings and displayed as integers, it is now safe to export the sheet as a csv file to import into R.  Select `Save As`, choose a directory, and from the `Save as type` menu select `CSV (Comma delimited)`.
+
+Read the `csv` file into R using the same `fread` command as for the cover score sheet.
+
+```{r, eval = F}
+# not run
+perms <- fread('mypermits.csv')
+```
+
+To demonstrate the functionality of the package, I have included a list of permits from 2013 to 2018 as a data object, which you can access using the `data` function.
+
+```{r}
+data(permits_13to18, package = 'riparian')
+colnames(permits_13to18)
+```
+
+
+## Change Tables
+
+The planning staff is concerned with which MapTaxlots have experienced net cover decrease, especially if the decrease is greater than 10%.  The `build_change_table()` function produces a change table designed for use by the planning staff.  The change table ranks sampling sites by mean cover change, all MapTaxlot numbers falling within the sampling box and all permits associated with a MapTaxlot on the permit list.
+
+The full syntax for the function is `build_change_table(csv, year1, year2, polys, lots, permits)`.  The argument `csv` is the record of cover scores for the sampling sites.  The arguments `year1` and `year2` are integers matching values in the `year` column of `csv`.  The argument `polys` is the spatial polygons object of samplings boxes.  The argument `lots` is the polygons object of MapTaxlots, and `permits` is the permit list formatted according to the instructions in the previous section.  The output is a csv file printed to the working directory.
+
+```{r}
+build_change_table(csv = samples2018,
+                   year1 = 2016,
+                   year2 = 2018,
+                   polys = samples,
+                   lots = prc_lots, 
+                   permits = permits_13to18)
+```
+
+
 
 
 

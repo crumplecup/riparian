@@ -9,9 +9,27 @@ samples <- readOGR('samples_nad83.shp')
 usethis::use_data(samples)
 
 res <- fread('samples2018.csv')                  #results of sampling observations
-samples2018 <- fread('samples2018.csv') 
+
+samples2018 <- res
 colnames(samples2018) <- c('id','year','type',1:50)
 usethis::use_data(samples2018, overwrite = T)
+
+
+# 50-foot stream buffer for prc lots
+prc_lots <- readOGR('riparian_lots.shp')
+prc_strms <- readOGR('ripov_streams.shp')
+prc_buff <- rgeos::gBuffer(streams, width = 50)
+
+setwd('E:/Riparian/riparian')
+usethis::use_data(prc_lots)
+usethis::use_data(prc_strms)
+usethis::use_data(prc_buff)
+
+# permit list 2013-2018
+permits_13to18 <- fread('permits_13to18.csv')
+setwd('E:/Riparian/riparian')
+usethis::use_data(permits_13to18)
+
 
 # subset results by year
 
@@ -199,8 +217,13 @@ dt_all <- dt16 %>% rbind(dt18_p %>% rbind(dt18_a))
 
 usethis::use_data(dt_all, overwrite = T)
 
-mod <- lm('rip ~ ndvi + red + grn + blu', data=dt_all)
-usethis::use_data(mod, overwrite = T)
+data(dt09, package = 'riparian')
+dt_all <- dt_all %>% rbind(dt09)
+usethis::use_data(dt_all, overwrite = T)
+
+mod18 <- lm('rip ~ ndvi + red + grn + blu', data=dt_all)
+summary(mod18)
+usethis::use_data(mod18, overwrite = T)
 
 
 

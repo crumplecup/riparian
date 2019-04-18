@@ -64,7 +64,7 @@
       <h1>riparian</h1>
                         <h4 class="author">Erik Rose</h4>
             
-            <h4 class="date">2019-04-05</h4>
+            <h4 class="date">2019-04-18</h4>
       
       
       <div class="hidden name"><code>riparian.Rmd</code></div>
@@ -127,40 +127,13 @@ obs &lt;-<span class="st"> </span><span class="kw">fread</span>(csv_path)
 <p>You can also examine the data as a native R object, using the <code>data</code> function.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/data">data</a></span>(samples2018, <span class="dt">package =</span> <span class="st">'riparian'</span>)
 
-<span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/head">head</a></span>(samples2018, <span class="dv">10</span>)
-<span class="co">#&gt;    id year   type 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22</span>
-<span class="co">#&gt; 1   1 2018 random 1 1 1 1 1 0 0 0 1  0  1  1  1  1  0  0  2  1  2  2  2  2</span>
-<span class="co">#&gt; 2   1 2016 random 1 1 1 1 1 0 0 0 1  0  1  1  1  1  0  0  2  1  2  2  2  2</span>
-<span class="co">#&gt; 3  o2 2018   trib 2 2 2 2 1 2 2 2 2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt; 4  o2 2016   trib 2 2 2 2 1 2 2 2 2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt; 5  o3 2018   trib 2 2 2 2 2 2 2 2 2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt; 6  o3 2016   trib 2 2 2 2 2 2 2 2 2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt; 7  o4 2018   trib 2 2 2 2 2 2 2 2 2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt; 8  o4 2016   trib 2 2 2 2 2 2 2 2 2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt; 9   2 2018 permit 2 2 2 2 2 2 2 2 2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt; 10  2 2016 permit 2 2 2 2 2 2 2 2 2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt;    23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46</span>
-<span class="co">#&gt; 1   0  2  1  1  0  1  0  1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0</span>
-<span class="co">#&gt; 2   0  2  1  1  0  1  0  1  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0</span>
-<span class="co">#&gt; 3   2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt; 4   2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt; 5   2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt; 6   2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt; 7   2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt; 8   2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt; 9   2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt; 10  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2  2</span>
-<span class="co">#&gt;    47 48 49 50</span>
-<span class="co">#&gt; 1   0  0  0  0</span>
-<span class="co">#&gt; 2   0  0  0  0</span>
-<span class="co">#&gt; 3   2  2  2  2</span>
-<span class="co">#&gt; 4   2  2  2  2</span>
-<span class="co">#&gt; 5   2  2  2  2</span>
-<span class="co">#&gt; 6   2  2  2  2</span>
-<span class="co">#&gt; 7   2  2  2  2</span>
-<span class="co">#&gt; 8   2  2  2  2</span>
-<span class="co">#&gt; 9   2  2  2  2</span>
-<span class="co">#&gt; 10  2  2  2  2</span></code></pre></div>
+<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/colnames">colnames</a></span>(samples2018)
+<span class="co">#&gt;  [1] "id"   "year" "type" "1"    "2"    "3"    "4"    "5"    "6"    "7"   </span>
+<span class="co">#&gt; [11] "8"    "9"    "10"   "11"   "12"   "13"   "14"   "15"   "16"   "17"  </span>
+<span class="co">#&gt; [21] "18"   "19"   "20"   "21"   "22"   "23"   "24"   "25"   "26"   "27"  </span>
+<span class="co">#&gt; [31] "28"   "29"   "30"   "31"   "32"   "33"   "34"   "35"   "36"   "37"  </span>
+<span class="co">#&gt; [41] "38"   "39"   "40"   "41"   "42"   "43"   "44"   "45"   "46"   "47"  </span>
+<span class="co">#&gt; [51] "48"   "49"   "50"</span></code></pre></div>
 <p>The spreadsheet has 53 columns, named <code>id</code>, <code>year</code>, <code>type</code> and then numbered 1:50. Your spreadsheet must adhere to this format, using 53 columns named just so. The <code>id</code> column refers to an individual site id assoiated with each site. The <code>year</code> column specifies the year of observation. The <code>type</code> column is for grouping sites into subsets, such as sites with active permits to track compared to random samples, and may be left blank without consequence. The columns numbered 1:50 correspond to the numbers on the sample plots printed by <code><a href="../reference/plot_samples.html">plot_samples()</a></code>. When you are scoring observations, enter the cover score associated with the number on the sampling plot under the column with the same number in the spreadsheet.</p>
 <p>The easiest way to adhere to the format requirement is to simply add new observations to the bottom of the 2018 spreadsheet, and save it under a new name. You can convert the R object into a csv file using the command <code><a href="https://www.rdocumentation.org/packages/utils/topics/write.table">write.csv(samples2018, 'myfile.csv')</a></code> and fill in your observations using Excel.</p>
 <p>When you are done editing your file in Excel, export it into csv format, which is a tried and true way to share data between programs. Read the csv into RStudio using the <code>data.table</code> package.</p>
@@ -189,7 +162,7 @@ sub18 &lt;-<span class="st"> </span>samples2018[year <span class="op">==</span><
 sub18[ , .N, by =<span class="st"> </span>year]
 <span class="co">#&gt;    year   N</span>
 <span class="co">#&gt; 1: 2018 170</span></code></pre></div>
-<p>The <code>type</code> variable is a catch-all for you define and compare groups within the sample. The 2018 dataset includes a type value <code>permit</code>, which refers to sites with active permits we selected for random monitoring. We can split the dataset into two groups by using <code>==</code> and <code>!=</code> (not equal) to divide the data by <code>type</code>:</p>
+<p>The <code>type</code> variable is a catch-all for you to define and compare groups within the sample. The 2018 dataset includes a type value <code>permit</code>, which refers to sites with active permits we selected for random monitoring. We can split the dataset into two groups by using <code>==</code> and <code>!=</code> (not equal) to divide the data by <code>type</code>:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># print table of obs by type</span>
 samples2018[ , .N, by =<span class="st"> </span>type]
 <span class="co">#&gt;      type   N</span>
@@ -209,7 +182,99 @@ nopermit_sites[ , .N, by =<span class="st"> </span>type]
 <span class="co">#&gt;      type   N</span>
 <span class="co">#&gt; 1: random  27</span>
 <span class="co">#&gt; 2:   trib 231</span></code></pre></div>
+<p>To subset by multiples criteria, you can subset sequentially or use logical operators <code>&amp;</code> and <code>|</code> to nest multiple logical tests.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">
+<span class="co"># subset 2018 sites with type trib or permit</span>
+sub &lt;-<span class="st"> </span>samples2018[year <span class="op">==</span><span class="st"> </span><span class="dv">2018</span>]
+sub &lt;-<span class="st"> </span>sub[type <span class="op">==</span><span class="st"> 'trib'</span> <span class="op">|</span><span class="st"> </span>type <span class="op">==</span><span class="st"> 'permit'</span>]
+
+<span class="co"># very subset has correct number of obs</span>
+sub[, .N, by =<span class="st"> </span>type]
+<span class="co">#&gt;      type   N</span>
+<span class="co">#&gt; 1:   trib 116</span>
+<span class="co">#&gt; 2: permit  50</span>
+
+<span class="co"># subset 2016 sites with type trib or permit</span>
+sub &lt;-<span class="st"> </span>samples2018[year <span class="op">==</span><span class="st"> </span><span class="dv">2016</span>]
+sub &lt;-<span class="st"> </span>sub[type <span class="op">==</span><span class="st"> 'trib'</span> <span class="op">|</span><span class="st"> </span>type <span class="op">==</span><span class="st"> 'permit'</span>]
+
+<span class="co"># very subset has correct number of obs</span>
+sub[, .N, by =<span class="st"> </span>.(year, type)]
+<span class="co">#&gt;    year   type   N</span>
+<span class="co">#&gt; 1: 2016   trib 115</span>
+<span class="co">#&gt; 2: 2016 permit  50</span></code></pre></div>
 </div>
+</div>
+<div id="plot-cover-extent" class="section level2">
+<h2 class="hasAnchor">
+<a href="#plot-cover-extent" class="anchor"></a>Plot Cover Extent</h2>
+<p>The function <code><a href="../reference/plot_cover.html">plot_cover(csv)</a></code> produces a plot of cover extent over all the samples in the object <code>csv</code>. To produce a plot of cover extent for a given year, subset the observations in the data.table() by year in the argument to <code><a href="../reference/plot_cover.html">plot_cover()</a></code>. Optional arguments: the argument <code>title</code> sets the name of the .png file printed into the working directory. The argument <code>heading</code> sets a title for the plot (default is blank). The argument <code>leg_pos</code> adjusts the legend position and accepts the arguments <code>topright</code>, <code>topleft</code>, <code>bottomright</code>, <code>bottomleft</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(riparian)
+<span class="co">#&gt; Warning: replacing previous import 'magrittr::extract' by 'raster::extract'</span>
+<span class="co">#&gt; when loading 'riparian'</span>
+<span class="co">#&gt; Warning: replacing previous import 'data.table::shift' by 'raster::shift'</span>
+<span class="co">#&gt; when loading 'riparian'</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Attaching package: 'riparian'</span>
+<span class="co">#&gt; The following object is masked _by_ '.GlobalEnv':</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;     samples2018</span>
+<span class="kw"><a href="../reference/plot_cover.html">plot_cover</a></span>(samples2018[year <span class="op">==</span><span class="st"> </span><span class="dv">2018</span>])
+<span class="co">#&gt;           mean        sd   n       upr       lwr</span>
+<span class="co">#&gt; [1,] 0.7319412 0.3300731 170 0.7815595 0.6823229</span>
+<span class="kw"><a href="../reference/plot_cover.html">plot_cover</a></span>(samples2018[year <span class="op">==</span><span class="st"> </span><span class="dv">2009</span>])
+<span class="co">#&gt;           mean        sd  n       upr       lwr</span>
+<span class="co">#&gt; [1,] 0.8172222 0.2556192 54 0.8854016 0.7490429</span>
+<span class="kw"><a href="../reference/plot_cover.html">plot_cover</a></span>(samples2018[year <span class="op">==</span><span class="st"> </span><span class="dv">2018</span> <span class="op">&amp;</span><span class="st"> </span>type <span class="op">!=</span><span class="st"> 'trib'</span>])
+<span class="co">#&gt;           mean        sd  n       upr       lwr</span>
+<span class="co">#&gt; [1,] 0.8416667 0.2417917 54 0.9061579 0.7771755</span></code></pre></div>
+</div>
+<div id="plot-cover-change" class="section level2">
+<h2 class="hasAnchor">
+<a href="#plot-cover-change" class="anchor"></a>Plot Cover Change</h2>
+<p>The function <code><a href="../reference/plot_change.html">plot_change(csv, year1, year2)</a></code> produces a plot of cover extent change from <code>year1</code> to <code>year2</code> across samples in <code>csv</code>. Here the function does the subsetting for you in the case of year, but you can still subset <code>csv</code> by type. The optional arguments are the same as for <code>plot_cover</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/plot_change.html">plot_change</a></span>(samples2018, <span class="dv">2016</span>, <span class="dv">2018</span>)
+<span class="co">#&gt;             mean         sd   n         upr        lwr</span>
+<span class="co">#&gt; [1,] -0.01047619 0.09416389 168 0.003763017 -0.0247154</span>
+<span class="kw"><a href="../reference/plot_change.html">plot_change</a></span>(samples2018[type <span class="op">!=</span><span class="st"> 'trib'</span>], <span class="dv">2016</span>, <span class="dv">2018</span>)
+<span class="co">#&gt;              mean         sd  n        upr         lwr</span>
+<span class="co">#&gt; [1,] -0.002962963 0.06778517 54 0.01511685 -0.02104277</span>
+<span class="kw"><a href="../reference/plot_change.html">plot_change</a></span>(samples2018, <span class="dv">2016</span>, <span class="dv">2009</span>)
+<span class="co">#&gt;             mean         sd  n         upr         lwr</span>
+<span class="co">#&gt; [1,] -0.02740741 0.05857378 54 -0.01178448 -0.04303034</span></code></pre></div>
+</div>
+<div id="clean-permit-list" class="section level2">
+<h2 class="hasAnchor">
+<a href="#clean-permit-list" class="anchor"></a>Clean Permit List</h2>
+<p>A staff member from the planning department will email you an Excel sheet containing all permits the County has issued since the last monitoring report. Reading the file into R will require a little extra work preparing the data in Excel. Open the permit list in Excel, and note that the first column should be <code>Record Number</code> and the fifth should read <code>MapTaxlot #</code>. Likely, many of the MapTaxlot numbers will be printed in scientific notation in their cells. That is a problem, because R will interpret the cells as character vectors, and the ending 7 digits of the MapTaxlot number will be lost. But first, scroll down and note the first cell where the MapTaxlot number has a little green triangle in the upper left corner. In order to avoid MapTaxlot numbers displaying in scientific notation, some planning staff display numbers as text in the Excel formatting options. This is problematic because Excel converts them back to numbers and hence to scientific notation when exporting the file in csv format, and R then interprets it as a character string again.</p>
+<p>Click on the first cell where a MapTaxlot number has the green triangle in the upper left corner, then scroll to the last permit on the sheet and click on its MapTaxlot number while holding the shift key so that you select the entire column below the cell with the green triangle. Scroll back to the first cell you selected and click on the yellow exclamation point, bringing down a dropdown menu. From the menu select <code>Convert to Number</code>, and watch all the numbers displayed as text revert to scientific notation.</p>
+<p>Now scroll to the top of the sheet and select the whole column for <code>MapTaxlot #</code>. Right click on a cell in the highlighted column and click on <code>Format Cells...</code>. The <code>number</code> tab should display. Select from the <code>Category</code> menu <code>Number</code>. Change <code>Decimal places</code> from 2 to 0. Click <code>OK</code>. With all MapTaxlot numbers converted to number strings and displayed as integers, it is now safe to export the sheet as a csv file to import into R. Select <code>Save As</code>, choose a directory, and from the <code>Save as type</code> menu select <code>CSV (Comma delimited)</code>.</p>
+<p>Read the <code>csv</code> file into R using the same <code>fread</code> command as for the cover score sheet.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># not run</span>
+perms &lt;-<span class="st"> </span><span class="kw">fread</span>(<span class="st">'mypermits.csv'</span>)</code></pre></div>
+<p>To demonstrate the functionality of the package, I have included a list of permits from 2013 to 2018 as a data object, which you can access using the <code>data</code> function.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/data">data</a></span>(permits_13to18, <span class="dt">package =</span> <span class="st">'riparian'</span>)
+<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/colnames">colnames</a></span>(permits_13to18)
+<span class="co">#&gt;  [1] "record_no"         "record_type"       "proj_name"        </span>
+<span class="co">#&gt;  [4] "description"       "maptaxlot"         "numer"            </span>
+<span class="co">#&gt;  [7] "dir"               "street_name"       "street_type"      </span>
+<span class="co">#&gt; [10] "post_dir"          "unit_no"           "city"             </span>
+<span class="co">#&gt; [13] "status"            "related_records"   "opened"           </span>
+<span class="co">#&gt; [16] "expires"           "balance"           "created_by"       </span>
+<span class="co">#&gt; [19] "assigned_to_staff"</span></code></pre></div>
+</div>
+<div id="change-tables" class="section level2">
+<h2 class="hasAnchor">
+<a href="#change-tables" class="anchor"></a>Change Tables</h2>
+<p>The planning staff is concerned with which MapTaxlots have experienced net cover decrease, especially if the decrease is greater than 10%. The <code><a href="../reference/build_change_table.html">build_change_table()</a></code> function produces a change table designed for use by the planning staff. The change table ranks sampling sites by mean cover change, all MapTaxlot numbers falling within the sampling box and all permits associated with a MapTaxlot on the permit list.</p>
+<p>The full syntax for the function is <code><a href="../reference/build_change_table.html">build_change_table(csv, year1, year2, polys, lots, permits)</a></code>. The argument <code>csv</code> is the record of cover scores for the sampling sites. The arguments <code>year1</code> and <code>year2</code> are integers matching values in the <code>year</code> column of <code>csv</code>. The argument <code>polys</code> is the spatial polygons object of samplings boxes. The argument <code>lots</code> is the polygons object of MapTaxlots, and <code>permits</code> is the permit list formatted according to the instructions in the previous section. The output is a csv file printed to the working directory.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="../reference/build_change_table.html">build_change_table</a></span>(<span class="dt">csv =</span> samples2018,
+                   <span class="dt">year1 =</span> <span class="dv">2016</span>,
+                   <span class="dt">year2 =</span> <span class="dv">2018</span>,
+                   <span class="dt">polys =</span> samples,
+                   <span class="dt">lots =</span> prc_lots, 
+                   <span class="dt">permits =</span> permits_13to18)
+<span class="co">#&gt; Loading required namespace: rgeos</span></code></pre></div>
 </div>
   </div>
 
@@ -220,6 +285,10 @@ nopermit_sites[ , .N, by =<span class="st"> </span>type]
       <ul class="nav nav-pills nav-stacked">
 <li><a href="#step-one-site-plots">Step One: Site Plots</a></li>
       <li><a href="#scoring-samples">Scoring Samples</a></li>
+      <li><a href="#plot-cover-extent">Plot Cover Extent</a></li>
+      <li><a href="#plot-cover-change">Plot Cover Change</a></li>
+      <li><a href="#clean-permit-list">Clean Permit List</a></li>
+      <li><a href="#change-tables">Change Tables</a></li>
       </ul>
 </div>
       </div>
