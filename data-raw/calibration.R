@@ -19,11 +19,13 @@ usethis::use_data(samples2018, overwrite = T)
 prc_lots <- readOGR('riparian_lots.shp')
 prc_strms <- readOGR('ripov_streams.shp')
 prc_buff <- rgeos::gBuffer(streams, width = 50)
+prc_per <- readOGR('srpo_strms.shp')
 
 setwd('E:/Riparian/riparian')
 usethis::use_data(prc_lots)
 usethis::use_data(prc_strms)
 usethis::use_data(prc_buff)
+usethis::use_data(prc_per)
 
 # permit list 2013-2018
 permits_13to18 <- fread('permits_13to18.csv')

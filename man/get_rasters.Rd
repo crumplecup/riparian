@@ -4,7 +4,7 @@
 \alias{get_rasters}
 \title{get raster names}
 \usage{
-get_rasters(path)
+get_rasters(path = getwd())
 }
 \arguments{
 \item{path}{is a character string specifying a file path to a directory of rasters}

@@ -69,7 +69,6 @@ build_change_table <- function(csv,
 
 
 
-
 #' COORDINATE LIST FROM SPATIALPOLYGONS
 #'
 #'
@@ -204,7 +203,7 @@ get_crs <- function(dir)  {
 
 
 
-get_rasters <- function(path)  {
+get_rasters <- function(path = getwd())  {
   og_dir <- getwd()
   setwd(path)
   files <- dir()
@@ -270,7 +269,7 @@ lookup_lots <- function(polys, lots)  {
   mtls <- vector(length = length(polys), mode = 'character')
   box <- match_crs(samples, lots)
   for (i in seq_along(samples)) {
-    lot <- crop(lots, box[i,])
+    lot <- raster::crop(lots, box[i,])
     mtls[i] <- squash(levels(factor(lot$MapTaxlot)))
   }
   mtls
@@ -294,7 +293,7 @@ lookup_permits <- function(polys, lots, permits){
   perms <- vector(length = length(polys), mode = 'character')
   box <- match_crs(samples, raster::crs(lots))
   for (i in seq_along(samples)) {
-    lot <- crop(lots, box[i,])
+    lot <- raster::crop(lots, box[i,])
     map_nos <- levels(factor(lot$MapTaxlot))
     perms[i] <- squash(permits$record_no[permits$maptaxlot %in% map_nos])
   }
@@ -466,6 +465,101 @@ plot_cover <- function(csv,
   dev.off()
   print(vars)
 }
+
+
+
+#' predict change
+#' 
+#' Given a directories of matching rasters from different years,
+#' calculate change by subtracting year 1 from year 2.
+#' 
+#' @param year1_path is a character string indicating path to year 1 rasters
+#' @param year2_path is a character string indicating path to year 2 rasters
+#' @param out_path is a character string indicating path to output change rasters
+#' @return prints .tif files to `out_path` of year 2 minus year 1
+#' @export
+pred_change <- function(year1_path, year2_path, out_path)  {
+  og_dir <- getwd()
+  year1_files <- get_rasters(year1_path)
+  year2_files <- get_rasters(year2_path)
+  for (i in seq_along(year1_files))  {
+    setwd(year1_path)
+    year1 <- raster::raster(year1_files[i])
+    setwd(year2_path)
+    year2 <- raster::raster(year2_files[i])
+    year1 <- raster::projectRaster(year1, year2)
+    chng <- year2 - year1
+    setwd(out_path)
+    writeRaster(chng, paste0('site_',i,'.tif'), 'GTiff')
+  }
+  setwd(og_dir)
+}
+
+
+
+
+#' predicted change report
+#' 
+#' Given a path to change rasters produced by `pred_change()`,
+#' outputs a csv to the working directory of change per taxlot,
+#' including permits for each taxlot.
+#' 
+#' @param chng_path is a path for directory of change rasters output by `pred_change()`
+#' @param year1_path is a character string path for directory of year 1 rasters
+#' @param year2_path is a character string path for directory of year 2 rasters
+#' @param permits is a list of permits issued by the county
+#' @param lots is a spatial polygons object (maptaxlots)
+#' @param title is the name given to the output csv file
+#' @return a csv to the working directory showing change per taxlot, and listing permits for each taxlot
+#' @import data.table
+#' @export
+pred_change_report <- function(chng_path, 
+                               year1_path,
+                               year2_path,
+                               permits = permits_13to18,
+                               lots = prc_lots, 
+                               title = 'pred_chng_table.csv')  {
+  og_dir <- getwd()
+  setwd(chng_path)
+  files <- get_rasters()
+  ids <- 1:length(files)
+  chng <- array(0, length(files))
+  area <- vector(length = length(files), mode = 'numeric')
+  mtls <- vector(length = length(files), mode = 'character')
+  perms <- vector(length = length(files), mode = 'character')
+  img_path <- paste0(og_dir,'images') 
+  dir.create(img_path)
+  for (i in seq_along(files))  {
+    ras <- raster::raster(files[i])
+    vals <- raster::values(ras)
+    chng[i] <- sum(vals[!is.na(vals)])
+    area[i] <- length(vals[!is.na(vals)])
+    mtls[i] <- squash(lookup_lots(ras, lots))
+    perms[i] <- squash(lookup_permits(ras, lots, permits))
+    r <- fill_extent(ras, year1_path, 1)
+    g <- fill_extent(ras, year1_path, 2)
+    b <- fill_extent(ras, year1_path, 3)
+    year1 <- raster::stack(r, g, b)
+    r <- fill_extent(ras, year2_path, 1)
+    g <- fill_extent(ras, year2_path, 2)
+    b <- fill_extent(ras, year2_path, 3)
+    year2 <- raster::stack(r, g, b)
+    setwd(img_path)
+    png(paste0('site_', i, '_before', '.png'))
+    raster::plotRGB(year1)
+    dev.off()
+    png(paste0('site_', i, '_after', '.png'))
+    raster::plotRGB(year2)
+    dev.off()
+    
+  }
+  dt <- setDT(data.frame(ids = ids, change = chng, area = area, maptaxlot = mtls, permits = perms))
+  setkey(dt, chng)
+  setwd(og_dir)
+  write.csv(dt, title)
+  
+}
+
 
 
 
@@ -760,163 +854,6 @@ spatialize <- function(mat, crs_ref)	{
 }
 
 
-
-#' SNAP POINT TO STREAM FLOWLINE
-#'
-#'
-#'
-#' @param pt is a coordinate pair (numeric vector)
-#' @param mat is a numeric matrix representing the stream path
-#' @return the point on the stream path closest to \code{pt}
-
-
-
-streamsnap <- function(pt,mat)	{
-  ptdif <- raster::pointDistance(pt,mat,lonlat=F)
-  nebr <- mat[ptdif==min(ptdif),]
-  nebrid <- ((ptdif==min(ptdif)) %>% as.numeric * 1:nrow(mat)) %>% sum
-  nebrdif <- raster::pointDistance(nebr,mat,lonlat=F)
-  above <- FALSE
-  if (nebrid < nrow(mat))	{
-    if (ptdif[nebrid+1]<nebrdif[nebrid+1]) above <- TRUE
-  }
-  if(above) new <- mat[1:nebrid,] %>% rbind(pt %>% rbind(mat[(nebrid+1):nrow(mat),]))
-  if(!above) new <- mat[1:(nebrid-1),] %>% rbind(pt %>% rbind(mat[nebrid:nrow(mat),]))
-  
-  return(new)
-}
-
-
-
-#triangle length
-
-tri_length <- function(pt,bear,dist,north=TRUE)	{
-  #given hypotenuse length of right triangle
-  #and coords of start point
-  #returns coords of end point along hypotenuse
-  
-  if(bear>=90 & bear<270)	{
-    C <- abs(bear-180)
-    north <- FALSE
-  }
-  
-  if(bear<90) C <- bear
-  if(bear>=270) C <- 360-bear
-  a <- (dist*sin((90-C)*pi/180))/sin(90*pi/180)
-  if(north) y <- pt[2] + a
-  if(!north) y <- pt[2] - a
-  
-  c <- (dist*sin(C*pi/180))/sin(90*pi/180)
-  if(bear<=180) x <- pt[1] + c
-  if(bear>180) x <- pt[1] - c
-  
-  pt <- c(x,y)
-  return(pt)
-}
-
-get_bear <- function(coords)	{
-  bear <- atan2(coords[2,1]-coords[1,1],coords[2,2]-coords[1,2])
-  if(bear<0) bear <- 2*pi + bear
-  bear <- bear * (180/pi)
-  if(bear>360) bear <- bear - 360
-  return(bear)
-}
-
-set_flag <- function(pt,mat,dist=75%>%FtoM,us=F,k=0)	{
-  #given a matrix of coords from start point past end point
-  #returns end point along path at distance dist
-  
-  mat <- pt %>% streamsnap(mat)
-  difs <- pt %>% pointDistance(mat,lonlat=F)
-  for (i in 1:nrow(mat))	{
-    if (difs[i]==min(difs)) ptid <- i
-  }
-  
-  if (us) mat <- mat[ptid:nrow(mat),]
-  if (!us) mat <- mat[ptid:1,]
-  
-  so_far <- 0
-  while (so_far <= dist)	{
-    k <- k + 1
-    rem <- dist - so_far
-    so_far <- so_far + norm_vec(mat[k+1,]-mat[k,])
-  }
-  if (nrow(mat)>=(k+1))	{
-    bear <- mat[k:(k+1),] %>% get_bear
-  }
-  if (nrow(mat)==k)	{
-    bear <- mat[(k-1):k,] %>% get_bear
-  }
-  
-  pt <- mat[k,] %>% tri_length(bear,rem)
-  return(pt)
-}
-
-
-
-logindex <- function(log,ids=0)	{
-  #given vector of logical operators
-  #returns vector of index ids of true among false
-  if (log %>% dim %>% length < 2)	{
-    for (i in 1:length(log))	{
-      if(log[i]) ids <- c(ids,i)
-    }
-  }
-  if (log %>% dim %>% length > 1)	{
-    for ( i in 1:nrow(log))	{
-      if(log[i,1] & log[i,2]) ids <- c(ids,i)
-    }
-  }
-  
-  ids <- ids[-1]
-  return(ids)
-}
-
-set_pt <- function(pt,mat,dist,k=0)	{
-  #given a matrix of coords from start point past end point
-  #returns end point along path at distance dist
-  
-  mat <- pt %>% snap_pt(mat)
-  difs <- pt %>% pointDistance(mat,lonlat=F)
-  for (i in 1:nrow(mat))	{
-    if (difs[i]==min(difs)) ptid <- i
-  }
-  
-  mat <- mat[ptid:nrow(mat),]
-  
-  so_far <- 0
-  while (so_far <= dist)	{
-    k <- k + 1
-    rem <- dist - so_far
-    so_far <- so_far + norm_vec(mat[k+1,]-mat[k,])
-  }
-  if (nrow(mat)>=(k+1))	{
-    bear <- mat[k:(k+1),] %>% get_bear
-  }
-  if (nrow(mat)==k)	{
-    bear <- mat[(k-1):k,] %>% get_bear
-  }
-  
-  pt <- mat[k,] %>% tri_length(bear,rem)
-  return(pt)
-}
-
-
-snap_pt <- function(pt,mat)	{
-  ptdif <- pointDistance(pt,mat,lonlat=F)
-  nebr <- mat[ptdif==min(ptdif),]
-  nebrid <- (ptdif==min(ptdif)) %>% logindex
-  nebrid <- nebrid[1]
-  nebrdif <- pointDistance(nebr,mat,lonlat=F)
-  above <- FALSE
-  if (nebrid < nrow(mat))	{
-    if (ptdif[nebrid+1]<nebrdif[nebrid+1]) above <- TRUE
-  }
-  if(above) new <- mat[1:nebrid,] %>% rbind(pt %>% rbind(mat[(nebrid+1):nrow(mat),]))
-  if(!above) new <- mat[1:(nebrid-1),] %>% rbind(pt %>% rbind(mat[nebrid:nrow(mat),]))
-  
-  return(new)
-}
 
 
 
