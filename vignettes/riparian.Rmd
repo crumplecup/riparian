@@ -188,7 +188,7 @@ The function `plot_change(csv, year1, year2)` produces a plot of cover extent ch
 ```{r, fig.show='hold'}
 plot_change(samples2018, 2016, 2018)
 plot_change(samples2018[type != 'trib'], 2016, 2018)
-plot_change(samples2018, 2016, 2009)
+plot_change(samples2018, 2009, 2016)
 ```
 
 

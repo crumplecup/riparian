@@ -4,10 +4,10 @@
 \alias{lookup_permits}
 \title{Look up permits}
 \usage{
-lookup_permits(polys, lots, permits)
+lookup_permits(so, lots, permits)
 }
 \arguments{
-\item{polys}{is a spatial polygons object (sampling boxes)}
+\item{so}{is a spatial polygons object (sampling boxes)}
 
 \item{lots}{is a spatial polygons object (taxlots)}
 

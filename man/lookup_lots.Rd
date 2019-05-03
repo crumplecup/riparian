@@ -4,10 +4,10 @@
 \alias{lookup_lots}
 \title{Look up MapTaxlot`}
 \usage{
-lookup_lots(polys, lots)
+lookup_lots(so, lots)
 }
 \arguments{
-\item{polys}{is a list of polygons (sampling boxes)}
+\item{so}{is a spatial object (sampling boxes)}
 
 \item{lots}{is an spdf of polygons (bc taxlots)}
 }

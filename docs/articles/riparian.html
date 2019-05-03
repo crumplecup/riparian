@@ -64,7 +64,7 @@
       <h1>riparian</h1>
                         <h4 class="author">Erik Rose</h4>
             
-            <h4 class="date">2019-04-18</h4>
+            <h4 class="date">2019-05-02</h4>
       
       
       <div class="hidden name"><code>riparian.Rmd</code></div>
@@ -239,9 +239,9 @@ sub[, .N, by =<span class="st"> </span>.(year, type)]
 <span class="kw"><a href="../reference/plot_change.html">plot_change</a></span>(samples2018[type <span class="op">!=</span><span class="st"> 'trib'</span>], <span class="dv">2016</span>, <span class="dv">2018</span>)
 <span class="co">#&gt;              mean         sd  n        upr         lwr</span>
 <span class="co">#&gt; [1,] -0.002962963 0.06778517 54 0.01511685 -0.02104277</span>
-<span class="kw"><a href="../reference/plot_change.html">plot_change</a></span>(samples2018, <span class="dv">2016</span>, <span class="dv">2009</span>)
-<span class="co">#&gt;             mean         sd  n         upr         lwr</span>
-<span class="co">#&gt; [1,] -0.02740741 0.05857378 54 -0.01178448 -0.04303034</span></code></pre></div>
+<span class="kw"><a href="../reference/plot_change.html">plot_change</a></span>(samples2018, <span class="dv">2009</span>, <span class="dv">2016</span>)
+<span class="co">#&gt;            mean         sd  n        upr        lwr</span>
+<span class="co">#&gt; [1,] 0.02740741 0.05857378 54 0.04303034 0.01178448</span></code></pre></div>
 </div>
 <div id="clean-permit-list" class="section level2">
 <h2 class="hasAnchor">
@@ -274,7 +274,221 @@ perms &lt;-<span class="st"> </span><span class="kw">fread</span>(<span class="s
                    <span class="dt">polys =</span> samples,
                    <span class="dt">lots =</span> prc_lots, 
                    <span class="dt">permits =</span> permits_13to18)
-<span class="co">#&gt; Loading required namespace: rgeos</span></code></pre></div>
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+<span class="co">#&gt; Loading required namespace: rgeos</span>
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
+
+<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span></code></pre></div>
 </div>
   </div>
 

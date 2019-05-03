@@ -4,7 +4,7 @@
 \alias{plot_samples}
 \title{Print Sample Plots}
 \usage{
-plot_samples(in_path, out_path, samples = samples, print_rgb = TRUE,
+plot_samples(in_path, out_path, polys = samples, print_rgb = TRUE,
   print_ndvi = TRUE)
 }
 \arguments{
@@ -12,7 +12,7 @@ plot_samples(in_path, out_path, samples = samples, print_rgb = TRUE,
 
 \item{out_path}{is a character vector specifying the output directory for the plots}
 
-\item{samples}{is a SpatialPolygonsDataFrame object (the sample boxes shapefile)}
+\item{polys}{is a SpatialPolygonsDataFrame object (the sample boxes shapefile)}
 
 \item{rgb}{is a logical indicator, prints rgb plots if true}
 

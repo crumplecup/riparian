@@ -39,7 +39,6 @@ bisecter <- function(ext, vertical=TRUE)	{
 #' @param lots is a spatial polygons object (riparian taxlots)
 #' @param permits is a csv file with cols(maptaxlot, record_no)
 #' @return prints a csv file with cols(id, change, maptaxlot, permits) to the working directory
-#' @import data.table
 #' @export
 
 
@@ -49,9 +48,10 @@ build_change_table <- function(csv,
                                polys,
                                lots,
                                permits)  {
-  dt <- setDT(csv)
-  yr1 <- csv[year == year1]
-  yr2 <- csv[year == year2]
+  dt <- data.table::setDT(csv)
+  dt$mn <- apply(dt[,4:53], 1, function(x) sum(x)/100)
+  yr1 <- dt[year == year1]
+  yr2 <- dt[year == year2]
   chng <- rep(NA,nrow(yr2))
   for (i in 1:nrow(yr2))  {
     try(chng[i] <- yr2$mn[i] - yr1$mn[yr1$id == yr2$id[i]], silent=T)
@@ -63,7 +63,7 @@ build_change_table <- function(csv,
   }
   mtls <- lookup_lots(polys, lots)
   perms <- lookup_permits(polys, lots, permits)
-  dt <- setDT(data.frame(id = ids, change = change, maptaxlot = mtls[ids], permits = perms[ids]))
+  dt <- data.table::setDT(data.frame(id = ids, change = change, maptaxlot = mtls[ids], permits = perms[ids]))
   write.csv(dt[order(change)], file = paste0('change_table_', year1, '-', year2,'.csv'))
 }
 
@@ -259,17 +259,17 @@ in_extent <- function(pt, so)	{
 #' Given a list of polygons, returns character vector of all maptaxlot numbers
 #' within each polygon.
 #'
-#' @param polys is a list of polygons (sampling boxes)
+#' @param so is a spatial object (sampling boxes)
 #' @param lots is an spdf of polygons (bc taxlots)
 #' @return the MapTaxlot numbers of each input polygon in a character vector
 #' @export
 
 
-lookup_lots <- function(polys, lots)  {
-  mtls <- vector(length = length(polys), mode = 'character')
-  box <- match_crs(samples, lots)
-  for (i in seq_along(samples)) {
-    lot <- raster::crop(lots, box[i,])
+lookup_lots <- function(so, lots)  {
+  mtls <- vector(length = length(so), mode = 'character')
+  polys <- sp::spTransform(lots, raster::crs(so))
+  for (i in seq_along(so)) {
+    lot <- raster::crop(polys, so[i,])
     mtls[i] <- squash(levels(factor(lot$MapTaxlot)))
   }
   mtls
@@ -281,19 +281,19 @@ lookup_lots <- function(polys, lots)  {
 #'
 #'
 #'
-#' @param polys is a spatial polygons object (sampling boxes)
+#' @param so is a spatial polygons object (sampling boxes)
 #' @param lots is a spatial polygons object (taxlots)
 #' @param permits is a csv file with cols(maptaxlot, record_no)
 #' @return a character vector listing permit record numbers for taxlots in polys
 
 
-lookup_permits <- function(polys, lots, permits){
+lookup_permits <- function(so, lots, permits){
   names(permits[,1]) <- c('record_no')
   names(permits[,5]) <- c('maptaxlot')
-  perms <- vector(length = length(polys), mode = 'character')
-  box <- match_crs(samples, raster::crs(lots))
-  for (i in seq_along(samples)) {
-    lot <- raster::crop(lots, box[i,])
+  perms <- vector(length = length(so), mode = 'character')
+  polys <- sp::spTransform(lots, raster::crs(so))
+  for (i in seq_along(so)) {
+    lot <- raster::crop(polys, so[i,])
     map_nos <- levels(factor(lot$MapTaxlot))
     perms[i] <- squash(permits$record_no[permits$maptaxlot %in% map_nos])
   }
@@ -342,7 +342,13 @@ make_line <- function(coords,crs_ref)  {
 
 
 match_crs <- function(polys, crs_ref)  {
-  polys <- sp::spTransform(polys, raster::crs(crs_ref))
+  if (class(poly) %in% c('RasterLayer', 'RasterStack'))  {
+    polys <- raster::projectRaster(polys, crs_ref)
+  }
+  if (class(poly) %in% c('SpatialPolygons', 'SpatialPolygonsDataFrame'))  {
+    polys <- sp::spTransform(polys, raster::crs(crs_ref))
+  }
+  polys
 }
 
 
@@ -522,24 +528,65 @@ pred_change_report <- function(chng_path,
   og_dir <- getwd()
   setwd(chng_path)
   files <- get_rasters()
-  ids <- 1:length(files)
-  chng <- array(0, length(files))
-  area <- vector(length = length(files), mode = 'numeric')
-  mtls <- vector(length = length(files), mode = 'character')
-  perms <- vector(length = length(files), mode = 'character')
-  img_path <- paste0(og_dir,'images') 
-  dir.create(img_path)
+  fil_len <- length(files)
+  ids <- 1:fil_len
+  chng <- array(0, fil_len)
+  area <- vector(length = fil_len, mode = 'numeric')
+  rat <- vector(length = fil_len, mode = 'numeric')
+  mtls <- vector(length = fil_len, mode = 'character')
+  perms <- vector(length = fil_len, mode = 'character')
   for (i in seq_along(files))  {
+    print(paste0('Reading ', i, ' of ', fil_len, ' files...'))
     ras <- raster::raster(files[i])
     vals <- raster::values(ras)
     chng[i] <- sum(vals[!is.na(vals)])
     area[i] <- length(vals[!is.na(vals)])
-    mtls[i] <- squash(lookup_lots(ras, lots))
-    perms[i] <- squash(lookup_permits(ras, lots, permits))
+    lot <- match_crs(lots, ras)
+    lot <- raster::crop(lot, ras)
+    mtls[i] <- lot$MapTaxlot
+    perms[i] <- squash(permits$record_no[permits$maptaxlot %in% ras$MapTaxlot])
+ 
+  }
+  rat[area > 0] <- chng[area > 0] / area[area > 0]
+  dt <- setDT(data.frame(ids = ids, change = chng, area = area, ratio = rat, maptaxlot = mtls, permits = perms))
+  setkey(dt, ratio)
+  setwd(og_dir)
+  write.csv(dt, title)
+  
+}
+
+
+
+
+#' before and after plots
+#' 
+#' for a set of rasters, print images for year 1 and year 2
+#' 
+#' @param chng_path is a path for directory of change rasters output by `pred_change()`
+#' @param year1_path is a character string path for directory of year 1 rasters
+#' @param year2_path is a character string path for directory of year 2 rasters
+#' @param img_path is a character string path of directory to output results
+#' @return plots to the working directory showing before and after
+#' @export
+
+before_and_after <- function(chng_path, 
+                             year1_path,
+                             year2_path,
+                             img_path)  {
+  og_dir <- getwd()
+  setwd(chng_path)
+  files <- get_rasters()
+  for (i in seq_along(files))  {
+    setwd(chng_path)
+    ras <- raster::raster(files[i])
+    crs1 <- get_crs(year1_path)
+    ras <- raster::projectRaster(ras, crs = crs1)
     r <- fill_extent(ras, year1_path, 1)
     g <- fill_extent(ras, year1_path, 2)
     b <- fill_extent(ras, year1_path, 3)
     year1 <- raster::stack(r, g, b)
+    crs2 <- get_crs(year2_path)
+    ras <- raster::projectRaster(ras, crs = crs2)
     r <- fill_extent(ras, year2_path, 1)
     g <- fill_extent(ras, year2_path, 2)
     b <- fill_extent(ras, year2_path, 3)
@@ -551,14 +598,10 @@ pred_change_report <- function(chng_path,
     png(paste0('site_', i, '_after', '.png'))
     raster::plotRGB(year2)
     dev.off()
-    
   }
-  dt <- setDT(data.frame(ids = ids, change = chng, area = area, maptaxlot = mtls, permits = perms))
-  setkey(dt, chng)
   setwd(og_dir)
-  write.csv(dt, title)
-  
 }
+
 
 
 
@@ -636,25 +679,24 @@ assign_raster <- function(ras, vals)  {
 #'
 #' @param in_path is a character vector containing the path to the orthoimagery
 #' @param out_path is a character vector specifying the output directory for the plots
-#' @param samples is a SpatialPolygonsDataFrame object (the sample boxes shapefile)
+#' @param polys is a SpatialPolygonsDataFrame object (the sample boxes shapefile)
 #' @param rgb is a logical indicator, prints rgb plots if true
 #' @param ndvi is a logical indicator, prints ndvi plots if true
 #' @return prints an rgb and/or ndvi plot into the \code{out_path} directory
 #' @export
 
 
-plot_samples <- function(in_path, out_path, samples=samples, 
+plot_samples <- function(in_path, out_path, polys = samples, 
                          print_rgb = TRUE, print_ndvi = TRUE)  {
   og_wd <- getwd()
   setwd(in_path)
   files <- get_rasters(in_path)
   crs_ref <- raster::crs(raster::raster(files[1]))
-  samples <- match_crs(list(samples), crs_ref)
-  samples <- samples[[1]]
+  polys <- sp::spTransform(polys, crs_ref)
   
-  for (i in seq_along(samples))	{
+  for (i in seq_along(polys))	{
     setwd(in_path)
-    frame <- raster::extent(samples[i,])
+    frame <- raster::extent(polys[i,])
     hit <- 0
     
     for (j in seq_along(files))	{
@@ -669,8 +711,8 @@ plot_samples <- function(in_path, out_path, samples=samples,
     }
     
     if (length(hit) > 0)  {
-      if (rgb_test) rgb <- raster::brick(files[hit[1]])
-      if (ndvi_test) {
+      if (print_rgb) rgb <- raster::brick(files[hit[1]])
+      if (print_ndvi) {
         nir <- raster::raster(files[hit[1]], band = 4)
         red <- raster::raster(files[hit[1]], band = 1)
       }
@@ -678,8 +720,8 @@ plot_samples <- function(in_path, out_path, samples=samples,
     
     if (length(hit) > 1)	{
       for (j in 2:length(hit))	{
-        if (rgb_test) rgb <- raster::mosaic(rgb, raster::brick(files[hit[j]]), fun = max)
-        if (ndvi_test)  {
+        if (print_rgb) rgb <- raster::mosaic(rgb, raster::brick(files[hit[j]]), fun = max)
+        if (print_ndvi)  {
           nir <- raster::mosaic(nir, raster::raster(files[hit[j]], band = 4), fun = max)
           red <- raster::mosaic(red, raster::raster(files[hit[j]], band = 1), fun = max)
         }
@@ -698,7 +740,7 @@ plot_samples <- function(in_path, out_path, samples=samples,
     if (print_rgb)  {
       png(paste0('rgb_',i,'.png'))
       raster::plotRGB(rgb, main = paste0('Sample Site ',i))
-      area <- lapply(methods::slot(samples[i,], 'polygons'),
+      area <- lapply(methods::slot(polys[i,], 'polygons'),
                      function(x) lapply(methods::slot(x, 'Polygons'),
                                         function(y) methods::slot(y, 'coords')))
       area <- area[[1]]
@@ -721,7 +763,7 @@ plot_samples <- function(in_path, out_path, samples=samples,
     if (print_ndvi)  {
       png(paste0('ndvi_',i,'.png'))
       plot(ndvi, main = paste0('Sample Site ',i))
-      area <- lapply(methods::slot(samples[i,], 'polygons'),
+      area <- lapply(methods::slot(polys[i,], 'polygons'),
                      function(x) lapply(methods::slot(x, 'Polygons'),
                                         function(y) methods::slot(y, 'coords')))
       area <- area[[1]]
