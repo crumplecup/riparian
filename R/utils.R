@@ -124,6 +124,25 @@ fill_extent <- function(poly, dir, band)  {
   raster::crop(ras, ext)
 }
 
+
+#' box from extent
+#' 
+#' produce polygon representation of extent
+#' 
+#' @param ras is a spatial object (raster)
+#' @return a Spatial Polygon drawn around the extent of `ras`
+ext_box <- function(ras, crs_ref)  {
+  ext <- raster::extent(ras)
+  crs_ref <- raster::crs(ras)
+  box <- matrix(ncol = 2, nrow = 5)
+  box[1,] <- ext[c(1,3)]
+  box[2,] <- ext[c(1,4)]
+  box[3,] <- ext[c(2,4)]
+  box[4,] <- ext[c(2,3)]
+  box[5,] <- ext[c(1,3)]
+  spatialize(box, crs_ref)
+}
+  
 fill_extent1 <- function(poly, dir, band)  {
   og_dir <- getwd()
   setwd(dir)
@@ -269,7 +288,7 @@ lookup_lots <- function(so, lots)  {
   mtls <- vector(length = length(so), mode = 'character')
   polys <- sp::spTransform(lots, raster::crs(so))
   for (i in seq_along(so)) {
-    lot <- raster::crop(polys, so[i,])
+    lot <- raster::crop(polys, raster::extent(so[i,]))
     mtls[i] <- squash(levels(factor(lot$MapTaxlot)))
   }
   mtls
@@ -293,7 +312,12 @@ lookup_permits <- function(so, lots, permits){
   perms <- vector(length = length(so), mode = 'character')
   polys <- sp::spTransform(lots, raster::crs(so))
   for (i in seq_along(so)) {
-    lot <- raster::crop(polys, so[i,])
+    if (class(so) %in% c('SpatialPolygons', 'SpatialPolygonsDataFrame')) {
+      lot <- raster::crop(polys, raster::extent(so[i,]))
+    }
+    if (class(so) %in% c('RasterLayer', 'RasterStack', 'RasterBrick'))  {
+      lot <- raster::crop(polys, so[i,], mask = T)
+    }
     map_nos <- levels(factor(lot$MapTaxlot))
     perms[i] <- squash(permits$record_no[permits$maptaxlot %in% map_nos])
   }
@@ -541,10 +565,11 @@ pred_change_report <- function(chng_path,
     vals <- raster::values(ras)
     chng[i] <- sum(vals[!is.na(vals)])
     area[i] <- length(vals[!is.na(vals)])
-    lot <- match_crs(lots, ras)
-    lot <- raster::crop(lot, ras)
-    mtls[i] <- lot$MapTaxlot
-    perms[i] <- squash(permits$record_no[permits$maptaxlot %in% ras$MapTaxlot])
+    lot <- sp::spTransform(lots, raster::crs(ras))
+    lot <- raster::crop(lot, ras, mask = T)
+    map_nos <- levels(factor(lot$MapTaxlot))
+    mtls[i] <- squash(map_nos)
+    perms[i] <- squash(permits$record_no[permits$maptaxlot %in% map_nos])
  
   }
   rat[area > 0] <- chng[area > 0] / area[area > 0]
@@ -567,6 +592,7 @@ pred_change_report <- function(chng_path,
 #' @param year2_path is a character string path for directory of year 2 rasters
 #' @param img_path is a character string path of directory to output results
 #' @return plots to the working directory showing before and after
+#' @import sp
 #' @export
 
 before_and_after <- function(chng_path, 
@@ -581,15 +607,17 @@ before_and_after <- function(chng_path,
     ras <- raster::raster(files[i])
     crs1 <- get_crs(year1_path)
     ras <- raster::projectRaster(ras, crs = crs1)
-    r <- fill_extent(ras, year1_path, 1)
-    g <- fill_extent(ras, year1_path, 2)
-    b <- fill_extent(ras, year1_path, 3)
+    box <- ext_box(ras)
+    r <- fill_extent(box, year1_path, 1)
+    g <- fill_extent(box, year1_path, 2)
+    b <- fill_extent(box, year1_path, 3)
     year1 <- raster::stack(r, g, b)
     crs2 <- get_crs(year2_path)
     ras <- raster::projectRaster(ras, crs = crs2)
-    r <- fill_extent(ras, year2_path, 1)
-    g <- fill_extent(ras, year2_path, 2)
-    b <- fill_extent(ras, year2_path, 3)
+    box <- ext_box(ras)
+    r <- fill_extent(box, year2_path, 1)
+    g <- fill_extent(box, year2_path, 2)
+    b <- fill_extent(box, year2_path, 3)
     year2 <- raster::stack(r, g, b)
     setwd(img_path)
     png(paste0('site_', i, '_before', '.png'))
