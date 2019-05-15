@@ -227,26 +227,27 @@ tri_length <- function(pt,bear,dist,north=TRUE)	{
 #' @importFrom magrittr %>%
 
 find_line <- function (pt, lines = prc_strms)  {
-  lines <- coordinates(lines)
+  lines <- sp::coordinates(lines)
   lines <- lines[[1]]
-  difs <- lapply(lines, function(a) min(apply(a, 1, function(b) pointDistance(b, pt, lonlat = F))))
+  difs <- lapply(lines, function(a) min(apply(a, 1, function(b) raster::pointDistance(b, pt, lonlat = F))))
   difs <- unlist(difs)
   id <- logindex(difs == min(difs))
   lines[[id]]
 }
 
 pt_to_line <- function(pt, line)  {
-  difs <- apply(line, 1, function(a) pointDistance(a, pt, lonlat = F))
+  difs <- apply(line, 1, function(a) raster::pointDistance(a, pt, lonlat = F))
   nebr <- logindex(difs == min(difs))
   line[nebr,]
 }
 
-sample_streams <- function(n = 100, per = prc_per, strms = prc_strms)  {
+sample_streams <- function(n = 100, prc = prc_per, strms = prc_strms)  {
   crs_ref <- raster::crs(strms)
-  pts <- sp::spsample(per, 1000, 'random')
+  prc <- sp::spTransform(prc, crs_ref)
+  pts <- sp::spsample(prc, 1000, 'random')
   pts <- sample(pts, n)
-  pt_cords <- coordinates(pts)
-  finds <- apply(pt_cords, 1, function(a) find_line(a, strms))
+  pt_cords <- sp::coordinates(pts)
+  finds <- apply(pt_cords, 1, function(a) find_line(a, prc_strms))
   pts <- matrix(0, nrow = length(finds), ncol = 2)
   for (i in seq_along(finds)) {
     pts[i,] <- pt_to_line(pt_cords[i,], finds[[i]])

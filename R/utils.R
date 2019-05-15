@@ -591,14 +591,17 @@ pred_change_report <- function(chng_path,
 #' @param year1_path is a character string path for directory of year 1 rasters
 #' @param year2_path is a character string path for directory of year 2 rasters
 #' @param img_path is a character string path of directory to output results
+#' @param buff is a spatial polygons object (stream buffer layer)
+#' @param lots is a spatial polygons object (taxlots)
 #' @return plots to the working directory showing before and after
-#' @import sp
 #' @export
 
 before_and_after <- function(chng_path, 
                              year1_path,
                              year2_path,
-                             img_path)  {
+                             img_path,
+                             buff = prc_buff,
+                             lots = prc_lots)  {
   og_dir <- getwd()
   setwd(chng_path)
   files <- get_rasters()
@@ -612,6 +615,10 @@ before_and_after <- function(chng_path,
     g <- fill_extent(box, year1_path, 2)
     b <- fill_extent(box, year1_path, 3)
     year1 <- raster::stack(r, g, b)
+    buff1 <- sp::spTransform(buff, crs1)
+    buff1 <- raster::crop(buff1, box)
+    lot1 <- sp::spTransform(lots, crs1)
+    lot1 <- raster::crop(lot1, box)
     crs2 <- get_crs(year2_path)
     ras <- raster::projectRaster(ras, crs = crs2)
     box <- ext_box(ras)
@@ -619,12 +626,20 @@ before_and_after <- function(chng_path,
     g <- fill_extent(box, year2_path, 2)
     b <- fill_extent(box, year2_path, 3)
     year2 <- raster::stack(r, g, b)
+    buff2 <- sp::spTransform(buff, crs2)
+    buff2 <- raster::crop(buff2, box)
+    lot2 <- sp::spTransform(lots, crs2)
+    lot2 <- raster::crop(lot2, box)
     setwd(img_path)
     png(paste0('site_', i, '_before', '.png'))
     raster::plotRGB(year1)
+    lines(lot1, col = 'coral')
+    lines(buff1, lwd = 2, col = 'slateblue')
     dev.off()
     png(paste0('site_', i, '_after', '.png'))
     raster::plotRGB(year2)
+    lines(lot2, col = 'coral')
+    lines(buff2, lwd = 2, col = 'slateblue')
     dev.off()
   }
   setwd(og_dir)

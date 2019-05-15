@@ -4,7 +4,8 @@
 \alias{before_and_after}
 \title{before and after plots}
 \usage{
-before_and_after(chng_path, year1_path, year2_path, img_path)
+before_and_after(chng_path, year1_path, year2_path, img_path,
+  buff = prc_buff, lots = prc_lots)
 }
 \arguments{
 \item{chng_path}{is a path for directory of change rasters output by `pred_change()`}
@@ -14,6 +15,10 @@ before_and_after(chng_path, year1_path, year2_path, img_path)
 \item{year2_path}{is a character string path for directory of year 2 rasters}
 
 \item{img_path}{is a character string path of directory to output results}
+
+\item{buff}{is a spatial polygons object (stream buffer layer)}
+
+\item{lots}{is a spatial polygons object (taxlots)}
 }
 \value{
 plots to the working directory showing before and after
