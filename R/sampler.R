@@ -60,8 +60,9 @@ logindex <- function(bool,ids=0)	{
 #' @param us is a logical boolean indicating whether distance is upstream or downstream
 #' @return the point distance `dist` from starting point `pt` along line `mat`
 #' @importFrom magrittr %>%
+#' @export
 
-set_flag <- function(pt,mat,dist=75*0.3048,us=F,k=0)	{
+set_flag <- function(pt,mat,dist=75*0.3048,us=F)	{
   mat <- streamsnap(pt, mat)
   difs <- raster::pointDistance(pt, mat, lonlat=F)
   for (i in 1:nrow(mat))	{
@@ -72,6 +73,7 @@ set_flag <- function(pt,mat,dist=75*0.3048,us=F,k=0)	{
   if (!us) mat <- mat[ptid:1, ]
   
   so_far <- 0
+  k <- 0
   while (so_far <= dist)	{
     k <- k + 1
     rem <- dist - so_far
@@ -100,6 +102,7 @@ set_flag <- function(pt,mat,dist=75*0.3048,us=F,k=0)	{
 #' @param mat is a matrix representing a line path with cols (x,y)
 #' @param dist is a distance in meters
 #' @return the point distance `dist` along line `mat` from starting point `pt`
+#' @export
 
 set_pt <- function(pt,mat,dist,k=0)	{
   mat <- snap_pt(pt, mat)
@@ -225,6 +228,7 @@ tri_length <- function(pt,bear,dist,north=TRUE)	{
 #' @return coordinate matrix of nearest line to `pt` in `lines`
 #' @importFrom raster pointDistance
 #' @importFrom magrittr %>%
+#' @export
 
 find_line <- function (pt, lines = prc_strms)  {
   lines <- sp::coordinates(lines)
@@ -232,7 +236,7 @@ find_line <- function (pt, lines = prc_strms)  {
   difs <- lapply(lines, function(a) min(apply(a, 1, function(b) raster::pointDistance(b, pt, lonlat = F))))
   difs <- unlist(difs)
   id <- logindex(difs == min(difs))
-  lines[[id]]
+  lines[[id[1]]]
 }
 
 pt_to_line <- function(pt, line)  {
@@ -252,9 +256,22 @@ sample_streams <- function(n = 100, prc = prc_per, strms = prc_strms)  {
   for (i in seq_along(finds)) {
     pts[i,] <- pt_to_line(pt_cords[i,], finds[[i]])
   }
+  polys <- list()
   boxes <- centerline(pts, finds)
-}
-
+  for(i in 1:length(boxes))  {
+    print(i)
+    buff <- get_buffer(boxes[[i]])
+    corners <- buff[[2]]
+    buff <- buff[[1]]
+    left_bank <- try(draw_bank(buff, corners, 'L'))
+    right_bank <- try(draw_bank(buff, corners, 'R'))
+    polys[[i]] <- try(boxify(boxes[[i]], left_bank, right_bank, i)) 
+  }
+  polys <- sp::SpatialPolygons(polys, proj4string=crs_ref)
+  pid <- lapply(slot(polys, 'polygons'), function(x) slot(x, 'ID'))
+  p.df <- data.frame( ID=1:length(polys), row.names = pid)
+  sp::SpatialPolygonsDataFrame(polys, p.df)
+} 
 
 
 
@@ -292,9 +309,7 @@ centerline <- function(pts, strms) {
 
 
 
-sides <- function(mat) {
-  lefts <- list()
-  rights <- list()
+get_buffer <- function(mat) {
   bear <- get_bear(mat[1:2,]) + 90
   if (bear > 360) bear <- bear - 360
   left_up <-  tri_length(mat[1,], bear, dist=50*0.3048)
@@ -309,7 +324,7 @@ sides <- function(mat) {
   right_down <- tri_length(mat[nrow(mat), ], bear, dist=50*0.3048)
   
   #create buffer polygon and pull matrix of coordinates
-  buff <- mat %>% Line %>% list %>% Lines(ID='first') %>% list %>% SpatialLines(crs_ref)
+  buff <- sp::Line(mat) %>% list %>% sp::Lines(ID='first') %>% list %>% sp::SpatialLines(crs_ref)
   buff <- rgeos::gBuffer(buff, width=50*0.3048)
   buff <- coord_lis(buff)[[1]]
   
@@ -327,70 +342,87 @@ sides <- function(mat) {
     if (left_down[1]==buff[i,1] & left_down[2]==buff[i,2]) ldid <- i
     if (right_down[1]==buff[i,1] & right_down[2]==buff[i,2]) rdid <- i
   }
-  
-  #find length of 'left' side
-  buff <- rbind(buff, buff)
-  above <- TRUE
-  done <- FALSE
-  k <- luid
-  while(above)	{
-    k <- k + 1
-    if (left_down[1]==buff[k,1] & left_down[2]==buff[k,2])	{
-      seg <- buff[luid:k,]
-      above <- FALSE
-      done <- TRUE
-    }
-    if (right_up[1]==buff[k,1] & right_up[2]==buff[k,2]) above <- FALSE
-  }
-  k <- luid + nrow(buff)*0.5
-  while(!above & !done)	{
-    k <- k - 1
-    if (left_down[1]==buff[k,1] & left_down[2]==buff[k,2])	{
-      seg <- buff[(luid+nrow(buff)*0.5):k,]
-      above <- TRUE
-    }
-  }
-  seglen <- seg %>% Line %>% list %>% Lines(ID='first') %>% list %>% SpatialLines(crs_ref) %>% lineLength / 25
-  
-  #record 'left' side points
-  left_side <- left_up %>% as.vector %>% as.matrix %>% t
-  for (j in 1:24)	{
-    left_side <- left_side %>% rbind(left_side[nrow(left_side), ] %>% set_pt(mat=seg, dist=seglen))
-  }
-  left_side <- left_side %>% rbind(left_down)
-  lefts[[i]] <- left_side
-  
-  #find length of 'right' side
-  above <- TRUE
-  done <- FALSE
-  k <- ruid
-  while(above)	{
-    k <- k + 1
-    if (right_down[1] == buff[k, 1] & right_down[2] == buff[k, 2])	{
-      seg <- buff[ruid:k, ]
-      above <- FALSE
-      done <- TRUE
-    }
-    if (left_up[1] == buff[k,1] & left_up[2] == buff[k,2]) above <- FALSE
-  }
-  k <- ruid + nrow(buff)*0.5
-  while(!above & !done)	{
-    k <- k - 1
-    if (right_down[1] == buff[k,1] & right_down[2] == buff[k,2])	{
-      seg <- buff[(ruid + nrow(buff) * 0.5):k, ]
-      above <- TRUE
-    }
-  }
-  seglen <- seg %>% Line %>% list %>% Lines(ID='first') %>% list %>% SpatialLines(crs_ref) %>% lineLength / 25
-  
-  #record 'right' side points
-  right_side <- right_up %>% as.vector %>% as.matrix %>% t
-  for (j in 1:24)	{
-    right_side <- right_side %>% rbind(right_side[nrow(right_side), ] %>% set_pt(mat=seg, dist=seglen))
-  }
-  right_side <- right_side %>% rbind(right_down)
-  rights[[i]] <- right_side
+  corners <- c(ldid, luid, rdid, ruid)
+  names(corners) <- c('ldid', 'luid', 'rdid', 'ruid')
+  return(list(buff, corners))
 }
+
+
+draw_bank <- function(mat, box, bank='L')  {
+  mat <- rbind(mat, mat)
+  above <- TRUE
+  done <- FALSE
+  if (bank=='L')  {
+    start <- box[2]
+    end <- box[1]
+    off <- box[4]
+  }
+  if (bank=='R')  {
+    start <- box[4]
+    end <- box[3]
+    off <- box[2]
+  }
+  
+  k <- start
+  while(above & !done)	{
+    k <- k + 1
+    if (mat[end,1]==mat[k,1] & mat[end,2]==mat[k,2])	{
+      seg <- mat[start:k,]
+      done <- TRUE
+    }
+    if (mat[off,1]==mat[k,1] & mat[off,2]==mat[k,2]) above <- FALSE
+  }
+  k <- start + nrow(mat)*0.5
+  while(!above & !done)	{
+    k <- k - 1
+    if (mat[end,1]==mat[k,1] & mat[end,2]==mat[k,2])	{
+      seg <- mat[(start+nrow(mat)*0.5):k,]
+      done <- TRUE
+    }
+  }
+  seglen <- sp::Line(seg) %>% list %>% sp::Lines(ID='first') %>% list %>% sp::SpatialLines(crs_ref)
+  seglen <- rgeos::gLength(seglen) / 25
+  
+  side <- mat[start,] %>% as.vector %>% as.matrix %>% t
+  for (j in 1:24)	{
+    side <- side %>% rbind(side[nrow(side), ] %>% set_pt(mat=seg, dist=seglen))
+  }
+  side <- side %>% rbind(mat[end,])
+  side
+}
+
+#   
+#   #find length of 'right' side
+#   above <- TRUE
+#   done <- FALSE
+#   k <- ruid
+#   while(above)	{
+#     k <- k + 1
+#     if (right_down[1] == buff[k, 1] & right_down[2] == buff[k, 2])	{
+#       seg <- buff[ruid:k, ]
+#       above <- FALSE
+#       done <- TRUE
+#     }
+#     if (left_up[1] == buff[k,1] & left_up[2] == buff[k,2]) above <- FALSE
+#   }
+#   k <- ruid + nrow(buff)*0.5
+#   while(!above & !done)	{
+#     k <- k - 1
+#     if (right_down[1] == buff[k,1] & right_down[2] == buff[k,2])	{
+#       seg <- buff[(ruid + nrow(buff) * 0.5):k, ]
+#       above <- TRUE
+#     }
+#   }
+#   seglen <- seg %>% Line %>% list %>% Lines(ID='first') %>% list %>% SpatialLines(crs_ref) %>% lineLength / 25
+#   
+#   #record 'right' side points
+#   right_side <- right_up %>% as.vector %>% as.matrix %>% t
+#   for (j in 1:24)	{
+#     right_side <- right_side %>% rbind(right_side[nrow(right_side), ] %>% set_pt(mat=seg, dist=seglen))
+#   }
+#   right_side <- right_side %>% rbind(right_down)
+#   rights[[i]] <- right_side
+# }
 
   
 # 
@@ -424,6 +456,36 @@ sides <- function(mat) {
 # rights <- shortright
 # 
 # 
+
+
+# polys <- list()
+# right_ids <- paste0('box_',c(replicate(5,0),replicate(5,1),replicate(5,2),replicate(5,3),
+#                              replicate(5,4)), replicate(5,1:5))
+# left_ids <- paste0('box_',c(replicate(5,9),replicate(5,8),replicate(5,7),replicate(5,6),
+#                             replicate(5,5)), replicate(5,5:1))
+# 
+# for (i in 1:length(boxes))	{
+#   if (boxes[[i]] %>% length > 1)	{
+#     mid <- boxes[[i]]
+#     left <- lefts[[i]]
+#     right <- rights[[i]]
+    
+
+boxify <- function(mid, left, right, id)  {
+  lbox <- list()
+  rbox <- list()
+  box <- list()
+  k <- 1
+  for (i in 1:(nrow(mid)-1))	{
+    rbox[[i]] <-  sp::Polygon(rbind(right[i:(i+1),], rbind(mid[(i+1):j,], right[i,])))
+    lbox[[i]] <- sp::Polygon(rbind(left[i:(i+1),], rbind(mid[(i+1):j,], left[i,])))
+    box[[k]] <- rbox[[i]]
+    k <- k + 1
+    box[[k]] <- lbox[[i]]
+    k <- k + 1
+  }
+  sp::Polygons(box, ID=id)
+}
 
 
 
