@@ -24,7 +24,7 @@ Benton County conducts riparian monitoring whenever new high resolution (1-foot)
 
 The County currently monitors 54 randomly selected sites along priority corridors, and may add additional sites based upon future permit approvals.  The reason we look at the same 54 sites every year is because we are trying to detect change in cover.  If we looked at a different slew of sites each year, it would be hard to know whether an increase or decrease in cover were due to variation between the sites we selected, or whether vegetation removal or accrual occurred.  Using this method, we can circle individual trees that have gone missing from one year to the next.  Because the sites are randomly selected and representative of conditions in the priority corridor generally, we can be reasonably confident that changes in cover within the sample reflect conditions in the priority corridor.
 
-Acces the polygon shapefile containing the 54 sampling boxes for each site by calling the command:
+If you are starting a fresh session of RStudio, remember to set the path to your personal package library using the .libPaths() function (eg: `.libPaths('P:/lib')`).  Access the polygon shapefile containing the 54 sampling boxes for each site by calling the command:
 
 ```{r}
 data(samples, package = 'riparian')
@@ -231,7 +231,30 @@ build_change_table(csv = samples2018,
 ```
 
 
+## Sampler
 
+The time will come when you need to draw new sampling boxes to sample new places.  Typically the County will approve new permits and flag those permits that may result in reduction of cover in the priority corridor.  Your bosses may ask you to include newly permitted areas in your sample.  The `sample_streams()` function generates new sampling boxes along the priority corridor within the area of your choice.  
+
+The full syntax for the function is `sample_streams(n=100, lots=prc_lots, prc=prc_per, strms=prc_strms)`.  The argument `n` is the number of sampling boxes you want to produce, and defaults to 100.  The argument `prc` is the line file along which the function generates random points.  The default is the NHD set of perennial or fish-bearing streams, clipped to the extent of the RR zone, and you should be able to leave the default as is.  The WSI hydro-enforced drainage layer is more accurate than the NHD dataset, so the function finds the nearest point on the WSI layer to the random point generated on the NHD layer, and draws the sampling box around that point.  The argument `lots` is the polygon shapefile that specifies the area within which you want to draw samples, and defaults to the whole priority corridor.
+
+To demonstrate the function, I will generate a random sample of lots within the priority corridor, then draw sample boxes using `sample_streams()`.
+
+```{r}
+# random lots from the priority corridor
+random_lots <- prc_mtls[sample.int(length(prc_mtls), 10),]
+
+# sample 10 spots without regard for which lot
+samp1 <- sample_streams(n = 3, lots = random_lots)
+
+# sample 10 spots, 1 from each lot
+samp2 <- sample_streams(n = 1, lots = random_lots[1,])
+
+for (i in 2:length(random_lots))  {
+  samp2 <- rbind(samp2, sample_streams(n = 1, lots = random_lots[i, ]))
+}
+
+
+```
 
 
 

@@ -334,7 +334,6 @@ lookup_permits <- function(so, lots, permits){
 #' @param coords is a matrix with cols(x,y)
 #' @param crs_ref is a crs character string
 #' @return a SpatialLines object
-#' @import magrittr
 #' @export
 
 make_line <- function(coords,crs_ref)  {
@@ -704,7 +703,6 @@ pred_cover <- function(poly, in_path = NULL, out_path = NULL, title = 'pred_chan
 #' @param ras is a raster
 #' @param vals are vals for raster
 #' @return raster `ras` with values `vals`
-#' @import raster
 #' @export
 assign_raster <- function(ras, vals)  {
   new <- ras

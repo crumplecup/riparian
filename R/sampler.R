@@ -31,6 +31,7 @@ get_bear <- function(coords)	{
 #' @param bool is a vector of logical operators
 #' @return the indices of true elements along the vector `log`
 #' @importFrom magrittr %>%
+#' @export
 
 logindex <- function(bool,ids=0)	{
   if (length(dim(bool)) < 2)	{
@@ -239,19 +240,52 @@ find_line <- function (pt, lines = prc_strms)  {
   lines[[id[1]]]
 }
 
+
+
+#' pt to line
+#' 
+#' returns nearest point on line to `pt` among vertices in the line path
+#' 
+#' @param pt is a coordinate pair
+#' @param line is SpatialLines object
+#' @return nearest point on line to `pt` among vertices in the line path
+#' @export
 pt_to_line <- function(pt, line)  {
   difs <- apply(line, 1, function(a) raster::pointDistance(a, pt, lonlat = F))
   nebr <- logindex(difs == min(difs))
   line[nebr,]
 }
 
-sample_streams <- function(n = 100, prc = prc_per, strms = prc_strms)  {
+
+#' sample streams
+#' 
+#' Generates `n` samples along `prc`, finds the closest points on `strms`
+#' to each point along `prc`, returns `n` samples along `strms`.
+#' 
+#' @param n is the number of samples to take
+#' @param lots is a polygon object representing sample extent
+#' @param prc is the line path for perennial and fish-bearing streams in RR (NHD)
+#' @param strms is the hydro-enforced drainage layer in RR (WSI)
+#' @return `n` points along `strms`
+#' @export
+sample_streams <- function(n = 100, 
+                           lots = prc_mtls, 
+                           prc = prc_per, 
+                           strms = prc_strms,
+                           buff = per_buff)  {
   crs_ref <- raster::crs(strms)
+  lots <- sp::spTransform(lots, crs_ref)
   prc <- sp::spTransform(prc, crs_ref)
+  buff <- sp::spTransform(buff, crs_ref)
+  poly <- raster::crop(buff, lots, mask=T)
+  prc <- prc[poly,]
   pts <- sp::spsample(prc, 1000, 'random')
   pts <- sample(pts, n)
   pt_cords <- sp::coordinates(pts)
-  finds <- apply(pt_cords, 1, function(a) find_line(a, prc_strms))
+  finds <- apply(pt_cords, 1, function(a) find_line(a, strms))
+  if(class(finds) == 'matrix')  {
+    finds <- list(matrix(finds, ncol = 2))
+  }
   pts <- matrix(0, nrow = length(finds), ncol = 2)
   for (i in seq_along(finds)) {
     pts[i,] <- pt_to_line(pt_cords[i,], finds[[i]])
@@ -260,12 +294,12 @@ sample_streams <- function(n = 100, prc = prc_per, strms = prc_strms)  {
   boxes <- centerline(pts, finds)
   for(i in 1:length(boxes))  {
     print(i)
-    buff <- get_buffer(boxes[[i]])
+    buff <- get_buffer(boxes[[i]], crs_ref)
     corners <- buff[[2]]
     buff <- buff[[1]]
-    left_bank <- try(draw_bank(buff, corners, 'L'))
-    right_bank <- try(draw_bank(buff, corners, 'R'))
-    polys[[i]] <- try(boxify(boxes[[i]], left_bank, right_bank, i)) 
+    left_bank <- try(draw_bank(buff, corners, 'L', crs_ref))
+    right_bank <- try(draw_bank(buff, corners, 'R', crs_ref))
+    polys[[i]] <- try(sample_box(boxes[[i]], left_bank, right_bank, i)) 
   }
   polys <- sp::SpatialPolygons(polys, proj4string=crs_ref)
   pid <- lapply(slot(polys, 'polygons'), function(x) slot(x, 'ID'))
@@ -274,13 +308,23 @@ sample_streams <- function(n = 100, prc = prc_per, strms = prc_strms)  {
 } 
 
 
+# n <- 1
+# lots <- random_lots[1,]
+# prc <- prc_per
+# strms <- prc_strms
+# buff <- per_buff
 
 
 
 
-
-
-
+#' centerline
+#' 
+#' Given sampling points, find the centerline points of the sampling box.
+#' 
+#' @param pts is a spatial points object (stream samples)
+#' @param strms is the stream layer `pts` lie along
+#' @return a list of matrices with coordinates for 25 segments along stream path
+#' @export
 centerline <- function(pts, strms) {
   boxes <- list()
   for(i in 1:nrow(pts))	{
@@ -306,10 +350,17 @@ centerline <- function(pts, strms) {
 
 
 
-
-
-
-get_buffer <- function(mat) {
+#' get buffer
+#' 
+#' Given the matrix output from the centerline function, generates the riparian
+#' buffer, adds the four corners of the sampling box explicitly to the buffer matrix,
+#' and returns the buffer and a vector of corner row ids in a list.
+#' 
+#' @param mat is a centerline matrix
+#' @return a list containing the buffer matrix and vector of box corner row ids
+#' @seealso centerline
+#' @export
+get_buffer <- function(mat, crs) {
   bear <- get_bear(mat[1:2,]) + 90
   if (bear > 360) bear <- bear - 360
   left_up <-  tri_length(mat[1,], bear, dist=50*0.3048)
@@ -324,7 +375,7 @@ get_buffer <- function(mat) {
   right_down <- tri_length(mat[nrow(mat), ], bear, dist=50*0.3048)
   
   #create buffer polygon and pull matrix of coordinates
-  buff <- sp::Line(mat) %>% list %>% sp::Lines(ID='first') %>% list %>% sp::SpatialLines(crs_ref)
+  buff <- sp::Line(mat) %>% list %>% sp::Lines(ID='first') %>% list %>% sp::SpatialLines(crs)
   buff <- rgeos::gBuffer(buff, width=50*0.3048)
   buff <- coord_lis(buff)[[1]]
   
@@ -348,7 +399,18 @@ get_buffer <- function(mat) {
 }
 
 
-draw_bank <- function(mat, box, bank='L')  {
+#' draw bank
+#' 
+#' Takes output from get_buffer and draws the left and right bank points for
+#' sampling box.
+#' 
+#' @param mat is a buffer matrix output by get_buffer
+#' @param box is a vector of corner row ids output by get_buffer
+#' @param bank is 'L' for left bank and 'R' for right bank
+#' @return right or left bank segment of sampling box points as matrix
+#' @seealso get_buffer
+#' @export
+draw_bank <- function(mat, box, bank='L', crs)  {
   mat <- rbind(mat, mat)
   above <- TRUE
   done <- FALSE
@@ -380,7 +442,7 @@ draw_bank <- function(mat, box, bank='L')  {
       done <- TRUE
     }
   }
-  seglen <- sp::Line(seg) %>% list %>% sp::Lines(ID='first') %>% list %>% sp::SpatialLines(crs_ref)
+  seglen <- sp::Line(seg) %>% list %>% sp::Lines(ID='first') %>% list %>% sp::SpatialLines(crs)
   seglen <- rgeos::gLength(seglen) / 25
   
   side <- mat[start,] %>% as.vector %>% as.matrix %>% t
@@ -471,14 +533,27 @@ draw_bank <- function(mat, box, bank='L')  {
 #     right <- rights[[i]]
     
 
-boxify <- function(mid, left, right, id)  {
+#' sample box
+#' 
+#' Given points for the centerline, left and right bank, assembles the points
+#' into 50 slices, and the slices into a spatial Polgyons object.
+#' 
+#' @param mid is the centerline matrix output by centerline
+#' @param left is the left bank matrix output by draw_bank
+#' @param right is the right bank matrix output by draw_bank
+#' @param id is a unique integer identifier for the sampling box
+#' @return a Polygons object (sampling box) containing 50 Polygon objects (slices)
+#' @seealso centerline
+#' @seealso draw_bank
+#' @export
+sample_box <- function(mid, left, right, id)  {
   lbox <- list()
   rbox <- list()
   box <- list()
   k <- 1
   for (i in 1:(nrow(mid)-1))	{
-    rbox[[i]] <-  sp::Polygon(rbind(right[i:(i+1),], rbind(mid[(i+1):j,], right[i,])))
-    lbox[[i]] <- sp::Polygon(rbind(left[i:(i+1),], rbind(mid[(i+1):j,], left[i,])))
+    rbox[[i]] <-  sp::Polygon(rbind(right[i:(i+1),], rbind(mid[(i+1):i,], right[i,])))
+    lbox[[i]] <- sp::Polygon(rbind(left[i:(i+1),], rbind(mid[(i+1):i,], left[i,])))
     box[[k]] <- rbox[[i]]
     k <- k + 1
     box[[k]] <- lbox[[i]]

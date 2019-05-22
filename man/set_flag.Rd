@@ -4,7 +4,7 @@
 \alias{set_flag}
 \title{set flag}
 \usage{
-set_flag(pt, mat, dist = 75 * 0.3048, us = F, k = 0)
+set_flag(pt, mat, dist = 75 * 0.3048, us = F)
 }
 \arguments{
 \item{pt}{is a coordinate pair (starting point)}
