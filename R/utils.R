@@ -365,10 +365,10 @@ make_line <- function(coords,crs_ref)  {
 
 
 match_crs <- function(polys, crs_ref)  {
-  if (class(poly) %in% c('RasterLayer', 'RasterStack'))  {
+  if (class(polys) %in% c('RasterLayer', 'RasterStack'))  {
     polys <- raster::projectRaster(polys, crs_ref)
   }
-  if (class(poly) %in% c('SpatialPolygons', 'SpatialPolygonsDataFrame'))  {
+  if (class(polys) %in% c('SpatialPolygons', 'SpatialPolygonsDataFrame'))  {
     polys <- sp::spTransform(polys, raster::crs(crs_ref))
   }
   polys
@@ -519,7 +519,7 @@ pred_change <- function(year1_path, year2_path, out_path)  {
     year1 <- raster::projectRaster(year1, year2)
     chng <- year2 - year1
     setwd(out_path)
-    writeRaster(chng, paste0('site_',i,'.tif'), 'GTiff')
+    raster::writeRaster(chng, paste0('site_',i,'.tif'), 'GTiff')
   }
   setwd(og_dir)
 }
@@ -549,33 +549,75 @@ pred_change_report <- function(chng_path,
                                lots = prc_lots, 
                                title = 'pred_chng_table.csv')  {
   og_dir <- getwd()
-  setwd(chng_path)
-  files <- get_rasters()
+  files <- get_rasters(year2_path)
   fil_len <- length(files)
   ids <- 1:fil_len
+  
+  cov_yr1 <- array(0, fil_len)
+  area_yr1 <- array(0, fil_len)
+  cov_yr2 <- array(0, fil_len)
+  area_yr2 <- array(0, fil_len)
+  
+  chng_adj <- array(0, fil_len)
+  
+  
   chng <- array(0, fil_len)
   area <- vector(length = fil_len, mode = 'numeric')
   rat <- vector(length = fil_len, mode = 'numeric')
   mtls <- vector(length = fil_len, mode = 'character')
   perms <- vector(length = fil_len, mode = 'character')
+  cover <- vector(length = fil_len, mode = 'numeric')
   for (i in seq_along(files))  {
     print(paste0('Reading ', i, ' of ', fil_len, ' files...'))
-    ras <- raster::raster(files[i])
+    ras <- raster::raster(paste0(chng_path, files[i]))
     vals <- raster::values(ras)
-    chng[i] <- sum(vals[!is.na(vals)])
+    chng[i] <- sum(vals[!is.na(vals)]) / 2
     area[i] <- length(vals[!is.na(vals)])
+    cover[i] <- (sum(vals[!is.na(vals)])/2) / area[i]
     lot <- sp::spTransform(lots, raster::crs(ras))
     lot <- raster::crop(lot, ras, mask = T)
     map_nos <- levels(factor(lot$MapTaxlot))
     mtls[i] <- squash(map_nos)
     perms[i] <- squash(permits$record_no[permits$maptaxlot %in% map_nos])
- 
+
+    ras <- raster::raster(paste0(year1_path, files[i]))
+    vals <- raster::values(ras)
+    vals[vals<0] <- 0
+    vals[vals>2] <- 2
+    area_yr1[i] <- length(vals[!is.na(vals)])
+    cov_yr1[i] <- sum(vals[!is.na(vals)]) / 2
+    
+    ras <- raster::raster(paste0(year2_path, files[i]))
+    vals <- raster::values(ras)
+    vals[vals<0] <- 0
+    vals[vals>2] <- 2
+    area_yr2[i] <- length(vals[!is.na(vals)])
+    cov_yr2[i] <- sum(vals[!is.na(vals)]) / 2
+    
   }
   rat[area > 0] <- chng[area > 0] / area[area > 0]
-  dt <- setDT(data.frame(ids = ids, change = chng, area = area, ratio = rat, maptaxlot = mtls, permits = perms))
+  cov_yr1[area_yr1 > 0] <- cov_yr1[area_yr1 > 0] / area_yr1[area_yr1 > 0]
+  cov_yr2[area_yr2 > 0] <- cov_yr2[area_yr2 > 0] / area_yr2[area_yr2 > 0]
+  chng_adj <- cov_yr2 - cov_yr1
+  
+  tot_yr1 <- sum(cov_yr1 * area_yr1) / sum(area_yr1)
+  tot_yr2 <- sum(cov_yr2 * area_yr2) / sum(area_yr2)
+  tot_chng <- sum(chng_adj * area_yr1) / sum(area_yr1)
+  dt <- setDT(data.frame(ids = ids, 
+                         year1 = cov_yr1, 
+                         year2 = cov_yr2,
+                         change = chng_adj,
+                         acres = area / 43560,
+                         ratio = rat,
+                         lots = mtls, 
+                         permits = perms))
   setkey(dt, ratio)
   setwd(og_dir)
   write.csv(dt, title)
+  print(paste0('Predicted cover extent year 1:  ', round(tot_yr1, 2)))
+  print(paste0('Predicted cover extent year 2:  ', round(tot_yr2, 2)))
+  print(paste0('Predicted cover change:  ', round(tot_chng, 2)))
+  
   
 }
 
@@ -648,6 +690,56 @@ before_and_after <- function(chng_path,
 
 
 
+#' plot predicted cover prime
+#'
+#' Predicts cover extent within a polygon and returns the results as a raster plot
+#'
+#' @param poly is a spatial polygons object (taxlot or sampling box)
+#' @param in_path is a character string indicating the path to a directory to rasters
+#' @param out_path is a character string indicating the path to the output directory
+#' @param rgb_path is the path to 3-band rgb data
+#' @param cir_path is the path to 3-band cir data
+#' @param buff is the 50-ft riparian buffer polygon for `poly`
+#' @return a raster plot of predicted cover masked by `poly`
+#' @export
+
+pred_cover1 <- function(poly,
+                       in_dir = NULL, 
+                       out_dir = NULL, 
+                       rgb_dir = NULL, 
+                       cir_dir = NULL, 
+                       buffer = prc_buff)  {
+    if(!is.null(rgb_dir)) {
+      red <- fill_extent(poly, rgb_dir, 1)
+      grn <- fill_extent(poly, rgb_dir, 2)
+      blu <- fill_extent(poly, rgb_dir, 3)
+    }
+    if(!is.null(cir_dir))  {
+      nir <- fill_extent(poly, cir_dir, 1)
+    } else {
+      nir <- fill_extent(poly, in_dir, 4)
+      red <- fill_extent(poly, in_dir, 1)
+      grn <- fill_extent(poly, in_dir, 2)
+      blu <- fill_extent(poly, in_dir, 3)
+    }
+    
+    ndvi <- (nir - red) / (nir + red)
+    dt <- setDT(
+      data.frame(ndvi = raster::values(ndvi),
+                 red = raster::values(red),
+                 grn = raster::values(grn),
+                 blu = raster::values(blu)))
+    pred <- predict(mod18, newdata = dt)
+    ras <- ndvi
+    raster::values(ras) <- pred
+    poly <- match_crs(poly, ras)
+    ras <- raster::mask(ras, poly)
+    buffer <- match_crs(buffer, ras)
+    ras <- raster::mask(ras, buffer)
+    ras
+}
+
+
 #' plot predicted cover
 #'
 #' Predicts cover extent within a polygon and returns the results as a raster plot
@@ -655,46 +747,61 @@ before_and_after <- function(chng_path,
 #' @param poly is a spatial polygons object (taxlot or sampling box)
 #' @param in_path is a character string indicating the path to a directory to rasters
 #' @param out_path is a character string indicating the path to the output directory
-#' @param title is the name of the png plot printed to the working directory
 #' @param rgb_path is the path to 3-band rgb data
 #' @param cir_path is the path to 3-band cir data
 #' @param buff is the 50-ft riparian buffer polygon for `poly`
 #' @return a raster plot of predicted cover masked by `poly`
 #' @export
 
-pred_cover <- function(poly, in_path = NULL, out_path = NULL, title = 'pred_change.png',
-                       rgb_path = NULL, cir_path = NULL, buff = prc_buff)  {
-  if(!is.null(rgb_path)) {
-    red <- fill_extent(poly, rgb_path, 1)
-    grn <- fill_extent(poly, rgb_path, 2)
-    blu <- fill_extent(poly, rgb_path, 3)
+pred_cover <- function(polys,
+                       in_path = NULL, 
+                       out_path = NULL, 
+                       rgb_path = NULL, 
+                       cir_path = NULL, 
+                       buff = prc_buff)  {
+  for (i in seq_along(polys))  {
+    ras <- pred_cover1(poly = polys[i,], 
+                       in_dir = in_path, 
+                       out_dir = out_path,
+                       rgb_dir = rgb_path,
+                       cir_dir = cir_path,
+                       buffer = buff) 
+    
+    raster::writeRaster(ras, paste0(out_path,'site_',i,'.tif'), 'GTiff', overwrite = T)
   }
-  if(!is.null(cir_path))  {
-    nir <- fill_extent(poly, cir_path, 1)
-  } else {
-    nir <- fill_extent(poly, in_path, 4)
-    red <- fill_extent(poly, in_path, 1)
-    grn <- fill_extent(poly, in_path, 2)
-    blu <- fill_extent(poly, in_path, 3)
-  }
-  
-  ndvi <- (nir - red) / (nir + red)
-  dt <- setDT(
-    data.frame(ndvi = raster::values(ndvi),
-               red = raster::values(red),
-               grn = raster::values(grn),
-               blu = raster::values(blu)))
-  data(mod18, package = 'riparian')
-  pred <- predict(mod18, newdata = dt)
-  ras <- ndvi
-  values(ras) <- pred
-  poly <- match_crs(poly, ras)
-  ras <- raster::mask(ras, poly)
-  buff <- match_crs(buff, ras)
-  ras <- raster::mask(ras, buff)
-  writeRaster(ras, paste0(out_path,'site_',i,'.tif'), 'GTiff')
 }
 
+#' predicted cover report
+#' 
+#' produces cover extent table from predicted cover rasters
+#' 
+#' @param in_path is the character string path directory to rasters
+#' @param taxlots is a polygon spatial object of maptaxlots
+#' @return prints a predicted cover table to the working directory
+#' @export
+
+pred_cover_report <- function(in_path, taxlots = prc_lots)  {
+  files <- get_rasters(in_path)
+  cover <- array(0, length(files))
+  area <- array(0, length(files))
+  mtls <- vector(length(files), mode = 'character')
+  for (i in seq_along(files))  {
+    ras <- raster::raster(paste0(in_path, files[i]))
+    vals <- raster::values(ras)
+    vals[vals<0] <- 0
+    vals[vals>2] <- 2
+    cover[i] <- sum(vals[!is.na(vals)])
+    area[i] <- length(vals[!is.na(vals)])
+    ras <- match_crs(ras, taxlots)
+    mtls[i] <- squash(lookup_lots(ras, taxlots))
+  }
+  pct_cov <- mapply(function(a, b) (sum(a)/2) / b, a = cover, b = area)
+  tot_cov <- (sum(cover)/2) * (area/(sum(area)))
+  dt <- data.table::setDT(data.frame(lot = mtls, cover = pct_cov, area = area))
+  write.csv(dt, 'pred_cov.csv')
+  print(paste0('Predicted Cover Extent:  ', tot_cov, '%'))
+  
+}
 
 #' assign raster
 #' 

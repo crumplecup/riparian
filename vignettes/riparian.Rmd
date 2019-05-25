@@ -240,6 +240,7 @@ The full syntax for the function is `sample_streams(n=100, lots=prc_lots, prc=pr
 To demonstrate the function, I will generate a random sample of lots within the priority corridor, then draw sample boxes using `sample_streams()`.
 
 ```{r}
+set.seed(777)
 # random lots from the priority corridor
 random_lots <- prc_mtls[sample.int(length(prc_mtls), 10),]
 
@@ -253,6 +254,25 @@ for (i in 2:length(random_lots))  {
   samp2 <- rbind(samp2, sample_streams(n = 1, lots = random_lots[i, ]))
 }
 
+
+```
+
+```{r}
+pred_cover(random_lots, out_path = 'E:/Riparian/pred_2016/',
+           rgb_path = 'S:/maps/OrthoPhotos/Hexagon2016/RGB/',
+           cir_path = 'S:/maps/OrthoPhotos/Hexagon2016/CIR/')
+
+
+
+pred_cover(random_lots, 'E:/ortho2018', 'E:/Riparian/pred_2018/')
+
+pred_change('E:/Riparian/pred_2016', 'E:/Riparian/pred_2018', 'E:/Riparian/chng_16to18')
+
+pred_change_report('E:/Riparian/chng_16to18/', 'E:/Riparian/pred_2016/', 
+                   'E:/Riparian/pred_2018/', random_lots)
+
+pred_change_report('E:/Riparian/pred_chng_16to18/', 'E:/Riparian/pred_cov_2016/', 
+                   'E:/Riparian/pred_cov_2018/')
 
 ```
 
