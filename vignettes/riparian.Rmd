@@ -20,7 +20,7 @@ Welcome to the `vignette` for the package `riparian`, a suite of tools designed 
 
 ## Step One:  Site Plots
 
-Benton County conducts riparian monitoring whenever new high resolution (1-foot) orthographic imagery becomes available.  Likely, your bosses have hired you because new imagery has just arrived.  In my year, the County collected collected imagery in S:/maps/OrthoPhotos, which each year of imagery in a separate folder.  If you are planning on doing a lot of operations on large raster data, then I suggest copying the folder containing the imagery onto an external drive.  This minimizes network traffic for others and speeds performance at your workstation.
+Benton County conducts riparian monitoring whenever new high resolution (1-foot) orthographic imagery becomes available.  Likely, your bosses have hired you because new imagery has just arrived.  In my year, the County collected imagery in S:/maps/OrthoPhotos, which each year of imagery in a separate folder.  If you are planning on doing a lot of operations on large raster data, then I suggest copying the folder containing the imagery onto an external drive.  This minimizes network traffic for others and speeds performance at your workstation.
 
 The County currently monitors 54 randomly selected sites along priority corridors, and may add additional sites based upon future permit approvals.  The reason we look at the same 54 sites every year is because we are trying to detect change in cover.  If we looked at a different slew of sites each year, it would be hard to know whether an increase or decrease in cover were due to variation between the sites we selected, or whether vegetation removal or accrual occurred.  Using this method, we can circle individual trees that have gone missing from one year to the next.  Because the sites are randomly selected and representative of conditions in the priority corridor generally, we can be reasonably confident that changes in cover within the sample reflect conditions in the priority corridor.
 
@@ -157,7 +157,7 @@ sub <- samples2018[year == 2018]
 sub <- sub[type == 'trib' | type == 'permit']
 
 # very subset has correct number of obs
-sub[, .N, by = type]
+sub[, .N, by = .(year,type)]
 
 # subset 2016 sites with type trib or permit
 sub <- samples2018[year == 2016]
@@ -170,7 +170,7 @@ sub[, .N, by = .(year, type)]
 
 ## Plot Cover Extent
 
-The function `plot_cover(csv)` produces a plot of cover extent over all the samples in the object `csv`.  To produce a plot of cover extent for a given year, subset the observations in the data.table() by year in the argument to `plot_cover()`.  Optional arguments: the argument `title` sets the name of the .png file printed into the working directory.  The argument `heading` sets a title for the plot (default is blank).  The argument `leg_pos` adjusts the legend position and accepts the arguments `topright`, `topleft`, `bottomright`, `bottomleft`.
+The function `plot_cover(csv)` produces a plot of cover extent over all the samples in the object `csv`.  To produce a plot of cover extent for a given year, subset the observations in the data.table by year in the argument to `plot_cover()`.  Optional arguments: the argument `title` sets the name of the .png file printed into the working directory.  The argument `heading` sets a title for the plot (default is blank).  The argument `leg_pos` adjusts the legend position and accepts the arguments `topright`, `topleft`, `bottomright` and `bottomleft`.
 
 ```{r, fig.show = 'hold'}
 library(riparian)
@@ -240,7 +240,8 @@ The full syntax for the function is `sample_streams(n=100, lots=prc_lots, prc=pr
 To demonstrate the function, I will generate a random sample of lots within the priority corridor, then draw sample boxes using `sample_streams()`.
 
 ```{r}
-set.seed(777)
+data(prc_mtls, package = 'riparian')
+set.seed(101)
 # random lots from the priority corridor
 random_lots <- prc_mtls[sample.int(length(prc_mtls), 10),]
 
@@ -257,7 +258,17 @@ for (i in 2:length(random_lots))  {
 
 ```
 
-```{r}
+
+## Predicted Cover
+
+The `pred_cover()` function predicts the level of vegetative cover using an NDVI-based model.  Over a given spatial polygon, the function predicts the level of cover based upon orthographic imagery, and prints a new raster of predicted cover values to a specified directory `out_path`.
+
+The full syntax of the function is `pred_cover(polys, in_path, out_path, rgb_path = NULL, cir_path = NULL, buff = prc_buff)`.  The argument `polys` is the spatial polygon object of taxlots over which you want to predict cover.  This function is designed to default to 4-band imagery, so the argument `in_path` is a character string representing a directory path to 4-band imagery.  In 2016, the County received 3-band RGB and CIR imagery.  If this is the case for you, set the arguments `rgb_path` and `cir_path` to directory paths to the RGB and CIR imagery respectively, and do not specify an argument for `in_path`.  The argument `buff` is the riparian buffer for the WSI hydro-enforced layer clipped to the Rural Residential zone.
+
+
+```{r, eval=F}
+#not run
+
 pred_cover(random_lots, out_path = 'E:/Riparian/pred_2016/',
            rgb_path = 'S:/maps/OrthoPhotos/Hexagon2016/RGB/',
            cir_path = 'S:/maps/OrthoPhotos/Hexagon2016/CIR/')
@@ -268,16 +279,18 @@ pred_cover(random_lots, 'E:/ortho2018', 'E:/Riparian/pred_2018/')
 
 pred_change('E:/Riparian/pred_2016', 'E:/Riparian/pred_2018', 'E:/Riparian/chng_16to18')
 
-pred_change_report('E:/Riparian/chng_16to18/', 'E:/Riparian/pred_2016/', 
-                   'E:/Riparian/pred_2018/', random_lots)
 
-pred_change_report('E:/Riparian/pred_chng_16to18/', 'E:/Riparian/pred_cov_2016/', 
-                   'E:/Riparian/pred_cov_2018/')
 
 ```
 
+The `pred_change()` function predicts the level of change in riparian cover based upon the output of the `pred_cover()` function.  The full syntax is `pred_change(year1_path, year2_path, out_path)`.  The argument `year1_path` is a character string specifying a directory path to the rasters produced by `pred_cover()` for year 1, and the argument `year2_path` is a character string specifying a directory path to the rasters produced by `pred_cover()` for year 2.  The argument `out_path` specifies the directory to which the function will print rasters with values of predicted change in cover.
 
+Produce a table summarizing the predicted change in cover using the function `pred_change_report()`.  The full syntax is `pred_change_report(chng_path, year1_path, year2_path, permits = permits_13to18, lots = prc_lots, title = 'pred_chng_table.csv')`.  The argument `chng_path` is the path to the directory of predicted change rasters produced by `pred_change()`.  The arguments `year1_path` and `year2_path` specify the paths to the directories of predicted cover rasters output by `pred_cover()` for year 1 and year 2 respectively.  The argument `permits` is the same csv file of approved permits you used to produce change tables of randomly selected sites.  The default is set to the list of permits from 2013 to 2018 to help demonstrate the functionality of the package in this vignette.  The argument `lots` defaults to a shapefile of taxlots in the priority corridor, and the function uses this file to search for which taxlot a given area of the priority corridor lies within.  The argument `title` specifies the title of the predicted change table, which should end in '.csv', and prints to the working directory.
 
+```{r}
+pred_change_report(chng_path = 'E:/Riparian/chng_16to18/', 
+                   year1_path = 'E:/Riparian/pred_2016/', 
+                   year2_path = 'E:/Riparian/pred_2018/')
 
-
+```
 

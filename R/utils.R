@@ -519,7 +519,7 @@ pred_change <- function(year1_path, year2_path, out_path)  {
     year1 <- raster::projectRaster(year1, year2)
     chng <- year2 - year1
     setwd(out_path)
-    raster::writeRaster(chng, paste0('site_',i,'.tif'), 'GTiff')
+    raster::writeRaster(chng, year1_files[i], 'GTiff')
   }
   setwd(og_dir)
 }
