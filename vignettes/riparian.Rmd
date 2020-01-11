@@ -235,17 +235,16 @@ build_change_table(csv = samples2018,
 
 The time will come when you need to draw new sampling boxes to sample new places.  Typically the County will approve new permits and flag those permits that may result in reduction of cover in the priority corridor.  Your bosses may ask you to include newly permitted areas in your sample.  The `sample_streams()` function generates new sampling boxes along the priority corridor within the area of your choice.  
 
-The full syntax for the function is `sample_streams(n=100, lots=prc_lots, prc=prc_per, strms=prc_strms)`.  The argument `n` is the number of sampling boxes you want to produce, and defaults to 100.  The argument `prc` is the line file along which the function generates random points.  The default is the NHD set of perennial or fish-bearing streams, clipped to the extent of the RR zone, and you should be able to leave the default as is.  The WSI hydro-enforced drainage layer is more accurate than the NHD dataset, so the function finds the nearest point on the WSI layer to the random point generated on the NHD layer, and draws the sampling box around that point.  The argument `lots` is the polygon shapefile that specifies the area within which you want to draw samples, and defaults to the whole priority corridor.
+The full syntax for the function is `sample_streams(n=100, lots=prc_lots, prc=prc_per, strms=prc_strms)`.  The argument `n` is the number of sampling boxes you want to produce, and defaults to 100.  The argument `prc` is the line file along which the function generates random points.  The default is the NHD set of perennial or fish-bearing streams, clipped to the extent of the RR zone, and you should be able to leave the default as is.  The argument 'strms' defaults to the WSI hydro-enforced drainage layer clipped to the priority corridor.  The WSI hydro-enforced drainage layer is more accurate than the NHD dataset, so the function finds the nearest point on the WSI layer to the random point generated on the NHD layer, and draws the sampling box around that point.  The argument `lots` is the polygon shapefile that specifies the area within which you want to draw samples, and defaults to the whole priority corridor.  If you have a list of permitted sites to check, then clip the taxlot shapefile down to only those taxlots you want to check, and specify the location of the resulting shapefile in the `lots` argument.
 
 To demonstrate the function, I will generate a random sample of lots within the priority corridor, then draw sample boxes using `sample_streams()`.
 
 ```{r}
-data(prc_mtls, package = 'riparian')
 set.seed(101)
 # random lots from the priority corridor
 random_lots <- prc_mtls[sample.int(length(prc_mtls), 10),]
 
-# sample 10 spots without regard for which lot
+# sample 3 from 10 spots without regard for which lot
 samp1 <- sample_streams(n = 3, lots = random_lots)
 
 # sample 10 spots, 1 from each lot
@@ -267,7 +266,8 @@ The full syntax of the function is `pred_cover(polys, in_path, out_path, rgb_pat
 
 
 ```{r, eval=F}
-#not run
+# not run
+# change directory paths to point to your data
 
 pred_cover(random_lots, out_path = 'E:/Riparian/pred_2016/',
            rgb_path = 'S:/maps/OrthoPhotos/Hexagon2016/RGB/',
@@ -283,11 +283,16 @@ pred_change('E:/Riparian/pred_2016', 'E:/Riparian/pred_2018', 'E:/Riparian/chng_
 
 ```
 
+## Predicted Cover Change
+
 The `pred_change()` function predicts the level of change in riparian cover based upon the output of the `pred_cover()` function.  The full syntax is `pred_change(year1_path, year2_path, out_path)`.  The argument `year1_path` is a character string specifying a directory path to the rasters produced by `pred_cover()` for year 1, and the argument `year2_path` is a character string specifying a directory path to the rasters produced by `pred_cover()` for year 2.  The argument `out_path` specifies the directory to which the function will print rasters with values of predicted change in cover.
 
 Produce a table summarizing the predicted change in cover using the function `pred_change_report()`.  The full syntax is `pred_change_report(chng_path, year1_path, year2_path, permits = permits_13to18, lots = prc_lots, title = 'pred_chng_table.csv')`.  The argument `chng_path` is the path to the directory of predicted change rasters produced by `pred_change()`.  The arguments `year1_path` and `year2_path` specify the paths to the directories of predicted cover rasters output by `pred_cover()` for year 1 and year 2 respectively.  The argument `permits` is the same csv file of approved permits you used to produce change tables of randomly selected sites.  The default is set to the list of permits from 2013 to 2018 to help demonstrate the functionality of the package in this vignette.  The argument `lots` defaults to a shapefile of taxlots in the priority corridor, and the function uses this file to search for which taxlot a given area of the priority corridor lies within.  The argument `title` specifies the title of the predicted change table, which should end in '.csv', and prints to the working directory.
 
-```{r}
+```{r, eval=F}
+# not run
+# change directory paths to point to your data
+
 pred_change_report(chng_path = 'E:/Riparian/chng_16to18/', 
                    year1_path = 'E:/Riparian/pred_2016/', 
                    year2_path = 'E:/Riparian/pred_2018/')

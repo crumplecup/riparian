@@ -308,13 +308,6 @@ sample_streams <- function(n = 100,
 } 
 
 
-# n <- 1
-# lots <- random_lots[1,]
-# prc <- prc_per
-# strms <- prc_strms
-# buff <- per_buff
-
-
 
 
 #' centerline
