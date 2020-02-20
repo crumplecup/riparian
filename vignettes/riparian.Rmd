@@ -240,9 +240,12 @@ The full syntax for the function is `sample_streams(n=100, lots=prc_lots, prc=pr
 To demonstrate the function, I will generate a random sample of lots within the priority corridor, then draw sample boxes using `sample_streams()`.
 
 ```{r}
-set.seed(101)
+set.seed(100)
 # random lots from the priority corridor
-random_lots <- prc_mtls[sample.int(length(prc_mtls), 10),]
+mtls <- as.character(prc_mtls$MapTaxlot[prc_mtls$MapTaxlot != ''])
+mtls <- mtls[sample.int(length(mtls), 10)]
+
+random_lots <- prc_mtls[prc_mtls$MapTaxlot %in% mtls, ]
 
 # sample 3 from 10 spots without regard for which lot
 samp1 <- sample_streams(n = 3, lots = random_lots)
