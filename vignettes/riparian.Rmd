@@ -43,9 +43,9 @@ library(riparian)
 plot_samples(in_path = 'E:/ortho2018',
              out_path ='E:/Riparian/sites2018')
 ```
-```{r, echo=FALSE, eval = F}
+```{r, echo=FALSE, eval = T}
 # example output
-pic_path <- system.file('extdata/images', 'eg1.png', pacakge = 'riparian')
+pic_path <- system.file('extdata', 'images/eg1.png', pacakge = 'riparian')
 knitr::include_graphics(pic_path)
 ```
 
@@ -239,7 +239,7 @@ The full syntax for the function is `sample_streams(n=100, lots=prc_lots, prc=pr
 
 To demonstrate the function, I will generate a random sample of lots within the priority corridor, then draw sample boxes using `sample_streams()`.
 
-```{r}
+```{r, eval = F}
 set.seed(101)
 # random lots from the priority corridor
 random_lots <- prc_mtls[sample.int(length(prc_mtls), 10),]
