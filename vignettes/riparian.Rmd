@@ -43,7 +43,7 @@ library(riparian)
 plot_samples(in_path = 'E:/ortho2018',
              out_path ='E:/Riparian/sites2018')
 ```
-```{r, echo=FALSE}
+```{r, echo=FALSE, eval = F}
 # example output
 pic_path <- system.file('extdata/images', 'eg1.png', pacakge = 'riparian')
 knitr::include_graphics(pic_path)
