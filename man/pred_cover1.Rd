@@ -4,8 +4,14 @@
 \alias{pred_cover1}
 \title{plot predicted cover prime}
 \usage{
-pred_cover1(poly, in_dir = NULL, out_dir = NULL, rgb_dir = NULL,
-  cir_dir = NULL, buffer = prc_buff)
+pred_cover1(
+  poly,
+  in_dir = NULL,
+  out_dir = NULL,
+  rgb_dir = NULL,
+  cir_dir = NULL,
+  buffer = prc_buff
+)
 }
 \arguments{
 \item{poly}{is a spatial polygons object (taxlot or sampling box)}

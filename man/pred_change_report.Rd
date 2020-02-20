@@ -4,9 +4,14 @@
 \alias{pred_change_report}
 \title{predicted change report}
 \usage{
-pred_change_report(chng_path, year1_path, year2_path,
-  permits = permits_13to18, lots = prc_lots,
-  title = "pred_chng_table.csv")
+pred_change_report(
+  chng_path,
+  year1_path,
+  year2_path,
+  permits = permits_13to18,
+  lots = prc_lots,
+  title = "pred_chng_table.csv"
+)
 }
 \arguments{
 \item{chng_path}{is a path for directory of change rasters output by `pred_change()`}
