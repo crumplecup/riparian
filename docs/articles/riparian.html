@@ -64,7 +64,7 @@
       <h1>riparian</h1>
                         <h4 class="author">Erik Rose</h4>
             
-            <h4 class="date">2019-05-02</h4>
+            <h4 class="date">2020-02-20</h4>
       
       
       <div class="hidden name"><code>riparian.Rmd</code></div>
@@ -77,9 +77,9 @@
 <div id="step-one-site-plots" class="section level2">
 <h2 class="hasAnchor">
 <a href="#step-one-site-plots" class="anchor"></a>Step One: Site Plots</h2>
-<p>Benton County conducts riparian monitoring whenever new high resolution (1-foot) orthographic imagery becomes available. Likely, your bosses have hired you because new imagery has just arrived. In my year, the County collected collected imagery in S:/maps/OrthoPhotos, which each year of imagery in a separate folder. If you are planning on doing a lot of operations on large raster data, then I suggest copying the folder containing the imagery onto an external drive. This minimizes network traffic for others and speeds performance at your workstation.</p>
+<p>Benton County conducts riparian monitoring whenever new high resolution (1-foot) orthographic imagery becomes available. Likely, your bosses have hired you because new imagery has just arrived. In my year, the County collected imagery in S:/maps/OrthoPhotos, which each year of imagery in a separate folder. If you are planning on doing a lot of operations on large raster data, then I suggest copying the folder containing the imagery onto an external drive. This minimizes network traffic for others and speeds performance at your workstation.</p>
 <p>The County currently monitors 54 randomly selected sites along priority corridors, and may add additional sites based upon future permit approvals. The reason we look at the same 54 sites every year is because we are trying to detect change in cover. If we looked at a different slew of sites each year, it would be hard to know whether an increase or decrease in cover were due to variation between the sites we selected, or whether vegetation removal or accrual occurred. Using this method, we can circle individual trees that have gone missing from one year to the next. Because the sites are randomly selected and representative of conditions in the priority corridor generally, we can be reasonably confident that changes in cover within the sample reflect conditions in the priority corridor.</p>
-<p>Acces the polygon shapefile containing the 54 sampling boxes for each site by calling the command:</p>
+<p>If you are starting a fresh session of RStudio, remember to set the path to your personal package library using the .libPaths() function (eg: <code><a href="https://www.rdocumentation.org/packages/base/topics/libPaths">.libPaths('P:/lib')</a></code>). Access the polygon shapefile containing the 54 sampling boxes for each site by calling the command:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/data">data</a></span>(samples, <span class="dt">package =</span> <span class="st">'riparian'</span>)
 
 <span class="co"># use the raster package to plot spatial data</span>
@@ -105,7 +105,7 @@ raster<span class="op">::</span><span class="kw"><a href="https://www.rdocumenta
 
 <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(rgdal)
 <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/getwd">setwd</a></span>(<span class="st">'path_to_shapefile'</span>)
-polys &lt;-<span class="st"> </span><span class="kw">readOGR</span>(<span class="st">'mysamples.shp'</span>)
+polys &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/rgdal/topics/readOGR">readOGR</a></span>(<span class="st">'mysamples.shp'</span>)
 
 <span class="kw"><a href="../reference/plot_samples.html">plot_samples</a></span>(<span class="st">'E:/ortho2018'</span>, <span class="st">'E:/Riparian/sites2018'</span>, <span class="dt">samples =</span> polys)</code></pre></div>
 </div>
@@ -120,7 +120,7 @@ polys &lt;-<span class="st"> </span><span class="kw">readOGR</span>(<span class=
 csv_path &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/system.file">system.file</a></span>(<span class="st">'extdata'</span>, <span class="st">'samples2018.csv'</span>, <span class="dt">package =</span> <span class="st">'riparian'</span>)
 
 <span class="co"># read the csv in as a data.table</span>
-obs &lt;-<span class="st"> </span><span class="kw">fread</span>(csv_path)
+obs &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/data.table/topics/fread">fread</a></span>(csv_path)
 
 <span class="co"># examine results</span>
 <span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/str">str</a></span>(obs)</code></pre></div>
@@ -141,7 +141,7 @@ obs &lt;-<span class="st"> </span><span class="kw">fread</span>(csv_path)
 <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(data.table)
 <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/getwd">setwd</a></span>(<span class="st">'path_to_file'</span>)
 
-obs &lt;-<span class="st"> </span><span class="kw">fread</span>(<span class="st">'myobs.csv'</span>)</code></pre></div>
+obs &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/data.table/topics/fread">fread</a></span>(<span class="st">'myobs.csv'</span>)</code></pre></div>
 <div id="subsetting-sites" class="section level3">
 <h3 class="hasAnchor">
 <a href="#subsetting-sites" class="anchor"></a>Subsetting Sites</h3>
@@ -189,10 +189,10 @@ sub &lt;-<span class="st"> </span>samples2018[year <span class="op">==</span><sp
 sub &lt;-<span class="st"> </span>sub[type <span class="op">==</span><span class="st"> 'trib'</span> <span class="op">|</span><span class="st"> </span>type <span class="op">==</span><span class="st"> 'permit'</span>]
 
 <span class="co"># very subset has correct number of obs</span>
-sub[, .N, by =<span class="st"> </span>type]
-<span class="co">#&gt;      type   N</span>
-<span class="co">#&gt; 1:   trib 116</span>
-<span class="co">#&gt; 2: permit  50</span>
+sub[, .N, by =<span class="st"> </span>.(year,type)]
+<span class="co">#&gt;    year   type   N</span>
+<span class="co">#&gt; 1: 2018   trib 116</span>
+<span class="co">#&gt; 2: 2018 permit  50</span>
 
 <span class="co"># subset 2016 sites with type trib or permit</span>
 sub &lt;-<span class="st"> </span>samples2018[year <span class="op">==</span><span class="st"> </span><span class="dv">2016</span>]
@@ -208,12 +208,8 @@ sub[, .N, by =<span class="st"> </span>.(year, type)]
 <div id="plot-cover-extent" class="section level2">
 <h2 class="hasAnchor">
 <a href="#plot-cover-extent" class="anchor"></a>Plot Cover Extent</h2>
-<p>The function <code><a href="../reference/plot_cover.html">plot_cover(csv)</a></code> produces a plot of cover extent over all the samples in the object <code>csv</code>. To produce a plot of cover extent for a given year, subset the observations in the data.table() by year in the argument to <code><a href="../reference/plot_cover.html">plot_cover()</a></code>. Optional arguments: the argument <code>title</code> sets the name of the .png file printed into the working directory. The argument <code>heading</code> sets a title for the plot (default is blank). The argument <code>leg_pos</code> adjusts the legend position and accepts the arguments <code>topright</code>, <code>topleft</code>, <code>bottomright</code>, <code>bottomleft</code>.</p>
+<p>The function <code><a href="../reference/plot_cover.html">plot_cover(csv)</a></code> produces a plot of cover extent over all the samples in the object <code>csv</code>. To produce a plot of cover extent for a given year, subset the observations in the data.table by year in the argument to <code><a href="../reference/plot_cover.html">plot_cover()</a></code>. Optional arguments: the argument <code>title</code> sets the name of the .png file printed into the working directory. The argument <code>heading</code> sets a title for the plot (default is blank). The argument <code>leg_pos</code> adjusts the legend position and accepts the arguments <code>topright</code>, <code>topleft</code>, <code>bottomright</code> and <code>bottomleft</code>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(riparian)
-<span class="co">#&gt; Warning: replacing previous import 'magrittr::extract' by 'raster::extract'</span>
-<span class="co">#&gt; when loading 'riparian'</span>
-<span class="co">#&gt; Warning: replacing previous import 'data.table::shift' by 'raster::shift'</span>
-<span class="co">#&gt; when loading 'riparian'</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Attaching package: 'riparian'</span>
 <span class="co">#&gt; The following object is masked _by_ '.GlobalEnv':</span>
@@ -251,7 +247,7 @@ sub[, .N, by =<span class="st"> </span>.(year, type)]
 <p>Now scroll to the top of the sheet and select the whole column for <code>MapTaxlot #</code>. Right click on a cell in the highlighted column and click on <code>Format Cells...</code>. The <code>number</code> tab should display. Select from the <code>Category</code> menu <code>Number</code>. Change <code>Decimal places</code> from 2 to 0. Click <code>OK</code>. With all MapTaxlot numbers converted to number strings and displayed as integers, it is now safe to export the sheet as a csv file to import into R. Select <code>Save As</code>, choose a directory, and from the <code>Save as type</code> menu select <code>CSV (Comma delimited)</code>.</p>
 <p>Read the <code>csv</code> file into R using the same <code>fread</code> command as for the cover score sheet.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># not run</span>
-perms &lt;-<span class="st"> </span><span class="kw">fread</span>(<span class="st">'mypermits.csv'</span>)</code></pre></div>
+perms &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/data.table/topics/fread">fread</a></span>(<span class="st">'mypermits.csv'</span>)</code></pre></div>
 <p>To demonstrate the functionality of the package, I have included a list of permits from 2013 to 2018 as a data object, which you can access using the <code>data</code> function.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/data">data</a></span>(permits_13to18, <span class="dt">package =</span> <span class="st">'riparian'</span>)
 <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/colnames">colnames</a></span>(permits_13to18)
@@ -274,221 +270,57 @@ perms &lt;-<span class="st"> </span><span class="kw">fread</span>(<span class="s
                    <span class="dt">polys =</span> samples,
                    <span class="dt">lots =</span> prc_lots, 
                    <span class="dt">permits =</span> permits_13to18)
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-<span class="co">#&gt; Loading required namespace: rgeos</span>
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span>
-
-<span class="co">#&gt; Warning in raster::crop(polys, so[i, ]): non identical CRS</span></code></pre></div>
+<span class="co">#&gt; Loading required namespace: rgeos</span></code></pre></div>
+</div>
+<div id="sampler" class="section level2">
+<h2 class="hasAnchor">
+<a href="#sampler" class="anchor"></a>Sampler</h2>
+<p>The time will come when you need to draw new sampling boxes to sample new places. Typically the County will approve new permits and flag those permits that may result in reduction of cover in the priority corridor. Your bosses may ask you to include newly permitted areas in your sample. The <code><a href="../reference/sample_streams.html">sample_streams()</a></code> function generates new sampling boxes along the priority corridor within the area of your choice.</p>
+<p>The full syntax for the function is <code><a href="../reference/sample_streams.html">sample_streams(n=100, lots=prc_lots, prc=prc_per, strms=prc_strms)</a></code>. The argument <code>n</code> is the number of sampling boxes you want to produce, and defaults to 100. The argument <code>prc</code> is the line file along which the function generates random points. The default is the NHD set of perennial or fish-bearing streams, clipped to the extent of the RR zone, and you should be able to leave the default as is. The argument ‘strms’ defaults to the WSI hydro-enforced drainage layer clipped to the priority corridor. The WSI hydro-enforced drainage layer is more accurate than the NHD dataset, so the function finds the nearest point on the WSI layer to the random point generated on the NHD layer, and draws the sampling box around that point. The argument <code>lots</code> is the polygon shapefile that specifies the area within which you want to draw samples, and defaults to the whole priority corridor. If you have a list of permitted sites to check, then clip the taxlot shapefile down to only those taxlots you want to check, and specify the location of the resulting shapefile in the <code>lots</code> argument.</p>
+<p>To demonstrate the function, I will generate a random sample of lots within the priority corridor, then draw sample boxes using <code><a href="../reference/sample_streams.html">sample_streams()</a></code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Random">set.seed</a></span>(<span class="dv">101</span>)
+<span class="co"># random lots from the priority corridor</span>
+random_lots &lt;-<span class="st"> </span>prc_mtls[<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/sample">sample.int</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/length">length</a></span>(prc_mtls), <span class="dv">10</span>),]
+
+<span class="co"># sample 3 from 10 spots without regard for which lot</span>
+samp1 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/sample_streams.html">sample_streams</a></span>(<span class="dt">n =</span> <span class="dv">3</span>, <span class="dt">lots =</span> random_lots)
+
+<span class="co"># sample 10 spots, 1 from each lot</span>
+samp2 &lt;-<span class="st"> </span><span class="kw"><a href="../reference/sample_streams.html">sample_streams</a></span>(<span class="dt">n =</span> <span class="dv">1</span>, <span class="dt">lots =</span> random_lots[<span class="dv">1</span>,])
+
+<span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="op">:</span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/length">length</a></span>(random_lots))  {
+  samp2 &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/data.table/topics/rbindlist">rbind</a></span>(samp2, <span class="kw"><a href="../reference/sample_streams.html">sample_streams</a></span>(<span class="dt">n =</span> <span class="dv">1</span>, <span class="dt">lots =</span> random_lots[i, ]))
+}</code></pre></div>
+</div>
+<div id="predicted-cover" class="section level2">
+<h2 class="hasAnchor">
+<a href="#predicted-cover" class="anchor"></a>Predicted Cover</h2>
+<p>The <code><a href="../reference/pred_cover.html">pred_cover()</a></code> function predicts the level of vegetative cover using an NDVI-based model. Over a given spatial polygon, the function predicts the level of cover based upon orthographic imagery, and prints a new raster of predicted cover values to a specified directory <code>out_path</code>.</p>
+<p>The full syntax of the function is <code><a href="../reference/pred_cover.html">pred_cover(polys, in_path, out_path, rgb_path = NULL, cir_path = NULL, buff = prc_buff)</a></code>. The argument <code>polys</code> is the spatial polygon object of taxlots over which you want to predict cover. This function is designed to default to 4-band imagery, so the argument <code>in_path</code> is a character string representing a directory path to 4-band imagery. In 2016, the County received 3-band RGB and CIR imagery. If this is the case for you, set the arguments <code>rgb_path</code> and <code>cir_path</code> to directory paths to the RGB and CIR imagery respectively, and do not specify an argument for <code>in_path</code>. The argument <code>buff</code> is the riparian buffer for the WSI hydro-enforced layer clipped to the Rural Residential zone.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># not run</span>
+<span class="co"># change directory paths to point to your data</span>
+
+<span class="kw"><a href="../reference/pred_cover.html">pred_cover</a></span>(random_lots, <span class="dt">out_path =</span> <span class="st">'E:/Riparian/pred_2016/'</span>,
+           <span class="dt">rgb_path =</span> <span class="st">'S:/maps/OrthoPhotos/Hexagon2016/RGB/'</span>,
+           <span class="dt">cir_path =</span> <span class="st">'S:/maps/OrthoPhotos/Hexagon2016/CIR/'</span>)
+
+
+
+<span class="kw"><a href="../reference/pred_cover.html">pred_cover</a></span>(random_lots, <span class="st">'E:/ortho2018'</span>, <span class="st">'E:/Riparian/pred_2018/'</span>)
+
+<span class="kw"><a href="../reference/pred_change.html">pred_change</a></span>(<span class="st">'E:/Riparian/pred_2016'</span>, <span class="st">'E:/Riparian/pred_2018'</span>, <span class="st">'E:/Riparian/chng_16to18'</span>)</code></pre></div>
+</div>
+<div id="predicted-cover-change" class="section level2">
+<h2 class="hasAnchor">
+<a href="#predicted-cover-change" class="anchor"></a>Predicted Cover Change</h2>
+<p>The <code><a href="../reference/pred_change.html">pred_change()</a></code> function predicts the level of change in riparian cover based upon the output of the <code><a href="../reference/pred_cover.html">pred_cover()</a></code> function. The full syntax is <code><a href="../reference/pred_change.html">pred_change(year1_path, year2_path, out_path)</a></code>. The argument <code>year1_path</code> is a character string specifying a directory path to the rasters produced by <code><a href="../reference/pred_cover.html">pred_cover()</a></code> for year 1, and the argument <code>year2_path</code> is a character string specifying a directory path to the rasters produced by <code><a href="../reference/pred_cover.html">pred_cover()</a></code> for year 2. The argument <code>out_path</code> specifies the directory to which the function will print rasters with values of predicted change in cover.</p>
+<p>Produce a table summarizing the predicted change in cover using the function <code><a href="../reference/pred_change_report.html">pred_change_report()</a></code>. The full syntax is <code><a href="../reference/pred_change_report.html">pred_change_report(chng_path, year1_path, year2_path, permits = permits_13to18, lots = prc_lots, title = 'pred_chng_table.csv')</a></code>. The argument <code>chng_path</code> is the path to the directory of predicted change rasters produced by <code><a href="../reference/pred_change.html">pred_change()</a></code>. The arguments <code>year1_path</code> and <code>year2_path</code> specify the paths to the directories of predicted cover rasters output by <code><a href="../reference/pred_cover.html">pred_cover()</a></code> for year 1 and year 2 respectively. The argument <code>permits</code> is the same csv file of approved permits you used to produce change tables of randomly selected sites. The default is set to the list of permits from 2013 to 2018 to help demonstrate the functionality of the package in this vignette. The argument <code>lots</code> defaults to a shapefile of taxlots in the priority corridor, and the function uses this file to search for which taxlot a given area of the priority corridor lies within. The argument <code>title</code> specifies the title of the predicted change table, which should end in ‘.csv’, and prints to the working directory.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># not run</span>
+<span class="co"># change directory paths to point to your data</span>
+
+<span class="kw"><a href="../reference/pred_change_report.html">pred_change_report</a></span>(<span class="dt">chng_path =</span> <span class="st">'E:/Riparian/chng_16to18/'</span>, 
+                   <span class="dt">year1_path =</span> <span class="st">'E:/Riparian/pred_2016/'</span>, 
+                   <span class="dt">year2_path =</span> <span class="st">'E:/Riparian/pred_2018/'</span>)</code></pre></div>
 </div>
   </div>
 
@@ -503,6 +335,9 @@ perms &lt;-<span class="st"> </span><span class="kw">fread</span>(<span class="s
       <li><a href="#plot-cover-change">Plot Cover Change</a></li>
       <li><a href="#clean-permit-list">Clean Permit List</a></li>
       <li><a href="#change-tables">Change Tables</a></li>
+      <li><a href="#sampler">Sampler</a></li>
+      <li><a href="#predicted-cover">Predicted Cover</a></li>
+      <li><a href="#predicted-cover-change">Predicted Cover Change</a></li>
       </ul>
 </div>
       </div>
