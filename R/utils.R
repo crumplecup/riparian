@@ -1045,6 +1045,43 @@ spatialize <- function(mat, crs_ref)	{
 
 
 
+#' stack_extent
+#'
+#' Given a `SpatialPolygons` object and a directory filepath character string,
+#' returns merged rasters from `dir` over extent of `poly`.
+#' Returns stack of all layers of og rasters
+#'
+#' @param poly is a `SpatialPolygons` object
+#' @param dir is a directory filepath character string
+#' @return merged rasters from `dir` over extent of `poly`
+#' @export
+
+
+
+stack_extent <- function(poly, dir)  {
+  files <- get_rasters(dir)
+  poly <- match_crs(poly, raster::raster(file.path(dir, files[1])))
+  ext <- raster::extent(poly)
+  hit <- 0
+  
+  for(i in seq_along(files))  {
+    ras <- raster::raster(file.path(dir, files[i]))
+    if (!is.null(unlist(ras[poly,])))  {
+      hit <- c(hit,i)
+    }
+  }
+  hit <- hit[-1]
+  ras <- raster::stack(file.path(dir, files[hit[1]]))
+  if (length(hit)>1)  {
+    for (i in 2:length(hit)) {
+      ras <- raster::mosaic(ras,raster::stack(file.path(dir, files[hit[i]])), 
+                            fun=max, tolerance = 1)
+    }
+  }
+  raster::crop(ras, ext)
+}
+
+
 
 
 
