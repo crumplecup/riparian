@@ -234,36 +234,229 @@ usethis::use_data(mod18, overwrite = T)
 
 
 sub <- samples2018[id %in% 1:54 & year == 2018, ] 
+sub <- samples2018[id %in% 1:54 & year == 2016, ] 
 ar <- array(t(sub[ , 4:53]), c(Reduce('*', dim(sub[, 4:53]))))
 labs <- vector(length(ar), mode = 'character')
 labs[ar == 0] <- 'bg'
 labs[ar == 1] <- 'pc'
 labs[ar == 2] <- 'fc'
 
+setwd('E:/Riparian')
 dir.create('rip_4band')
+dir.create('rip_3band')
+in_dir <- 'S:/maps/OrthoPhotos/Hexagon2016/RGB'
+out_dir <- ('E:/Riparian/rip_3band/')
 in_dir <- 'E:/ortho2018'
 out_dir <- ('E:/Riparian/rip_4band/')
 
-make_4band <- function(polys, keys, in_path, out_path, lab = 'id') {
+
+make_3band <- function(polys, keys, in_path, out_path, lab = 'id') {
   files <- get_rasters(in_path)
+  polys <- match_crs(polys, raster::raster(file.path(in_path,files[1])))
   k <- 1
   for (i in seq_along(polys)) {
-    poly <- match_crs(samples[1,], raster::raster(file.path(in_path,files[1])))
-    boxs <- lapply(methods::slot(poly, 'polygons'),
+    boxs <- lapply(methods::slot(polys[i, ], 'polygons'),
                    function(x) methods::slot(x, 'Polygons'))[[1]]
-    ras <- stack_extent(poly, in_path)
+    ras <- stack_extent(polys[i, ], in_path)
+    ras <- raster::subset(ras, 1:3)
     
     for (j in seq_along(boxs)) {
       box <- spatialize(boxs[[j]], raster::crs(ras))
       m <- raster::crop(raster::mask(ras, box), raster::extent(box))
       nm <- paste(lab, i, j, keys[k], sep = '_')
-      raster::writeRaster(m, paste0(out_path, nm), 'GTiff')
+      raster::writeRaster(m, paste0(out_path, nm), 'HFA')
       k <- k + 1
     }
   }
 }
 
+# make_3band(samples, labs, in_dir, out_dir, 'samples2018')
+
+
+
+make_4band <- function(polys, keys, in_path, out_path, lab = 'id',
+                       rgb_path = NULL, cir_path = NULL) {
+  if (!is.null(rgb_path)) {
+    rgb_files <- get_rasters(rgb_path)
+    cir_files <- get_rasters(cir_path)
+    polys <- match_crs(polys, raster::raster(file.path(rgb_path,rgb_files[1])))
+    
+  }
+  if (is.null(cir_path)) {
+    files <- get_rasters(in_path)
+    polys <- match_crs(polys, raster::raster(file.path(in_path, files[1])))
+  }
+  k <- 1
+  for (i in seq_along(polys)) {
+    boxs <- lapply(methods::slot(polys[i,], 'polygons'),
+                   function(x) methods::slot(x, 'Polygons'))[[1]]
+    if (!is.null(rgb_path)) {
+      rgb_ras <- stack_extent(polys[i, ], rgb_path)
+      cir_ras <- raster::subset(stack_extent(polys[i, ], cir_path), 1)
+      ras <- raster::stack(rgb_ras, cir_ras)
+    }
+    if (is.null(rgb_path)) {
+      ras <- stack_extent(polys[i, ], in_path)
+    }
+    for (j in seq_along(boxs)) {
+      box <- spatialize(boxs[[j]], raster::crs(ras))
+      m <- raster::crop(raster::mask(ras, box), raster::extent(box))
+      nm <- paste(lab, i, j, keys[k], sep = '_')
+      raster::writeRaster(m, paste0(out_path, nm), 'HFA')
+      k <- k + 1
+    }
+  }
+}
+
+
+
+# make_4band(samples, labs, in_dir, out_dir, 'samples2016')
+
+sub <- samples2018[id %in% 1:54 & year == 2016, ] 
+ar <- array(t(sub[ , 4:53]), c(Reduce('*', dim(sub[, 4:53]))))
+labs <- vector(length(ar), mode = 'character')
+labs[ar == 0] <- 'bg'
+labs[ar == 1] <- 'pc'
+labs[ar == 2] <- 'fc'
+
+in_dir <- 'S:/maps/OrthoPhotos/Hexagon2016/RGB'
+out_dir <- ('E:/Riparian/rip_3band/')
+
+make_3band(samples, labs, in_dir, out_dir, 'samples2016')
+
+sub <- samples2018[id %in% 1:54 & year == 2018, ] 
+ar <- array(t(sub[ , 4:53]), c(Reduce('*', dim(sub[, 4:53]))))
+labs <- vector(length(ar), mode = 'character')
+labs[ar == 0] <- 'bg'
+labs[ar == 1] <- 'pc'
+labs[ar == 2] <- 'fc'
+
+in_dir <- 'E:/ortho2018'
+make_3band(samples, labs, in_dir, out_dir, 'samples2018')
+
+out_dir <- ('E:/Riparian/rip_4band/')
 make_4band(samples, labs, in_dir, out_dir, 'samples2018')
+
+
+sub <- samples2018[id %in% 1:54 & year == 2016, ] 
+ar <- array(t(sub[ , 4:53]), c(Reduce('*', dim(sub[, 4:53]))))
+labs <- vector(length(ar), mode = 'character')
+labs[ar == 0] <- 'bg'
+labs[ar == 1] <- 'pc'
+labs[ar == 2] <- 'fc'
+
+rgb_dir <- 'S:/maps/OrthoPhotos/Hexagon2016/RGB'
+cir_dir <- 'S:/maps/OrthoPhotos/Hexagon2016/CIR'
+
+make_4band(samples, labs,
+           rgb_path = rgb_dir,
+           cir_path = cir_dir,
+           out_path = out_dir, 
+           lab = 'samples2016')
+
+
+sub <- samples2018[id %in% 1:54 & year == 2009, ] 
+ar <- array(t(sub[ , 4:53]), c(Reduce('*', dim(sub[, 4:53]))))
+labs <- vector(length(ar), mode = 'character')
+labs[ar == 0] <- 'bg'
+labs[ar == 1] <- 'pc'
+labs[ar == 2] <- 'fc'
+
+in_dir <- 'E:/ortho2009'
+out_dir <- ('E:/Riparian/rip_3band/')
+
+make_3band(samples, labs, in_dir, out_dir, 'samples2009')
+
+
+sub <- samples2018[year == 2018, ] 
+sub <- sub[grep('p', sub$id), ]
+p_ids <- 0
+for (i in 1:nrow(sub)) {
+  p_ids[i] <- as.numeric(strsplit(sub$id[i], 'p')[[1]][2])
+}
+p_sites <- readOGR('groupB_ortho2018.shp')
+p_sites <- p_sites[p_ids, ]
+ar <- array(t(sub[ , 4:53]), c(Reduce('*', dim(sub[, 4:53]))))
+labs <- vector(length(ar), mode = 'character')
+labs[ar == 0] <- 'bg'
+labs[ar == 1] <- 'pc'
+labs[ar == 2] <- 'fc'
+
+in_dir <- 'E:/ortho2018'
+out_dir <- ('E:/Riparian/rip_3band/')
+
+make_3band(p_sites, labs, in_dir, out_dir, 'p_sites2018')
+
+out_dir <- ('E:/Riparian/rip_4band/')
+make_4band(p_sites, labs, in_dir, out_dir, 'p_sites2018')
+
+
+sub <- samples2018[year == 2016, ] 
+sub <- sub[grep('p', sub$id), ]
+ar <- array(t(sub[ , 4:53]), c(Reduce('*', dim(sub[, 4:53]))))
+labs <- vector(length(ar), mode = 'character')
+labs[ar == 0] <- 'bg'
+labs[ar == 1] <- 'pc'
+labs[ar == 2] <- 'fc'
+
+in_dir <- 'S:/maps/OrthoPhotos/Hexagon2016/RGB'
+out_dir <- ('E:/Riparian/rip_3band/')
+
+make_3band(p_sites, labs, in_dir, out_dir, 'p_sites2016')
+
+out_dir <- ('E:/Riparian/rip_4band/')
+make_4band(p_sites, labs, 
+           rgb_path = rgb_dir,
+           cir_path = cir_dir, 
+           out_path = out_dir, 
+           lab = 'p_sites2016')
+
+
+
+sub <- samples2018[year == 2018, ] 
+sub <- sub[grep('s', sub$id), ]
+s_ids <- 0
+for (i in 1:nrow(sub)) {
+  s_ids[i] <- as.numeric(strsplit(sub$id[i], 's')[[1]][2])
+}
+s_sites <- readOGR('groupC_ortho2018.shp')
+s_sites <- s_sites[s_ids, ]
+ar <- array(t(sub[ , 4:53]), c(Reduce('*', dim(sub[, 4:53]))))
+labs <- vector(length(ar), mode = 'character')
+labs[ar == 0] <- 'bg'
+labs[ar == 1] <- 'pc'
+labs[ar == 2] <- 'fc'
+
+in_dir <- 'E:/ortho2018'
+out_dir <- ('E:/Riparian/rip_3band/')
+
+make_3band(s_sites, labs, in_dir, out_dir, 's_sites2018')
+
+out_dir <- ('E:/Riparian/rip_4band/')
+make_4band(s_sites, labs, in_dir, out_dir, 's_sites2018')
+
+
+sub <- samples2018[year == 2016, ] 
+sub <- sub[grep('s', sub$id), ]
+ar <- array(t(sub[ , 4:53]), c(Reduce('*', dim(sub[, 4:53]))))
+labs <- vector(length(ar), mode = 'character')
+labs[ar == 0] <- 'bg'
+labs[ar == 1] <- 'pc'
+labs[ar == 2] <- 'fc'
+
+in_dir <- 'S:/maps/OrthoPhotos/Hexagon2016/RGB'
+out_dir <- ('E:/Riparian/rip_3band/')
+
+make_3band(s_sites, labs, in_dir, out_dir, 's_sites2016')
+
+out_dir <- ('E:/Riparian/rip_4band/')
+make_4band(s_sites, labs, 
+           rgb_path = rgb_dir,
+           cir_path = cir_dir, 
+           out_path = out_dir, 
+           lab = 's_sites2016')
+
+
 
 
 base_dir <- 'E:/Riparian/ml'
@@ -346,6 +539,37 @@ validation_generator <- flow_images_from_directory(
 )
 
 batch <- generator_next(train_generator)
+
+model <- keras_model_sequential() %>%
+  layer_conv_2d(filters = 32, kernel_size = c(3, 3), activation = "relu",
+                input_shape = c(150, 150, 4)) %>%
+  layer_max_pooling_2d(pool_size = c(2, 2)) %>%
+  layer_conv_2d(filters = 64, kernel_size = c(3, 3), activation = "relu") %>%
+  layer_max_pooling_2d(pool_size = c(2, 2)) %>%
+  layer_conv_2d(filters = 128, kernel_size = c(3, 3), activation = "relu") %>%
+  layer_max_pooling_2d(pool_size = c(2, 2)) %>%
+  layer_conv_2d(filters = 128, kernel_size = c(3, 3), activation = "relu") %>%
+  layer_max_pooling_2d(pool_size = c(2, 2)) %>%
+  layer_flatten() %>%
+  layer_dense(units = 512, activation = "relu") %>%
+  layer_dense(units = 3, activation = "softmax")
+summary(model)
+
+model %>% compile(
+  loss = "categorical_crossentropy",
+  optimizer = optimizer_rmsprop(lr = 1e-4),
+  metrics = c("acc")
+)
+
+history <- model %>% fit_generator(
+  train_generator,
+  steps_per_epoch = 100,
+  epochs = 4,
+  validation_data = validation_generator,
+  validation_steps = 50
+)
+
+
 
 in_dir <- 'E:/ortho2018'
 
