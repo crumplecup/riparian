@@ -657,3 +657,86 @@ net <- model %>% fit(rip_4band[[1]][1:1200,,,], id_bin[1:1200,],
 setwd('E:/Riparian/riparian')
 usethis::use_data(rip_4band)
 
+
+
+
+sub <- samples2018[year == 2018, ] 
+sub <- sub[grep('o', sub$id), ]
+oids <- sub$id[-55]
+
+sub <- samples2018[year == 2018, ] 
+sub <- sub[grep('s', sub$id), ]
+sids <- sub$id
+s_ids <- 0
+for (i in 1:nrow(sub)) {
+  s_ids[i] <- as.numeric(strsplit(sub$id[i], 's')[[1]][2])
+}
+s_sites <- readOGR('groupC_ortho2018.shp')
+s_sites <- s_sites[s_ids, ]
+
+sub <- samples2018[year == 2018, ] 
+sub <- sub[grep('p', sub$id), ]
+pids <- sub$id
+p_ids <- 0
+for (i in 1:nrow(sub)) {
+  p_ids[i] <- as.numeric(strsplit(sub$id[i], 'p')[[1]][2])
+}
+p_sites <- readOGR('groupB_ortho2018.shp')
+p_sites <- p_sites[p_ids, ]
+
+olen <- length(oids)
+plen <- length(pids)
+
+crs_ref <- raster::crs(samples)
+p_sites <- spTransform(p_sites, crs_ref)
+s_sites <- spTransform(s_sites, crs_ref)
+
+op <- slot(samples, 'polygons')
+pp <- slot(p_sites, 'polygons')
+sp <- slot(s_sites, 'polygons')
+ss <- list()
+
+for (i in seq_along(op)) {
+  slot(op[[i]], 'ID') <- oids[i]
+  ss[[i]] <- op[[i]]
+}
+
+for (i in seq_along(pp)) {
+  slot(pp[[i]], 'ID') <- pids[i]
+  ss[[i + olen]] <- pp[[i]]
+}
+
+for (i in seq_along(sp)) {
+  slot(sp[[i]], 'ID') <- sids[i]
+  ss[[i + olen + plen]] <- sp[[i]]
+}
+
+ids <- data.frame(ID = c(oids, pids, sids))
+rownames(ids) <- c(oids, pids, sids)
+
+polys <- SpatialPolygons(ss, proj4string = crs_ref)
+supersample <- SpatialPolygonsDataFrame(polys, data = ids)
+setwd('E:/Riparian/riparian')
+usethis::use_data(supersample, overwrite = T)
+
+thumdir <- 'E:/Riparian/thumbnails'
+thumbnails('E:/ortho2018', thumdir, supersample)
+
+setwd(thumdir)
+file.rename(list.files(getwd()), 
+            paste0('samples2018_', 1:length(supersample)))
+
+thumbnails('S:/maps/OrthoPhotos/Hexagon2016/RGB', thumdir, supersample)
+file.rename(list.files(getwd()), 
+            paste0('rgb2016_', 1:length(supersample)))
+
+thumbnails('S:/maps/OrthoPhotos/Hexagon2016/CIR', thumdir, supersample)
+file.rename(list.files(getwd()), 
+            paste0('cir2016_', 1:length(supersample)))
+
+thumbnails('E:/ortho2009', thumdir, supersample)
+file.rename(list.files(getwd()), 
+            paste0('samples2009_', 1:length(supersample)))
+
+
+
