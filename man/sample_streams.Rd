@@ -4,13 +4,8 @@
 \alias{sample_streams}
 \title{sample streams}
 \usage{
-sample_streams(
-  n = 100,
-  lots = prc_mtls,
-  prc = prc_per,
-  strms = prc_strms,
-  buff = per_buff
-)
+sample_streams(n = 100, lots = prc_mtls, prc = prc_per,
+  strms = prc_strms, buff = per_buff)
 }
 \arguments{
 \item{n}{is the number of samples to take}

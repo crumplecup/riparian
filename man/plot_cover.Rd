@@ -4,13 +4,9 @@
 \alias{plot_cover}
 \title{Plot Cover Extent}
 \usage{
-plot_cover(
-  csv,
-  title = "cover_change.png",
-  heading = " ",
+plot_cover(csv, title = "cover_change.png", heading = " ",
   leg_pos = "topleft",
-  y_lab = "Proportion of Samples at or below X\% Cover"
-)
+  y_lab = "Proportion of Samples at or below X\% Cover")
 }
 \arguments{
 \item{csv}{is a csv with cols (id, year, type, results(1:50))}

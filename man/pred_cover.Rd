@@ -4,14 +4,8 @@
 \alias{pred_cover}
 \title{plot predicted cover}
 \usage{
-pred_cover(
-  polys,
-  in_path = NULL,
-  out_path = NULL,
-  rgb_path = NULL,
-  cir_path = NULL,
-  buff = prc_buff
-)
+pred_cover(polys, in_path = NULL, out_path = NULL, rgb_path = NULL,
+  cir_path = NULL, buff = prc_buff)
 }
 \arguments{
 \item{in_path}{is a character string indicating the path to a directory to rasters}
