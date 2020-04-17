@@ -738,5 +738,41 @@ thumbnails('E:/ortho2009', thumdir, supersample)
 file.rename(list.files(getwd()), 
             paste0('samples2009_', 1:length(supersample)))
 
+setwd('/home/crumplecup/work')
+load('rip_4band_df.rds')
+load('rip_lmod.rds')
+rip_lmod <- lm(as.character(lmod[1,1]), data = df)
+
+load('rip_lmod3.rds')
+rip_lmod3 <- lm(as.character(lmod[1,1]), data = df)
+
+load('rip_bin1.rds')
+dt <- df
+dt$cov1 <- dt$cov
+dt$cov1[dt$cov1 == 2] <- 1
+dt <- dt[ , c(17,2:16)]
+rip_bin1 <- glm(as.character(bin1[1,1]), family = 'binomial', data = dt)
+load('rip_bin2.rds')
+dt <- df
+dt$cov1 <- dt$cov - 1
+dt <- dt[dt$cov > 0, ]
+dt <- dt[ , c(17,2:16)]
+rip_bin2 <- glm(as.character(bin2[1,1]), family = 'binomial', data = dt)
+
+setwd('/home/crumplecup/work/riparian')
+usethis::use_data(rip_lmod)
+usethis::use_data(rip_lmod3)
+usethis::use_data(bad_box)
+
+
+setwd('/home/crumplecup/work')
+load('sam.rds')
+bad_box <- sam[15, ]
+
+
+rasdir <- '/media/crumplecup/Seagate Backup Plus Drive/gis/ortho2018'
+slcdir <- '/home/crumplecup/work/slices'
+plot_samples(rasdir, slcdir, sam[1:14,], 2018, 'random', 'lm')
+
 
 

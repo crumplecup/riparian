@@ -297,9 +297,9 @@ sample_streams <- function(n = 100,
     buff <- get_buffer(boxes[[i]], crs_ref)
     corners <- buff[[2]]
     buff <- buff[[1]]
-    left_bank <- try(draw_bank(buff, corners, 'L', crs_ref))
-    right_bank <- try(draw_bank(buff, corners, 'R', crs_ref))
-    polys[[i]] <- try(sample_box(boxes[[i]], left_bank, right_bank, i)) 
+    left_bank <- try(draw_bank(buff, corners, 'L', crs_ref), silent = TRUE)
+    right_bank <- try(draw_bank(buff, corners, 'R', crs_ref), silent = TRUE)
+    polys[[i]] <- try(sample_box(boxes[[i]], left_bank, right_bank, i), silent = TRUE) 
   }
   polys <- sp::SpatialPolygons(polys, proj4string=crs_ref)
   pid <- lapply(slot(polys, 'polygons'), function(x) slot(x, 'ID'))

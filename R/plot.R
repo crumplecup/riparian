@@ -123,19 +123,27 @@ thumbnails <- function(in_path, out_path, polys = samples)  {
 
 #' Print Sample Plots
 #'
-#' Given a shapefile of sampling boxes, and a path to a directory of 4-band ortho-imagery
-#' prints plots of the sampling area with numbered boxes superimposed.
+#' Superimposes sampling boxes over orthographic data.
+#' Predicts the level of cover using specified `method`.
+#' `method` options are c('lm', 'binom', 'lm3').
+#' Default is 'lm', use 'lm3' for 3-band data.
 #'
 #' @param in_path is a character vector containing the path to the orthoimagery
 #' @param out_path is a character vector specifying the output directory for the plots
 #' @param polys is a SpatialPolygonsDataFrame object (the sample boxes shapefile)
+#' @param year is an integer specifying the year of orthographic survey
+#' @param type is a character vector length 1 specifying sample type
 #' @param method is a character vector specifying model type
 #' @return prints rgb plots of `polys` to `out_path` & a csv of predicted results
 #' @importFrom magrittr %>%
 #' @export
 
 
-plot_samples <- function(in_path, out_path, polys = samples,
+plot_samples <- function(in_path, 
+                         out_path, 
+                         polys = samples,
+                         year,
+                         type = 'random',
                          method = 'lm')  {
   files <- get_ras(in_path)
   crs_ref <- raster::crs(raster::raster(file.path(in_path, files[1])))
@@ -175,7 +183,7 @@ plot_samples <- function(in_path, out_path, polys = samples,
     sam <- raster::crop(sam, frame)
 
 
-    png(file.path(out_path, paste0('sam_',i,'.png')))
+    png(file.path(out_path, paste0('sample_',i,'.png')))
     raster::plotRGB(sam, r = 1, g = 2, b = 3, main = paste0('Sample Site ',i))
     area <- lapply(methods::slot(polys[i,], 'polygons'),
                    function(x) lapply(methods::slot(x, 'Polygons'),
@@ -235,8 +243,15 @@ plot_samples <- function(in_path, out_path, polys = samples,
 
 
   }
-  write.csv(obs, file = file.path(out_path, 'obs.csv'))
-  obs
+  
+  df <- as.data.frame(obs)
+  colnames(df) <- 1:50
+  df$id <- 1:nrow(df)
+  df$year <- year
+  df$type <- type
+  df <- df[ , c(51:53,1:50)]
+  write.csv(df, file = file.path(out_path, paste0('samples_', year, '.csv')))
+  df
 }
 
 
