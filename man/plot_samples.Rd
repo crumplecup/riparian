@@ -4,8 +4,14 @@
 \alias{plot_samples}
 \title{Print Sample Plots}
 \usage{
-plot_samples(in_path, out_path, polys = samples, year, type = "random",
-  method = "lm")
+plot_samples(
+  in_path,
+  out_path,
+  polys = samples,
+  year,
+  type = "random",
+  method = "lm"
+)
 }
 \arguments{
 \item{in_path}{is a character vector containing the path to the orthoimagery}

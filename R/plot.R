@@ -255,6 +255,92 @@ plot_samples <- function(in_path,
 }
 
 
+#' plot_scores
+#'
+#' Superimposes sampling boxes over orthographic data.
+#' Prints cover scores over each box.  
+#' `scores` matches output format of plot_samples().  
+#' `scores` must have same number of rows as `polys`, in the same order.
+#'
+#' @param in_path is a character vector containing the path to the orthoimagery
+#' @param out_path is a character vector specifying the output directory for the plots
+#' @param polys is a SpatialPolygonsDataFrame object (the sample boxes shapefile)
+#' @param scores is a data.table recording cover score observations
+#' @return prints rgb plots of `polys` to `out_path` with scores indicated by color
+#' @importFrom magrittr %>%
+#' @export
+
+
+plot_scores <- function(in_path, 
+                         out_path, 
+                        scores,
+                        polys = samples,
+                        title = 'samples_')  {
+  files <- get_ras(in_path)
+  crs_ref <- raster::crs(raster::raster(file.path(in_path, files[1])))
+  polys <- sp::spTransform(polys, crs_ref)
+  scores <- as.matrix(scores[,4:53])
+  
+  for (i in seq_along(polys))	{
+    frame <- raster::extent(polys[i,])
+    hit <- 0
+    
+    for (j in seq_along(files))	{
+      if (riparian::in_extent(frame, raster::raster(file.path(in_path, files[j]))))	{
+        hit <- c(hit,j)
+      }
+    }
+    hit <- hit[-1]
+    
+    if (length(hit) == 0)  {
+      print(paste0('Failed to find raster in extent for sample ',i))
+    }
+    
+    if (length(hit) > 0)  {
+      sam <- raster::stack(file.path(in_path, files[hit[1]]))
+      sam <- raster::crop(sam, frame)
+    }
+    
+    if (length(hit) > 1)	{
+      for (k in 2:length(hit))	{
+        r <- raster::stack(file.path(in_path, files[hit[k]]))
+        r <- raster::crop(r, frame)
+        sam <- raster::mosaic(sam, r, fun = max)
+      }
+    }
+    
+    sam <- raster::crop(sam, frame)
+    
+    
+    png(file.path(out_path, paste0(title ,i,'.png')))
+    raster::plotRGB(sam, r = 1, g = 2, b = 3, main = paste0('Sample Site ',i))
+    area <- lapply(methods::slot(polys[i,], 'polygons'),
+                   function(x) lapply(methods::slot(x, 'Polygons'),
+                                      function(y) methods::slot(y, 'coords')))
+    area <- area[[1]]
+    
+    for (j in 1:50)  {
+      pal <- get_palette(c('crimson', 'gold', 'forest'), .7)
+      lines(area[[j]], col = get_palette('slate', .5), lwd = 3)
+      lines(area[[j]][1:2, ], col = pal[scores[i,j]+1], lwd = 7)
+    }
+    lines(area[[1]], lty = 2, lwd = 2)
+    labcords <- matrix(0, nrow = 50, ncol = 2)
+    for (j in 1:50)	{
+      labcords[j,] <- methods::slot(
+        rgeos::gCentroid(
+          riparian::spatialize(area[[j]], crs_ref)
+        ), 'coords')
+    }
+    text(labcords, as.character(1:50))
+    dev.off()
+    
+    
+  }
+}
+
+
+
 #' color_array
 #'
 #' extracts color statistics from raster image

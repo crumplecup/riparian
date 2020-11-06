@@ -4,9 +4,15 @@
 \alias{plot_change}
 \title{Plot Cover Change}
 \usage{
-plot_change(csv, year1, year2, title = "cover_change.png",
-  heading = " ", leg_pos = "topleft",
-  y_lab = "No. of Sample Sites with Cover Change of X")
+plot_change(
+  csv,
+  year1,
+  year2,
+  title = "cover_change.png",
+  heading = " ",
+  leg_pos = "topleft",
+  y_lab = "No. of Sample Sites with Cover Change of X"
+)
 }
 \arguments{
 \item{csv}{is a csv with cols (id, year, type, results(1:50))}

@@ -4,8 +4,14 @@
 \alias{before_and_after}
 \title{before and after plots}
 \usage{
-before_and_after(chng_path, year1_path, year2_path, img_path,
-  buff = prc_buff, lots = prc_lots)
+before_and_after(
+  chng_path,
+  year1_path,
+  year2_path,
+  img_path,
+  buff = prc_buff,
+  lots = prc_lots
+)
 }
 \arguments{
 \item{chng_path}{is a path for directory of change rasters output by `pred_change()`}
