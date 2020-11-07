@@ -311,7 +311,7 @@ plot_scores <- function(in_path,
     
     sam <- raster::crop(sam, frame)
     
-    
+
     png(file.path(out_path, paste0(title ,i,'.png')))
     raster::plotRGB(sam, r = 1, g = 2, b = 3, main = paste0('Sample Site ',i))
     area <- lapply(methods::slot(polys[i,], 'polygons'),
