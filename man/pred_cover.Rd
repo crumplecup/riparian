@@ -10,7 +10,7 @@ pred_cover(
   out_path = NULL,
   rgb_path = NULL,
   cir_path = NULL,
-  buff = prc_buff
+  buff = sf_buff
 )
 }
 \arguments{

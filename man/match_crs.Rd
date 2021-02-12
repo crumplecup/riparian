@@ -2,19 +2,22 @@
 % Please edit documentation in R/utils.R
 \name{match_crs}
 \alias{match_crs}
-\title{MATCH CRS}
+\title{match_crs}
 \usage{
-match_crs(polys, crs_ref)
+match_crs(so, target)
 }
 \arguments{
-\item{polys}{is a spatial polygons objects}
+\item{so}{is a spatial polygons objects}
 
-\item{crs_ref}{is a character string representing the crs}
+\item{target}{is a spatial object with the target crs projection}
 }
 \value{
-a list of spatial polygons projected in the common crs
+spatial object projected in the target crs
 }
 \description{
 Make sure your extents overlap by converting polygons
 into a common reference crs.
+}
+\seealso{
+pred_cover1
 }

@@ -1,7 +1,7 @@
 Package: riparian
 Type: Package
 Title: Analyzing the Extent of Riparian Cover
-Version: 0.0.9000
+Version: 0.1.0
 Author: Erik Rose
 Maintainer: Erik Rose <erik.w.rose@gmail.com>
 Description: Analyzing the extent of riparian cover.
@@ -16,3 +16,5 @@ Suggests:
 VignetteBuilder: knitr
 URL: https://crumplecup.github.io/riparian
 BugReports: https://github.com/crumplecup/riparian/issues
+Depends: 
+    R (>= 2.10)

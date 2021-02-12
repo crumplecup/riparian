@@ -2,21 +2,24 @@
 % Please edit documentation in R/utils.R
 \name{fill_extent}
 \alias{fill_extent}
-\title{MERGE RASTERS TO FILL EXTENT}
+\title{fill_extent}
 \usage{
-fill_extent(poly, dir, band)
+fill_extent(poly, in_path, pad = 0.1)
 }
 \arguments{
-\item{poly}{is a `SpatialPolygons` object}
+\item{poly}{is a `sf` object}
 
-\item{dir}{is a directory filepath character string}
+\item{in_path}{is a directory filepath character string}
 
-\item{band}{is the band to extract from multiband imagery}
+\item{pad}{is the padding factor}
 }
 \value{
-merged rasters from `dir` over extent of `poly`
+merged rasters from `in_path` over extent of `poly`
 }
 \description{
-Given a `SpatialPolygons` object and a directory filepath character string,
-returns merged rasters from `dir` over extent of `poly`.
+Given a `sf` object and a directory filepath character string,
+returns merged rasters from `in_path` over extent of `poly`.
+}
+\seealso{
+before_and_after get_cols_4band plot_samples pred_cover1 sample_streams thumbnails
 }

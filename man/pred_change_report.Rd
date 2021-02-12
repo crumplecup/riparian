@@ -9,7 +9,7 @@ pred_change_report(
   year1_path,
   year2_path,
   permits = permits_13to18,
-  lots = prc_lots,
+  lots = sf_lots,
   title = "pred_chng_table.csv"
 )
 }

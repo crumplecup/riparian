@@ -2,9 +2,9 @@
 % Please edit documentation in R/utils.R
 \name{ext_box}
 \alias{ext_box}
-\title{box from extent}
+\title{extent box}
 \usage{
-ext_box(ras, crs_ref)
+ext_box(ras)
 }
 \arguments{
 \item{ras}{is a spatial object (raster)}
@@ -14,4 +14,7 @@ a Spatial Polygon drawn around the extent of `ras`
 }
 \description{
 produce polygon representation of extent
+}
+\seealso{
+before_and_after
 }

@@ -4,7 +4,7 @@
 \alias{pred_cover_report}
 \title{predicted cover report}
 \usage{
-pred_cover_report(in_path, taxlots = prc_lots)
+pred_cover_report(in_path, taxlots = sf_lots)
 }
 \arguments{
 \item{in_path}{is the character string path directory to rasters}

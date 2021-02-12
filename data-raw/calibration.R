@@ -1,3 +1,49 @@
+
+
+annual2018_color_array <- car
+save(annual2018_color_array, file = 'annual2018_color_array.rds')
+
+scores_random18 <- samples2018[year == 2018 & id %in% 1:54]
+scores_random18 <- unlist(sub[, c(4:53)])
+site_ids <- as.character(unlist(lapply(1:54, function(x) rep(x, 50))))
+
+
+library(muddier)
+df <- data.frame(scores = scores_random18)
+df <- cbind(df, car)
+
+df$site_id <- site_ids
+
+df$par <- 1
+df$par[df$scores == 0] <- 0
+
+df$full <- 1
+df$full[df$scores != 2] <- 0
+
+lm18 <- lm(scores ~ red_mn + red_sd + red_sk + red_kr + 
+             grn_mn + 
+             blu_mn + # blu_sd + blu_sk + blu_kr + 
+             nir_mn + 
+             ndvi_mn, data = df)
+summary(lm18)
+
+lm18 <- lm(scores ~ site_id + red_mn + red_sd + red_sk + red_kr + 
+            grn_mn +
+            blu_mn + blu_sd + blu_sk + blu_kr +
+           nir_mn +
+             ndvi_mn + ndvi_sd + ndvi_sk + ndvi_kr
+           , data = df)
+summary(lm18)
+
+bin18 <- glm(par ~ site_id + #red_mn + red_sd + red_sk + red_kr + 
+#            grn_mn + 
+            # blu_mn + # blu_sd + blu_sk + blu_kr + 
+            # nir_mn + 
+            # ndvi_mn
+, data = df, family = 'binomial')
+summary(bin18)
+
+
 # set library path
 .libPaths( c( 'P:/lib', .libPaths()) )
 
@@ -88,7 +134,7 @@ vals18_c <- res18_c[,4:53] %>% unlist %>%
   matrix(ncol=50) %>% t %>% 
   data.frame %>% setDT %>% unlist
 
-
+ortho18 <- '/media/crumplecup/catacomb/gis/benton_2018'
 
 mat <- matrix(c(rep(1,10), rep(2,10), rep(3,10)), ncol=3)
 dt <- setDT(data.frame(mat))
@@ -97,10 +143,10 @@ dt18_p <- data.frame(rip = vals18_p) #%>% cbind(dt)
 
 for (i in seq_along(samples))  {
   if (i == 1)  {
-    dt <- get_cols_4band(samples[i,], 'E:/ortho2018')
+    dt <- get_cols_4band(samples[i,], ortho18)
   }
   if (i >1)  {
-    dt <- rbind(dt, get_cols_4band(samples[i,], 'E:/ortho2018'))
+    dt <- rbind(dt, get_cols_4band(samples[i,], '/media/crumplecup/catacomb/gis/benton_2018'))
   }
 }
 
