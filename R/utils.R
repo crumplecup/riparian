@@ -1494,10 +1494,12 @@ thumbnails <- function(in_path, out_path, polys = random_samples, output = 'tif'
       }
       if (output == 'png') {
         polys <- sf::st_transform(polys, sf::st_crs(r))
+        buff <- sf::st_transform(sf_buff, sf::st_crs(r))
         png(file.path(out_path, paste0('sample_', i, '.png')),
             height = 36, width = 36, units = 'cm', res = 300)
         raster::plotRGB(r)
         plot(polys[i,1], lwd = 2, col = get_palette('slate', .01), add = T)
+        plot(buff, col = get_palette('ocean', .15), add = T)
         dev.off()
       }
     }
