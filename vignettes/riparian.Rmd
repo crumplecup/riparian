@@ -114,8 +114,6 @@ plot_samples(in_path = 'S:/maps/OrthoPhotos/Oregon2018',
 **Example Sample Plot**
 </center>
 
-
-
 The `plot_samples` function prints a .png file into the `out_path` directory for each sampling box in the `polys` object, showing the sampling box superimposed over the aerial imagery, with slices labeled by number (as shown in the example plot above).
 
 ## Scoring Samples
