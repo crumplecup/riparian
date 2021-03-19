@@ -784,7 +784,7 @@ plot_change <- function(csv,
                         title='cover_change.png',
                         heading=' ',
                         leg_pos='topleft',
-                        y_lab = 'No. of Sample Sites with Cover Change of X')  {
+                        y_lab = 'Relative Frequency of Samples at X%')  {
   dt <- as.data.table(csv)
   dt$mn <- apply(dt[,4:53],1,function(x) sum(x)/100)
   yr1 <- dt[year == year1]
@@ -812,7 +812,7 @@ plot_change <- function(csv,
   abline(v=vars[1,4],col='steelblue',lty=2)
   abline(v=vars[1,5],col='steelblue',lty=2)
   abline(v=vars[1,1],col='slategrey')
-  legend(leg_pos,legend=c('No. of Samples at X% Change','Mean Cover Change',
+  legend(leg_pos,legend=c('Relative Frequency of Samples at X%','Mean Cover Change',
                           'Upper & Lower 95% CI on Mean Change'),
          fill = c('forestgreen','slategrey','steelblue'))
   dev.off()
@@ -857,7 +857,7 @@ plot_cover <- function(csv,
   abline(v=vars[1,4],col='steelblue',lty=2)
   abline(v=vars[1,5],col='steelblue',lty=2)
   abline(v=vars[1,1],col='slategrey')
-  legend(leg_pos,legend=c('No. of Samples at X% Change','Mean Cover Extent',
+  legend(leg_pos,legend=c('Relative Frequency of Samples at X%','Mean Cover Extent',
                           'Upper & Lower 95% CI on Mean Extent'),
          fill = c('forestgreen','slategrey','steelblue'))
   dev.off()
