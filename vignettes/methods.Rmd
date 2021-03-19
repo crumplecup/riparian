@@ -183,7 +183,7 @@ Even when restricting our analysis to perennial and fish-bearing streams, there 
 
 Clearly, trees cannot provide shade to a stream that is passing through a tube underground, so the metric of cover extent does not apply to culverts.  Given that we are interested in the impact of canopy shade on stream temperature, it is reasonable to restrict our analysis to portions of the corridor that do not run through culverts.  However, the proportion of total stream length channeled through culverts is still relevant information about the stream system, with potential impacts on temperature.
 
-Going forward, our method to report on culverts in the priority corridor is to:
+Going forward, the recommended method to report on culverts in the priority corridor is to:
 
  * Remove survey boxes with culverts from annual and permit sampling pools.
  * Report the total stream length channelized through culverts within priority corridors.

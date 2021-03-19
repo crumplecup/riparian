@@ -327,8 +327,6 @@ build_change_table(csv = samples2018,
                    permits = permits_13to18)
 ```
 
-!['build_change_table output:'](change_table_2016-2018.csv)
-
 When a change table indicates that the cover extent has decreased, it is important to ascertain whether the decrease is the result of measurement error or actual canopy cover decline.
 
  * Inspect the sample plots from the previous and current year.  Can you identify cover loss?
@@ -501,4 +499,3 @@ pred_change_report(chng_path = 'E:/Riparian/chng_16to18/',
 
 ```
 
-!['pred_change_report output:'](pred_chng_table.csv)
