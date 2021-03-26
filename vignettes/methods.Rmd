@@ -304,7 +304,7 @@ As mentioned previously, disregard any portion of the surveying box that lies be
 
 ### Determining Mean Cover Extent
 
-Estimating the mean cover extent in the priority corridor is a primary deliverable of the bi-annual monitoring report, and it characterizes the proportion of the riparian zone shaded by canopy cover.  We use the mean percent cover of survey boxes in our stream samples to characterize the mean cover extent of the corridor.  If $N$ is the total number of samples, and $c_i$ is the percent cover of sample $i \in N$, then mean cover $\bar c$ is:
+Estimating the mean cover extent in the priority corridor is a primary deliverable of the biennial monitoring report, and it characterizes the proportion of the riparian zone shaded by canopy cover.  We use the mean percent cover of survey boxes in our stream samples to characterize the mean cover extent of the corridor.  If $N$ is the total number of samples, and $c_i$ is the percent cover of sample $i \in N$, then mean cover $\bar c$ is:
 
 $$ \bar c = \frac{\Sigma_{i=1}^{N}c_i}{N} $$
 
@@ -379,7 +379,7 @@ Unlike in the previous case, we are not concerned with a 10% difference as a thr
 
 ### Estimating Cover Change Using Predictive Modeling
 
-Although staff follow up with every observed loss in cover, ascertaining the cause of cover loss by contacting the owner, and informing owners of best practices in riparian management, one can argue that there is a disparity in equity, in that a minority of property owners face ongoing accountability through monitoring, and a majority do not experience direct monitoring.  This is because once county staff have selected a pool of random samples representative of the corridor, we maintain this pool of samples and revisit them over time, rather than selecting a new pool each year.  Therefore, a handful of property owners experience direct bi-annual monitoring and most do not.
+Although staff follow up with every observed loss in cover, ascertaining the cause of cover loss by contacting the owner, and informing owners of best practices in riparian management, one can argue that there is a disparity in equity, in that a minority of property owners face ongoing accountability through monitoring, and a majority do not experience direct monitoring.  This is because once county staff have selected a pool of random samples representative of the corridor, we maintain this pool of samples and revisit them over time, rather than selecting a new pool each year.  Therefore, a handful of property owners experience direct biennial monitoring and most do not.
 
 County staff lack resources to monitor riparian cover beyond reporting obligations under the Willamette Basin TMDL agreement with the EPA.  Without the ability to devote staff time and resources to collect additional samples, staff explored the possibility of using predictive modeling to estimate cover change in areas where we cannot observe directly.  The `pred_cover()` function in the `riparian` package uses the normalized vegetative difference index (NDVI) to predict the extent of cover throughout priority riparian corridors.  Calculating the NDVI requires 4-band imagery, and describes the ratio between red light and near-infrared light (NIR) reflected from the vegetative canopy, so that:
 
