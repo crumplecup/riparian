@@ -11,7 +11,7 @@ plot_change(
   title = "cover_change.png",
   heading = " ",
   leg_pos = "topleft",
-  y_lab = "No. of Sample Sites with Cover Change of X"
+  y_lab = "Relative Frequency of Samples at X\%"
 )
 }
 \arguments{

@@ -85,7 +85,7 @@
       <h1 data-toc-skip>riparian</h1>
                         <h4 class="author">Erik Rose</h4>
             
-            <h4 class="date">2021-03-18</h4>
+            <h4 class="date">2021-03-25</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/crumplecup/riparian/blob/master/vignettes/riparian.Rmd"><code>vignettes/riparian.Rmd</code></a></small>
       <div class="hidden name"><code>riparian.Rmd</code></div>
@@ -94,12 +94,51 @@
 
     
     
-<p>Welcome to the <code>vignette</code> for the package <code>riparian</code>, a suite of tools designed to help Benton County Community Development staff analyze riparian cover extent and change in cover over time. This document models the workflow of producing an annual monitoring report for the Benton County riparian monitoring program, and demonstrates how functions in the <code>riparian</code> package can make monitoring faster and more efficient for the researcher.</p>
+<p>Welcome to the <code>vignette</code> for the package <code>riparian</code>, a suite of tools designed to help Benton County Community Development staff analyze riparian cover extent and change in cover over time. This document models the workflow of producing an annual monitoring report for the Benton County riparian monitoring program, and demonstrates how functions in the <code>riparian</code> package can make monitoring faster and more efficient for the researcher. The tools in this package adhere to the procedures described in the <a href="methods.html">Research Methods</a> document.</p>
+<div id="table-of-contents" class="section level2">
+<h2 class="hasAnchor">
+<a href="#table-of-contents" class="anchor"></a>Table of Contents</h2>
+<ul>
+<li><a href="#site_plots">Step One: Site Plots</a></li>
+<li><a href="#library_path">The Library Path</a></li>
+<li><a href="#survey_boxes">Survey Boxes</a></li>
+<li><a href="#thumbnails">Thumbnail Images</a></li>
+<li><a href="#sample_plots">Sample Plots</a></li>
+<li><a href="#pred_cover">Predicting Cover</a></li>
+<li><a href="#scoring_samples">Scoring Samples</a></li>
+<li><a href="#subsetting_sites">Subsetting Sites</a></li>
+<li><a href="#plot_cover">Plot Cover Extent</a></li>
+<li><a href="#plot_change">Plot Cover Change</a></li>
+<li><a href="#clean_permits">Clean Permit List</a></li>
+<li><a href="#change_tables">Change Tables</a></li>
+<li><a href="#comparing_permits_to_random">Comparing Areas with Permits to Random Areas</a></li>
+<li><a href="#sampler">Drawing New Survey Boxes</a></li>
+<li>
+<a href="#vetting">Vetting Survey Boxes</a>
+<ul>
+<li><a href="#inspecting">Process for Inspecting Boxes</a></li>
+<li><a href="#verifying_form">Verifying Form and Position</a></li>
+<li><a href="#selecting_active_permits">Selecting Lots with Active Permits</a></li>
+<li><a href="#overlapping">Overlapping Survey Boxes</a></li>
+</ul>
+</li>
+<li><a href="#append_samples">Appending Samples</a></li>
+<li><a href="#export_boxes">Exporting Survey Boxes</a></li>
+<li>
+<a href="#predicting_cover">Predicted Cover Tools</a>
+<ul>
+<li><a href="#predicting_change">Predicting Cover Change</a></li>
+</ul>
+</li>
+</ul>
+<p><a name="site_plots"></a></p>
+</div>
 <div id="step-one-site-plots" class="section level2">
 <h2 class="hasAnchor">
 <a href="#step-one-site-plots" class="anchor"></a>Step One: Site Plots</h2>
 <p>Benton County conducts riparian monitoring whenever new high resolution (1-foot) orthographic imagery becomes available. Likely, your are reading this because new imagery is about to arrive.</p>
 <p>The County currently monitors 54 randomly selected sites along priority corridors, and may add additional sites based upon future permit approvals. The reason we look at the same 54 sites every year is because we are trying to detect change in cover. If we looked at a different slew of sites each year, it would be hard to know whether an increase or decrease in cover were due to variation between the sites we selected, or whether vegetation removal or accrual occurred. Using this method, we can circle individual trees that have gone missing from one year to the next. Because the sites are randomly selected and representative of conditions in the priority corridor generally, we can be reasonably confident that changes in cover within the sample reflect conditions in the priority corridor.</p>
+<p><a name="library_path"></a></p>
 <div id="the-library-path" class="section level3">
 <h3 class="hasAnchor">
 <a href="#the-library-path" class="anchor"></a>The Library Path</h3>
@@ -110,11 +149,12 @@
 <span class="co"># remember to run this at the start of every Rstudio() session!</span>
 <span class="co"># replace 'P:/lib' with the path to a dedicated folder in your workspace</span>
 <span class="fu"><a href="https://rdrr.io/r/base/libPaths.html">.libPaths</a></span><span class="op">(</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span> <span class="st">'P:/lib'</span>, <span class="fu"><a href="https://rdrr.io/r/base/libPaths.html">.libPaths</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span></code></pre></div>
+<p><a name="survey_boxes"></a></p>
 </div>
-<div id="sampling-boxes" class="section level3">
+<div id="survey-boxes" class="section level3">
 <h3 class="hasAnchor">
-<a href="#sampling-boxes" class="anchor"></a>Sampling Boxes</h3>
-<p>The <code>riparian</code> package contains several data objects related to riparian monitoring in Benton County. You can access these data objects by name using the <code><a href="https://rdrr.io/r/utils/data.html">data()</a></code> function, or they will load automatically with the rest of package when using `library(). Access the polygon shapefile containing the 54 sampling boxes as shown:</p>
+<a href="#survey-boxes" class="anchor"></a>Survey Boxes</h3>
+<p>The <code>riparian</code> package contains several data objects related to riparian monitoring in Benton County. You can access these data objects by name using the <code><a href="https://rdrr.io/r/utils/data.html">data()</a></code> function, or they will load automatically with the rest of package when using `library(). Access the polygon shapefile containing the 54 survey boxes as shown:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># load the package, all associated functions and data objects</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://crumplecup.github.io/riparian">riparian</a></span><span class="op">)</span>
@@ -124,39 +164,42 @@
 <span class="co">#&gt; </span>
 <span class="co">#&gt;     within</span>
 
-<span class="co"># alternative method: access the sampling box object without loading the full package</span>
+<span class="co"># alternative method: access the survey box object without loading the full package</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span><span class="op">(</span><span class="va">random_samples</span>, package <span class="op">=</span> <span class="st">'riparian'</span><span class="op">)</span>
 
 <span class="co"># use the sf package to plot the first box</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_zm.html">st_zm</a></span><span class="op">(</span><span class="va">random_samples</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">'Example Sampling Box'</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_zm.html">st_zm</a></span><span class="op">(</span><span class="va">random_samples</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">'Example Survey Box'</span><span class="op">)</span></code></pre></div>
 <p><img src="riparian_files/figure-html/samples-1.png" width="700"></p>
 <p>In 2018, the County collected orthographic imagery in S:/maps/OrthoPhotos, with each year of imagery in a separate folder. Each raster file is typically a large file covering a broad extent of the county. Performing operations on these files is expensive, and when using the county network can slow traffic for others and increase the risk of dropped connections or other errors. If you can copy the years of interest to an external drive, this can minimize network traffic and speed performance at your workstation. However, due to the size of the data, orthographic data from the whole county will likely not fit on hard drive of a laptop.</p>
-<p>Compared the size of the survey images, the monitoring boxes are relatively small. The <code><a href="../reference/thumbnails.html">thumbnails()</a></code> functions produces smaller raster files just big enough to fit a given set of sampling boxes. These raster files are small enough to fit on a laptop without impeding performance, allowing one to conduct the remainder of the analysis without being tethered to an external drive or the county network.</p>
+<p>Compared the size of the survey images, the monitoring boxes are relatively small. The <code><a href="../reference/thumbnails.html">thumbnails()</a></code> functions produces smaller raster files just big enough to fit a given set of survey boxes. These raster files are small enough to fit on a laptop without impeding performance, allowing one to conduct the remainder of the analysis without being tethered to an external drive or the county network.</p>
+<p><a name="thumbnails"></a></p>
 </div>
 <div id="thumbnail-images" class="section level3">
 <h3 class="hasAnchor">
 <a href="#thumbnail-images" class="anchor"></a>Thumbnail Images</h3>
-<p>The <code><a href="../reference/thumbnails.html">thumbnails()</a></code> function takes three arguments. <code>in_path</code> is the directory path for orthoimagery. <code>out_path</code> is the directory in which to print the thumbnail images. <code>polys</code> is the sampling box spatial object.</p>
-<p>R uses the convention of forward slashes in path names (for instance, the path to my working folder for this project is ‘P:/Riparian’ and the path to the 2018 imagery is ‘S:/maps/OrthoPhotos/Oregon2018’). The function expects a character string, so the path name needs to have single or double quotes around it. When you run this function, it will produce a .tif file in the output directory centered around each sampling box in the <code>polys</code> argument.</p>
+<p>The <code><a href="../reference/thumbnails.html">thumbnails()</a></code> function takes three arguments. <code>in_path</code> is the directory path for orthoimagery. <code>out_path</code> is the directory in which to print the thumbnail images. <code>polys</code> is the survey box spatial object.</p>
+<p>R uses the convention of forward slashes in path names (for instance, the path to my working folder for this project is ‘P:/Riparian’ and the path to the 2018 imagery is ‘S:/maps/OrthoPhotos/Oregon2018’). The function expects a character string, so the path name needs to have single or double quotes around it. When you run this function, it will produce a .tif file in the output directory centered around each survey box in the <code>polys</code> argument.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
 <span class="co"># crop small images of the sampling area and print to personal drive</span>
 <span class="fu"><a href="../reference/thumbnails.html">thumbnails</a></span><span class="op">(</span>in_path <span class="op">=</span> <span class="st">'S:/maps/OrthoPhotos/Oregon2018'</span>,
            out_path <span class="op">=</span> <span class="st">'P:/Riparian'</span>,
            polys <span class="op">=</span> <span class="va">random_samples</span><span class="op">)</span></code></pre></div>
+<p><a name="sample_plots"></a></p>
 </div>
 <div id="sample-plots" class="section level3">
 <h3 class="hasAnchor">
 <a href="#sample-plots" class="anchor"></a>Sample Plots</h3>
-<p>In order to assess the level of cover over a sample area, we need to project the lines of the sampling box over the new orthographic imagery. The function for printing these plots is called <code><a href="../reference/plot_samples.html">plot_samples()</a></code>. The full syntax for the function is <code><a href="../reference/plot_samples.html">plot_samples(in_path, out_path, polys = random_samples, year, type = 'random', method = 'lm')</a></code>. Let’s break down these arguments one by one.</p>
-<p>The first argument is called <code>in_path</code> and it is the path to the directory of orthographic imagery. If you made a directory of thumbnails, use this directory as your <code>in_path</code> argument. The second argument is <code>out_path</code>, and specifies the location where the function will print the sample plots. The third argument, <code>polys</code> is the polygon shapefile of sampling boxes.</p>
+<p>In order to assess the level of cover over a sample area, we need to project the lines of the survey box over the new orthographic imagery. The function for printing these plots is called <code><a href="../reference/plot_samples.html">plot_samples()</a></code>. The full syntax for the function is <code><a href="../reference/plot_samples.html">plot_samples(in_path, out_path, polys = random_samples, year, type = 'random', method = 'lm')</a></code>. Let’s break down these arguments one by one.</p>
+<p>The first argument is called <code>in_path</code> and it is the path to the directory of orthographic imagery. If you made a directory of thumbnails, use this directory as your <code>in_path</code> argument. The second argument is <code>out_path</code>, and specifies the location where the function will print the sample plots. The third argument, <code>polys</code> is the polygon shapefile of survey boxes.</p>
 <p>The <code>year</code> argument is an integer that represents the year of orthographic survey. Do not try getting fancy and entering ‘year = 2020jun’ or somesuch, because the tools in this package use this number a lot. Each one is expecting an integer and will break if they do not get one.</p>
 <p>The <code>type</code> argument, on the other hand, is entirely there for your convenience. You can even safely ignore it. In 2018, I wanted to know if the level of cover was different in taxlots where the county had issued permits that might affect the riparian zone, compared to the priority corridor as a whole. I labeled random samples in the riparian corridor as ‘random’ and samples where the county had issued permits as ‘permit’. The <code>type</code> argument is expecting a word of your choice wrapped in quotes. Other tools in the <code>riparian</code> package allow you to filter your sample pool by the <code>type</code> names you specify.</p>
+<p><a name="pred_cover"></a></p>
 </div>
 <div id="predicting-cover" class="section level3">
 <h3 class="hasAnchor">
 <a href="#predicting-cover" class="anchor"></a>Predicting Cover</h3>
-<p>The <code><a href="../reference/plot_samples.html">plot_samples()</a></code> function predicts the level of cover in each slice of the sampling box using a linear regression fit to the record of sample observations from 2018, 2016 and 2009. The function adds a green bar to the outer edge of the sample box where it predicts full cover, yellow on slices of partial cover, and red on slices of bare ground. The function also outputs a spreadsheet containing the predicted values, correctly formatted for later use by other tools in this package. The spreadsheet output can save you labor by automatically scoring easy calls.</p>
+<p>The <code><a href="../reference/plot_samples.html">plot_samples()</a></code> function predicts the level of cover in each slice of the survey box using a linear regression fit to the record of sample observations from 2018, 2016 and 2009. The function adds a green bar to the outer edge of the sample box where it predicts full cover, yellow on slices of partial cover, and red on slices of bare ground. The function also outputs a spreadsheet containing the predicted values, correctly formatted for later use by other tools in this package. The spreadsheet output can save you labor by automatically scoring easy calls.</p>
 <p>Currently the <code><a href="../reference/plot_samples.html">plot_samples()</a></code> function defaults to using a linear model that expects 4-band imagery (rgbn) as an input. If you are using 3-band imagery (rgb), then you can tell the function to use a different linear model using the <code>method</code> argument. For 3-band imagery, use the argument <code>method = 'lm3'</code>.</p>
 <p>The default <code>polys = 'random_samples'</code> means the function looks for an object called <code>random_samples</code> in the current environment, so you can omit this argument for the random annual monitoring boxes if you have loaded <code>random_samples</code> into the current environment. You can omit the argument names in a function call and R will process the arguments in the order given, but if you omit arguments to use the default, or otherwise provide function arguments out of order, then you need to include the name of specific arguments in the function call.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -178,7 +221,8 @@
 <center>
 <img src="examples/sample_22_2020.png" width="650"><br><strong>Example Sample Plot</strong>
 </center>
-<p>The <code>plot_samples</code> function prints a .png file into the <code>out_path</code> directory for each sampling box in the <code>polys</code> object, showing the sampling box superimposed over the aerial imagery, with slices labeled by number (as shown in the example plot above).</p>
+<p>The <code>plot_samples</code> function prints a .png file into the <code>out_path</code> directory for each survey box in the <code>polys</code> object, showing the survey box superimposed over the aerial imagery, with slices labeled by number (as shown in the example plot above).</p>
+<p><a name="scoring_samples"></a></p>
 </div>
 </div>
 <div id="scoring-samples" class="section level2">
@@ -222,8 +266,9 @@
 <span class="fu"><a href="https://rdrr.io/r/utils/write.table.html">write.csv</a></span><span class="op">(</span><span class="va">obs</span>, <span class="st">'samples_MyYear.csv'</span><span class="op">)</span>
 <span class="co"># or as a data object</span>
 <span class="fu"><a href="https://rdrr.io/r/base/save.html">save</a></span><span class="op">(</span><span class="va">obs</span>, file <span class="op">=</span> <span class="st">'samples_MyYear.rds'</span><span class="op">)</span></code></pre></div>
-<p>If you are using the predicted cover spreadsheet, then as you inspect each site plot, observe whether each slice is assigned the correct cover class. Where the predicted class is incorrect, you can update the spreadsheet in Excel. The column names correspond to the slice numbers on the site plot, and the rows of the spreadsheet will be in the order of the sampling boxes fed to the <code><a href="../reference/plot_samples.html">plot_samples()</a></code> function. So long as you do not have to do too much manual editing, the prediction feature has the potential to save time compared to manually scoring each slice from scratch.</p>
+<p>If you are using the predicted cover spreadsheet, then as you inspect each site plot, observe whether each slice is assigned the correct cover class. Where the predicted class is incorrect, you can update the spreadsheet in Excel. The column names correspond to the slice numbers on the site plot, and the rows of the spreadsheet will be in the order of the survey boxes fed to the <code><a href="../reference/plot_samples.html">plot_samples()</a></code> function. So long as you do not have to do too much manual editing, the prediction feature has the potential to save time compared to manually scoring each slice from scratch.</p>
 <p>Note that while you can cut and paste the corrected scores onto the end of the previous observations in Excel, you can also bind them together easily in R using the native function <code><a href="https://Rdatatable.gitlab.io/data.table/reference/rbindlist.html">rbind()</a></code>.</p>
+<p><a name="subsetting_sites"></a></p>
 <div id="subsetting-sites" class="section level3">
 <h3 class="hasAnchor">
 <a href="#subsetting-sites" class="anchor"></a>Subsetting Sites</h3>
@@ -288,6 +333,7 @@
 <span class="co">#&gt;    year   type   N</span>
 <span class="co">#&gt; 1: 2016   trib 115</span>
 <span class="co">#&gt; 2: 2016 permit  50</span></code></pre></div>
+<p><a name="plot_cover"></a></p>
 </div>
 </div>
 <div id="plot-cover-extent" class="section level2">
@@ -314,6 +360,7 @@
 <center>
 <img src="my_cover_plot.png" width="650"><br><strong>my_cover_plot.png</strong>
 </center>
+<p><a name="plot_change"></a></p>
 </div>
 <div id="plot-cover-change" class="section level2">
 <h2 class="hasAnchor">
@@ -338,6 +385,7 @@
 <center>
 <img src="my_change_plot.png" width="650"><br><strong>my_change_plot.png</strong>
 </center>
+<p><a name="clean_permits"></a></p>
 </div>
 <div id="clean-permit-list" class="section level2">
 <h2 class="hasAnchor">
@@ -387,12 +435,13 @@
 <span class="co"># Save the exhaustive list as a data object or csv file.</span>
 <span class="fu"><a href="https://rdrr.io/r/base/save.html">save</a></span><span class="op">(</span><span class="va">perms</span>, file <span class="op">=</span> <span class="st">'/path_to_drive/my_permit_list.rds'</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/write.table.html">write.csv</a></span><span class="op">(</span><span class="va">perms</span>, file <span class="op">=</span> <span class="st">'/path_to_drive/my_permit_list.csv'</span><span class="op">)</span></code></pre></div>
+<p><a name="change_tables"></a></p>
 </div>
 <div id="change-tables" class="section level2">
 <h2 class="hasAnchor">
 <a href="#change-tables" class="anchor"></a>Change Tables</h2>
-<p>The planning staff is concerned with which map taxlots have experienced net cover decrease, especially if the decrease is greater than 10%. The <code><a href="../reference/build_change_table.html">build_change_table()</a></code> function produces a change table designed for use by the planning staff. The purpose of this tool is to enable staff to locate where change is occurring, which property owners are involved, and whether any county issued permits may be related. The change table ranks sampling sites by mean cover change, and includes columns with all MapTaxlot numbers falling within the sampling box and all permits associated with a MapTaxlot on the permit list.</p>
-<p>The full syntax for the function is <code><a href="../reference/build_change_table.html">build_change_table(csv, year1, year2, polys, lots, permits)</a></code>. The argument <code>csv</code> is the record of cover scores for the sampling sites. The arguments <code>year1</code> and <code>year2</code> are integers matching values in the <code>year</code> column of <code>csv</code>. The argument <code>polys</code> is the spatial polygons object of samplings boxes. The argument <code>lots</code> is the polygons object of MapTaxlots, and <code>permits</code> is the permit list formatted according to the instructions in the previous section. The output is a csv file printed to the working directory.</p>
+<p>The planning staff is concerned with which map taxlots have experienced net cover decrease, especially if the decrease is greater than 10%. The <code><a href="../reference/build_change_table.html">build_change_table()</a></code> function produces a change table designed for use by the planning staff. The purpose of this tool is to enable staff to locate where change is occurring, which property owners are involved, and whether any county issued permits may be related. The change table ranks sampling sites by mean cover change, and includes columns with all MapTaxlot numbers falling within the survey box and all permits associated with a MapTaxlot on the permit list.</p>
+<p>The full syntax for the function is <code><a href="../reference/build_change_table.html">build_change_table(csv, year1, year2, polys, lots, permits)</a></code>. The argument <code>csv</code> is the record of cover scores for the sampling sites. The arguments <code>year1</code> and <code>year2</code> are integers matching values in the <code>year</code> column of <code>csv</code>. The argument <code>polys</code> is the spatial polygons object of survey boxes. The argument <code>lots</code> is the polygons object of MapTaxlots, and <code>permits</code> is the permit list formatted according to the instructions in the previous section. The output is a csv file printed to the working directory.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/build_change_table.html">build_change_table</a></span><span class="op">(</span>csv <span class="op">=</span> <span class="va">samples2018</span>,
                    year1 <span class="op">=</span> <span class="fl">2016</span>,
@@ -406,11 +455,12 @@
 <li>If you can identify specific trees or limbs that have been removed, create a slide showing the before and after image with the removal circled to present to planning staff.</li>
 <li>Try to ascertain on which map taxlot the removal occurred and include the number.</li>
 <li>Include all permit numbers from the change table column associated with the sample.</li>
-<li>If no discernible loss has occurred, but changes in camera aspect cause the position of tree canopy relative to the sampling box to move, record as measurement error and disregard.</li>
+<li>If no discernible loss has occurred, but changes in camera aspect cause the position of tree canopy relative to the survey box to move, record as measurement error and disregard.</li>
 <li>We ignore this type of error because it is random (as likely to make cover go up as down) and small relative to sizes of changes we are measuring.</li>
 <li>If no discernible loss has occurred, but shading effects caused disparate scores between years, correct the shaded record to match the fully visible record and rerun the analysis.</li>
 <li>If the corrected record is a prior year, include a corrections table for the prior year in your final report.</li>
 </ul>
+<p><a name="comparing_permits_to_random"></a></p>
 <div id="comparing-areas-with-permits-to-random-areas" class="section level3">
 <h3 class="hasAnchor">
 <a href="#comparing-areas-with-permits-to-random-areas" class="anchor"></a>Comparing Areas with Permits to Random Areas</h3>
@@ -422,7 +472,7 @@
 <span class="va">dt</span> <span class="op">&lt;-</span> <span class="va">samples2018</span>
 
 <span class="co"># use apply to convert each row of score observations</span>
-<span class="co"># into a mean cover extent per sampling box</span>
+<span class="co"># into a mean cover extent per survey box</span>
 <span class="va">dt</span><span class="op">$</span><span class="va">mn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span><span class="op">(</span><span class="va">dt</span><span class="op">[</span>,<span class="fl">4</span><span class="op">:</span><span class="fl">53</span><span class="op">]</span>, <span class="fl">1</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">/</span><span class="fl">100</span><span class="op">)</span>
 
 <span class="co"># subset random samples and permit samples for 2018</span>
@@ -443,14 +493,15 @@
 <span class="co">#&gt; mean of x mean of y </span>
 <span class="co">#&gt;    0.7200    0.8514</span></code></pre></div>
 <p>Note the confidence interval associated with the Welch two-sample t-test in your monitoring report. If the confidence interval overlaps zero, the two sample means are not statistically distinguishable from one another with 95% confidence.</p>
+<p><a name="sampler"></a></p>
 </div>
 </div>
-<div id="sampler" class="section level2">
+<div id="drawing-new-survey-boxes" class="section level2">
 <h2 class="hasAnchor">
-<a href="#sampler" class="anchor"></a>Sampler</h2>
-<p>The time will come when you need to draw new sampling boxes to sample new places. Typically the County will approve new permits and flag those permits that may result in reduction of cover in the priority corridor. Your bosses may ask you to include newly permitted areas in your sample. The <code><a href="../reference/sample_streams.html">sample_streams()</a></code> function generates new sampling boxes along the priority corridor within the area of your choice.</p>
-<p>The full syntax for the function is <code><a href="../reference/sample_streams.html">sample_streams(n=100, lots=sf_lots, prc=sf_per, strms=sf_strms)</a></code>. The argument <code>n</code> is the number of sampling boxes you want to produce, and defaults to 100. The argument <code>prc</code> is the line file along which the function generates random points. The default (<code>sf_per</code>) is the NHD set of perennial or fish-bearing streams, clipped to the extent of the RR zone, and you should be able to leave the default as is.</p>
-<p>The argument <code>strms</code> defaults to the WSI hydro-enforced drainage layer clipped to the priority corridor (<code>sf_strms</code>). The WSI hydro-enforced drainage layer is more accurate than the NHD dataset, so the function finds the nearest point on the WSI layer to the random point generated on the NHD layer, and draws the sampling box around that point.</p>
+<a href="#drawing-new-survey-boxes" class="anchor"></a>Drawing New Survey Boxes</h2>
+<p>The time will come when you need to draw new survey boxes to sample new places. Typically the County will approve new permits and flag those permits that may result in reduction of cover in the priority corridor. Your bosses may ask you to include newly permitted areas in your sample. The <code><a href="../reference/sample_streams.html">sample_streams()</a></code> function generates new survey boxes along the priority corridor within the area of your choice.</p>
+<p>The full syntax for the function is <code><a href="../reference/sample_streams.html">sample_streams(n=100, lots=sf_lots, prc=sf_per, strms=sf_strms)</a></code>. The argument <code>n</code> is the number of survey boxes you want to produce, and defaults to 100. The argument <code>prc</code> is the line file along which the function generates random points. The default (<code>sf_per</code>) is the NHD set of perennial or fish-bearing streams, clipped to the extent of the RR zone, and you should be able to leave the default as is.</p>
+<p>The argument <code>strms</code> defaults to the WSI hydro-enforced drainage layer clipped to the priority corridor (<code>sf_strms</code>). The WSI hydro-enforced drainage layer is more accurate than the NHD dataset, so the function finds the nearest point on the WSI layer to the random point generated on the NHD layer, and draws the survey box around that point.</p>
 <p>The argument <code>lots</code> is the polygon object that specifies the area within which you want to draw samples, and defaults to the whole priority corridor (<code>sf_lots</code>). If you have a list of permitted sites to check, then clip the <code>sf_lots</code> object down to only those taxlots you want to check, and specify the location of the resulting object in the <code>lots</code> argument.</p>
 <p>What we casually refer to as random numbers in computer code refer to pseudo-random number generators, or complex deterministic algorithms. Deterministic means that we will get exactly the same output given a specific input, what we call a <code>seed</code>. By setting the <code>seed</code> in R, you can generate a string of seemingly random numbers that is reproducible. Consider it a best practice to set and record your seed before taking random samples, especially for research involving the public.</p>
 <p>To demonstrate the function, I will generate a random sample of lots within the priority corridor, then draw sample boxes using <code><a href="../reference/sample_streams.html">sample_streams()</a></code>.</p>
@@ -474,25 +525,82 @@
 
 <span class="co"># sample 10 spots from permitted lots in the riparian corridor</span>
 <span class="va">new_sample</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sample_streams.html">sample_streams</a></span><span class="op">(</span>n <span class="op">=</span> <span class="fl">10</span>, lots <span class="op">=</span> <span class="va">permit_lots</span><span class="op">)</span></code></pre></div>
-<div id="bad-sampling-boxes" class="section level3">
-<h3 class="hasAnchor">
-<a href="#bad-sampling-boxes" class="anchor"></a>Bad Sampling Boxes</h3>
-<p>The sampling tool has known bugs that cause sampling boxes to fail to draw correctly. I would offer an expected date when these bugs might be resolved, but let’s just say I was lucky to get the sampler function working at all. When you generate a series of sampling boxes, it is possible that many will be good boxes and some will be bad boxes. My strategy was to create more sampling boxes than I needed, and then to delete bad or unwanted boxes from the resulting spatial object.</p>
-<p>R recognizes the sampling boxes as spreadsheets with associated spatial data. Each sampling box is a row of data, and you can delete unwanted rows as shown in the code snippet below. Note the use of the concatenate function <code><a href="https://rdrr.io/r/base/c.html">c()</a></code> to delete multiple samples at once.</p>
+<p><a name="vetting"></a></p>
+</div>
+<div id="vetting-survey-boxes" class="section level2">
+<h2 class="hasAnchor">
+<a href="#vetting-survey-boxes" class="anchor"></a>Vetting Survey Boxes</h2>
+<p>There are a chain of assumptions that occur when generating survey boxes. We expect:</p>
+<ul>
+<li>The randomly-selected point will occur on a stream path.</li>
+<li>The stream path will occur in one of the specified tax lots.</li>
+<li>The survey box will extend across 150-ft of stream path, and 50-ft into the riparian zone.<br>
+</li>
+<li>Survey boxes will have 50 slices per box, with divisions between slices to extend perpendicular from the stream path.</li>
+<li>The survey box will follow the higher order stream (main stem) at tributary junctions.</li>
+</ul>
+<p>These assumptions are requirements that must hold for survey boxes to be valid. The <code>riparian</code> package depends upon a suite of complex spatial and data libraries, and my imperfect understanding of how those libraries function and interact. Hence, one should view with a reasonable amount of suspicion the survey boxes output by the <code><a href="../reference/sample_streams.html">sample_streams()</a></code> function until having had the chance to vet each survey box to ascertain that it meets each basic assumption, or requirement, imposed upon valid survey boxes.</p>
+<p>The <code><a href="../reference/inspect_samples.html">inspect_samples()</a></code> functions is a tool designed to address the difficulty of verifying whether new samples meet all the validation criteria. The full syntax of the function is:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># remove unwanted sample from polygons object</span>
-<span class="va">samp1</span> <span class="op">&lt;-</span> <span class="va">new_sample</span><span class="op">[</span> , <span class="op">-</span><span class="fl">2</span><span class="op">]</span>  <span class="co"># remove second sample</span>
-<span class="va">samp2</span> <span class="op">&lt;-</span> <span class="va">new_sample</span><span class="op">[</span> , <span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">3</span>,<span class="fl">7</span><span class="op">:</span><span class="fl">9</span><span class="op">)</span><span class="op">]</span>  <span class="co"># remove samples 3, 7, 8 and 9</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="../reference/inspect_samples.html">inspect_samples</a></span><span class="op">(</span>
+  samples <span class="op">=</span> <span class="va">my_new_samples</span>, <span class="co"># replace with the name of new samples to vet</span>
+  in_path <span class="op">=</span> <span class="st">'/path_to_imagery/'</span>, <span class="co"># replace with your own path to raster imagery</span>
+  out_path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/getwd.html">getwd</a></span><span class="op">(</span><span class="op">)</span>, <span class="co"># path to output results, defaults to working directory</span>
+  permits <span class="op">=</span> <span class="va">permits_13to18</span>, <span class="co"># replace with cleaned list of active permits</span>
+  lots <span class="op">=</span> <span class="va">sf_lots</span>  <span class="co"># lots within the riparian corridor, can remain as-is</span>
+<span class="op">)</span></code></pre></div>
+<p><a name="inspecting"></a></p>
+<div id="process-for-inspecting-boxes" class="section level3">
+<h3 class="hasAnchor">
+<a href="#process-for-inspecting-boxes" class="anchor"></a>Process for Inspecting Boxes</h3>
+<p>When run, <code><a href="../reference/inspect_samples.html">inspect_samples()</a></code> will print a series of PNG files to <code>out_path</code>. Each picture will show a survey box from <code>samples</code>, as well as any maptaxlots overlain by the survey box, and the adjacent priority riparian corridor. The figure labeled <a href="#inspection">Inspection Plot</a> shows an example from 2020.</p>
+<a name="inspection"></a>
+<center>
+<img src="examples/inspection_plot.png" width="650"><br><strong>Inspection Plot</strong>
+</center>
+<p>For each survey box in samples, the function looks for maptaxlots lying under the box and prints them in a black outline over raster imagery. The maptaxlot number prints in the center of each taxlot. Blue numbers indicate the maptaxlot has active county permits, while red numbers indicate no active permits. The riparian corridor is superimposed over the top of the imagery in translucent blue. The subject survey box will appear as a clear wire frame within the riparian corridor, while other survey boxes in the list will be red in color. Use the inspection plots to ascertain:</p>
+<ul>
+<li>If a survey box has the correct form around a valid position on the stream path.</li>
+<li>If a survey box overlays a maptaxlot with an active county permit.</li>
+<li>If a survey box overlaps another survey box in the sample set.</li>
+</ul>
+<p><a name="verifying_form"></a></p>
+<div id="verfiying-form-and-position" class="section level4">
+<h4 class="hasAnchor">
+<a href="#verfiying-form-and-position" class="anchor"></a>Verfiying Form and Position</h4>
+<p>The sampling tool has known bugs that cause survey boxes to fail to draw correctly. I would offer an expected date when these bugs might be resolved, but let’s just say I was lucky to get the sampler function working at all. When you generate a series of survey boxes, it is possible that many will be good boxes and some will be <a href="#bad_boxes">bad boxes</a>. A box that is properly drawn will extend 150-ft along the stream path, and extend 50-ft into the riparian corridor, divided into 25 evenly-spaces slices on either stream bank, with divisions between slices extending perpendicular from the direction of the stream path. A box that is properly positioned is centered on the stream path within the priority riparian corridor, as delineated in blue on the inspection plots.</p>
+<a name="bad_boxes"></a>
 <center>
 <img src="examples/bad_boxes.png" width="650"><br><strong>Bad Boxes</strong>
 </center>
+<p><a name="selecting_active_permits"></a></p>
+</div>
+<div id="selecting-lots-with-active-permits" class="section level4">
+<h4 class="hasAnchor">
+<a href="#selecting-lots-with-active-permits" class="anchor"></a>Selecting Lots With Active Permits</h4>
+<p>When sampling a subset of taxlots (lots with active permits), compared to the corridor as a whole (randomly-selected lots), the <code><a href="../reference/sample_streams.html">sample_streams()</a></code> function can fail to properly restrict the sampling area to the subset of lots, and unintentionally draw samples from unrelated parts of the priority corridor outside the study area of interest (lots without active permits). This is a known issue that will hopefully be resolved in the near future.</p>
+<p>The color of the maptaxlot number on the inspection plot indicates whether the maptaxlot is associated with an active permit. Blue maptaxlot numbers indicate active permits, while red numbers indicate no active permits. When sampling lots with active permits, the centerpoint of the survey box (the sampling point) should occur within a lot associated with an active permit, or a blue maptaxlot number.</p>
+<p><a name="overlapping"></a></p>
+</div>
+<div id="overlapping-survey-boxes" class="section level4">
+<h4 class="hasAnchor">
+<a href="#overlapping-survey-boxes" class="anchor"></a>Overlapping Survey Boxes</h4>
+<p>Two survey boxes may be valid individually, but if they overlap one another then we cannot use both in the same sample set, because their cover scores are not independent of one another. The subject survey box has a clear black outline, while additional survey boxes in the list have a red fill. If a red survey box overlaps the clear black survey box, then there is a conflict with the subject sample, and we can only include one or the other in the analysis. Standard practice is to retain valid survey boxes in the order produced and discard any subsequent samples that overlap.</p>
+<p>To check if new samples (samples with permits) overlap with a pre-existing set of samples (random samples), <a href="#append_samples">append the two sample sets together</a> before running <code><a href="../reference/inspect_samples.html">inspect_samples()</a></code>. The pre-existing samples will appear as red survey boxes when new survey boxes are the subject of the plot, and you can disregard inspection plots where the pre-existing survey boxes are the subject.</p>
+<p>My strategy to deal with invalid boxes generally was to create more survey boxes than I needed, and then to delete bad or invalid boxes from the resulting spatial object. R recognizes the survey boxes as spreadsheets with associated spatial data. Each survey box is a row of data, and you can delete unwanted rows as shown in the code snippet below. Note the use of the concatenate function <code><a href="https://rdrr.io/r/base/c.html">c()</a></code> to delete multiple samples at once.</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="co"># remove unwanted sample from polygons object</span>
+<span class="va">samp1</span> <span class="op">&lt;-</span> <span class="va">new_sample</span><span class="op">[</span> , <span class="op">-</span><span class="fl">2</span><span class="op">]</span>  <span class="co"># remove second sample</span>
+<span class="va">samp2</span> <span class="op">&lt;-</span> <span class="va">new_sample</span><span class="op">[</span> , <span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">3</span>,<span class="fl">7</span><span class="op">:</span><span class="fl">9</span><span class="op">)</span><span class="op">]</span>  <span class="co"># remove samples 3, 7, 8 and 9</span></code></pre></div>
+<p><a name="append_samples"></a></p>
+</div>
 </div>
 <div id="appending-samples" class="section level3">
 <h3 class="hasAnchor">
 <a href="#appending-samples" class="anchor"></a>Appending Samples</h3>
-<p>When you have a pre-existing set of sampling boxes, you may wish to append additional sampling boxes to the end. For instance, you may have a set of sampling boxes used for permit-based monitoring in a previous report. When presented with a list of new permits the county has issued since the last report, you may elect to take a smaller number of samples from the new pool and add these to the pre-existing set.</p>
-<p>Since the sampling boxes are represented as lists, you construct a new sampling object by concatenating two lists together using the <code><a href="https://rdrr.io/r/base/c.html">c()</a></code> function.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<p>When you have a pre-existing set of survey boxes, you may wish to append additional survey boxes to the end. For instance, you may have a set of survey boxes used for permit-based monitoring in a previous report. When presented with a list of new permits the county has issued since the last report, you may elect to take a smaller number of samples from the new pool and add these to the pre-existing set.</p>
+<p>Since the survey boxes are represented as lists, you construct a new sampling object by concatenating two lists together using the <code><a href="https://rdrr.io/r/base/c.html">c()</a></code> function.</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># just demonstrating how this works</span>
 <span class="co"># there is no practical reason to perform these merges</span>
 
@@ -501,12 +609,13 @@
 
 <span class="co"># append permit samples to itself</span>
 <span class="va">merged_2</span> <span class="op">&lt;</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">new_sample</span>, <span class="va">new_sample</span><span class="op">)</span></code></pre></div>
+<p><a name="export_boxes"></a></p>
 </div>
-<div id="exporting-sampling-boxes" class="section level3">
+<div id="exporting-survey-boxes" class="section level3">
 <h3 class="hasAnchor">
-<a href="#exporting-sampling-boxes" class="anchor"></a>Exporting Sampling Boxes</h3>
+<a href="#exporting-survey-boxes" class="anchor"></a>Exporting Survey Boxes</h3>
 <p>You can export a polygons object into a shapefile using the <code><a href="http://rgdal.r-forge.r-project.org/reference/writeOGR.html">writeOGR()</a></code> function from the <code>rgdal</code> package. Since there is a lot of good online documentation for that package, I will present an example of how to export your data using the function in the code snippet below, but I will not explain the nuts and bolts in detail. Alternatively, you can save your work as a native R object (.rds format). This is the recommended method if you are storing objects for projects that are in progress, but when you have a finished product consider it best practice to export it to a shapefile, because the county GIS standard is ArcGIS. If you save it only as a native R object, the rest of the staff may be unable to use it on their software.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://rgdal.r-forge.r-project.org">rgdal</a></span><span class="op">)</span>
 
 <span class="co"># export to shapefile</span>
@@ -520,14 +629,15 @@
 
 <span class="co"># load a saved object</span>
 <span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">'my_new_sample.rds'</span><span class="op">)</span></code></pre></div>
+<p><a name="predicting_cover"></a></p>
 </div>
 </div>
-<div id="predicted-cover" class="section level2">
+<div id="predicted-cover-tools" class="section level2">
 <h2 class="hasAnchor">
-<a href="#predicted-cover" class="anchor"></a>Predicted Cover</h2>
+<a href="#predicted-cover-tools" class="anchor"></a>Predicted Cover Tools</h2>
 <p>The <code><a href="../reference/pred_cover.html">pred_cover()</a></code> function predicts the level of vegetative cover using an NDVI-based model. Over a given spatial polygon, the function predicts the level of cover based upon orthographic imagery, and prints a new raster of predicted cover values to a specified directory <code>out_path</code>.</p>
 <p>The full syntax of the function is <code><a href="../reference/pred_cover.html">pred_cover(polys, in_path, out_path, rgb_path = NULL, cir_path = NULL, buff = sf_buff)</a></code>. The argument <code>polys</code> is the spatial polygon object of taxlots over which you want to predict cover. This function is designed to default to 4-band imagery, so the argument <code>in_path</code> is a character string representing a directory path to 4-band imagery. In 2016, the County received 3-band RGB and CIR imagery. If this is the case for you, set the arguments <code>rgb_path</code> and <code>cir_path</code> to directory paths to the RGB and CIR imagery respectively, and do not specify an argument for <code>in_path</code>. The argument <code>buff</code> is the riparian buffer for the WSI hydro-enforced layer clipped to the Rural Residential zone.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># not run</span>
 <span class="co"># change directory paths to point to your data</span>
 
@@ -541,13 +651,14 @@
 
 <span class="co"># predict cover change</span>
 <span class="fu"><a href="../reference/pred_change.html">pred_change</a></span><span class="op">(</span><span class="st">'E:/Riparian/pred_2016'</span>, <span class="st">'E:/Riparian/pred_2018'</span>, <span class="st">'E:/Riparian/chng_16to18'</span><span class="op">)</span></code></pre></div>
+<p><a name="predicting_change"></a></p>
 </div>
-<div id="predicted-cover-change" class="section level2">
+<div id="predicting-cover-change" class="section level2">
 <h2 class="hasAnchor">
-<a href="#predicted-cover-change" class="anchor"></a>Predicted Cover Change</h2>
+<a href="#predicting-cover-change" class="anchor"></a>Predicting Cover Change</h2>
 <p>The <code><a href="../reference/pred_change.html">pred_change()</a></code> function predicts the level of change in riparian cover based upon the output of the <code><a href="../reference/pred_cover.html">pred_cover()</a></code> function. The full syntax is <code><a href="../reference/pred_change.html">pred_change(year1_path, year2_path, out_path)</a></code>. The argument <code>year1_path</code> is a character string specifying a directory path to the rasters produced by <code><a href="../reference/pred_cover.html">pred_cover()</a></code> for year 1, and the argument <code>year2_path</code> is a character string specifying a directory path to the rasters produced by <code><a href="../reference/pred_cover.html">pred_cover()</a></code> for year 2. The argument <code>out_path</code> specifies the directory to which the function will print rasters with values of predicted change in cover.</p>
 <p>Produce a table summarizing the predicted change in cover using the function <code><a href="../reference/pred_change_report.html">pred_change_report()</a></code>. The full syntax is <code><a href="../reference/pred_change_report.html">pred_change_report(chng_path, year1_path, year2_path, permits = permits_13to18, lots = sf_lots, title = 'pred_chng_table.csv')</a></code>. The argument <code>chng_path</code> is the path to the directory of predicted change rasters produced by <code><a href="../reference/pred_change.html">pred_change()</a></code>. The arguments <code>year1_path</code> and <code>year2_path</code> specify the paths to the directories of predicted cover rasters output by <code><a href="../reference/pred_cover.html">pred_cover()</a></code> for year 1 and year 2 respectively. The argument <code>permits</code> is the same csv file of approved permits you used to produce change tables of randomly selected sites. The default is set to the list of permits from 2013 to 2018 to help demonstrate the functionality of the package in this vignette. The argument <code>lots</code> defaults to a shapefile of taxlots in the priority corridor, and the function uses this file to search for which taxlot a given area of the priority corridor lies within. The argument <code>title</code> specifies the title of the predicted change table, which should end in ‘.csv’, and prints to the working directory.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># not run</span>
 <span class="co"># change directory paths to point to your data</span>
 

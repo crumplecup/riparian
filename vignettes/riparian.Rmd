@@ -16,7 +16,35 @@ knitr::opts_chunk$set(
 )
 ```
 
-Welcome to the `vignette` for the package `riparian`, a suite of tools designed to help Benton County Community Development staff analyze riparian cover extent and change in cover over time.  This document models the workflow of producing an annual monitoring report for the Benton County riparian monitoring program, and demonstrates how functions in the `riparian` package can make monitoring faster and more efficient for the researcher.
+Welcome to the `vignette` for the package `riparian`, a suite of tools designed to help Benton County Community Development staff analyze riparian cover extent and change in cover over time.  This document models the workflow of producing an annual monitoring report for the Benton County riparian monitoring program, and demonstrates how functions in the `riparian` package can make monitoring faster and more efficient for the researcher.  The tools in this package adhere to the procedures described in the [Research Methods](methods.html) document.
+
+## Table of Contents
+
+ * [Step One: Site Plots](#site_plots)
+ * [The Library Path](#library_path)
+ * [Survey Boxes](#survey_boxes)
+ * [Thumbnail Images](#thumbnails)
+ * [Sample Plots](#sample_plots)
+ * [Predicting Cover](#pred_cover)
+ * [Scoring Samples](#scoring_samples)
+ * [Subsetting Sites](#subsetting_sites)
+ * [Plot Cover Extent](#plot_cover)
+ * [Plot Cover Change](#plot_change)
+ * [Clean Permit List](#clean_permits)
+ * [Change Tables](#change_tables)
+ * [Comparing Areas with Permits to Random Areas](#comparing_permits_to_random)
+ * [Drawing New Survey Boxes](#sampler)
+ * [Vetting Survey Boxes](#vetting)
+   + [Process for Inspecting Boxes](#inspecting)
+   + [Verifying Form and Position](#verifying_form)
+   + [Selecting Lots with Active Permits](#selecting_active_permits)
+   + [Overlapping Survey Boxes](#overlapping)
+ * [Appending Samples](#append_samples)
+ * [Exporting Survey Boxes](#export_boxes)
+ * [Predicted Cover Tools](#predicting_cover)
+   + [Predicting Cover Change](#predicting_change)
+
+<a name="site_plots"></a>
 
 ## Step One:  Site Plots
 
@@ -24,6 +52,7 @@ Benton County conducts riparian monitoring whenever new high resolution (1-foot)
 
 The County currently monitors 54 randomly selected sites along priority corridors, and may add additional sites based upon future permit approvals.  The reason we look at the same 54 sites every year is because we are trying to detect change in cover.  If we looked at a different slew of sites each year, it would be hard to know whether an increase or decrease in cover were due to variation between the sites we selected, or whether vegetation removal or accrual occurred.  Using this method, we can circle individual trees that have gone missing from one year to the next.  Because the sites are randomly selected and representative of conditions in the priority corridor generally, we can be reasonably confident that changes in cover within the sample reflect conditions in the priority corridor.
 
+<a name="library_path"></a>
 
 ### The Library Path
 
@@ -38,30 +67,34 @@ If you using a county computer linked into the network, as of 2021 there is an a
 .libPaths( c( 'P:/lib', .libPaths()) )
 ```
 
-### Sampling Boxes
+<a name="survey_boxes"></a>
 
-The `riparian` package contains several data objects related to riparian monitoring in Benton County.  You can access these data objects by name using the `data()` function, or they will load automatically with the rest of package when using `library().  Access the polygon shapefile containing the 54 sampling boxes as shown:
+### Survey Boxes
+
+The `riparian` package contains several data objects related to riparian monitoring in Benton County.  You can access these data objects by name using the `data()` function, or they will load automatically with the rest of package when using `library().  Access the polygon shapefile containing the 54 survey boxes as shown:
 
 ```{r samples}
 # load the package, all associated functions and data objects
 library(riparian)
 
-# alternative method: access the sampling box object without loading the full package
+# alternative method: access the survey box object without loading the full package
 data(random_samples, package = 'riparian')
 
 # use the sf package to plot the first box
-plot(sf::st_zm(random_samples[1, ]), main = 'Example Sampling Box')
+plot(sf::st_zm(random_samples[1, ]), main = 'Example Survey Box')
 ```
 
 In 2018, the County collected orthographic imagery in S:/maps/OrthoPhotos, with each year of imagery in a separate folder.  Each raster file is typically a large file covering a broad extent of the county.  Performing operations on these files is expensive, and when using the county network can slow traffic for others and increase the risk of dropped connections or other errors.  If you can copy the years of interest to an external drive, this can minimize network traffic and speed performance at your workstation.  However, due to the size of the data, orthographic data from the whole county will likely not fit on hard drive of a laptop.
 
-Compared the size of the survey images, the monitoring boxes are relatively small.  The `thumbnails()` functions produces smaller raster files just big enough to fit a given set of sampling boxes.  These raster files are small enough to fit on a laptop without impeding performance, allowing one to conduct the remainder of the analysis without being tethered to an external drive or the county network.
+Compared the size of the survey images, the monitoring boxes are relatively small.  The `thumbnails()` functions produces smaller raster files just big enough to fit a given set of survey boxes.  These raster files are small enough to fit on a laptop without impeding performance, allowing one to conduct the remainder of the analysis without being tethered to an external drive or the county network.
+
+<a name="thumbnails"></a>
 
 ### Thumbnail Images
 
-The `thumbnails()` function takes three arguments.  `in_path` is the directory path for orthoimagery.  `out_path` is the directory in which to print the thumbnail images.  `polys` is the sampling box spatial object.
+The `thumbnails()` function takes three arguments.  `in_path` is the directory path for orthoimagery.  `out_path` is the directory in which to print the thumbnail images.  `polys` is the survey box spatial object.
 
-R uses the convention of forward slashes in path names (for instance, the path to my working folder for this project is 'P:/Riparian' and the path to the 2018 imagery is 'S:/maps/OrthoPhotos/Oregon2018').  The function expects a character string, so the path name needs to have single or double quotes around it.  When you run this function, it will produce a .tif file in the output directory centered around each sampling box in the `polys` argument.
+R uses the convention of forward slashes in path names (for instance, the path to my working folder for this project is 'P:/Riparian' and the path to the 2018 imagery is 'S:/maps/OrthoPhotos/Oregon2018').  The function expects a character string, so the path name needs to have single or double quotes around it.  When you run this function, it will produce a .tif file in the output directory centered around each survey box in the `polys` argument.
 
 ```{r thumbnail, eval=FALSE}
 
@@ -71,20 +104,24 @@ thumbnails(in_path = 'S:/maps/OrthoPhotos/Oregon2018',
            polys = random_samples)
 
 ```
-  
+
+<a name="sample_plots"></a>
+
 ### Sample Plots
 
-In order to assess the level of cover over a sample area, we need to project the lines of the sampling box over the new orthographic imagery. The function for printing these plots is called `plot_samples()`.  The full syntax for the function is `plot_samples(in_path, out_path, polys = random_samples, year, type = 'random', method = 'lm')`.  Let's break down these arguments one by one.
+In order to assess the level of cover over a sample area, we need to project the lines of the survey box over the new orthographic imagery. The function for printing these plots is called `plot_samples()`.  The full syntax for the function is `plot_samples(in_path, out_path, polys = random_samples, year, type = 'random', method = 'lm')`.  Let's break down these arguments one by one.
 
-The first argument is called `in_path` and it is the path to the directory of orthographic imagery.  If you made a directory of thumbnails, use this directory as your `in_path` argument.  The second argument is `out_path`, and specifies the location where the function will print the sample plots.  The third argument, `polys` is the polygon shapefile of sampling boxes.
+The first argument is called `in_path` and it is the path to the directory of orthographic imagery.  If you made a directory of thumbnails, use this directory as your `in_path` argument.  The second argument is `out_path`, and specifies the location where the function will print the sample plots.  The third argument, `polys` is the polygon shapefile of survey boxes.
 
 The `year` argument is an integer that represents the year of orthographic survey.  Do not try getting fancy and entering 'year = 2020jun' or somesuch, because the tools in this package use this number a lot.  Each one is expecting an integer and will break if they do not get one.
 
 The `type` argument, on the other hand, is entirely there for your convenience. You can even safely ignore it.  In 2018, I wanted to know if the level of cover was different in taxlots where the county had issued permits that might affect the riparian zone, compared to the priority corridor as a whole.  I labeled random samples in the riparian corridor as 'random' and samples where the county had issued permits as 'permit'.  The `type` argument is expecting a word of your choice wrapped in quotes.  Other tools in the `riparian` package allow you to filter your sample pool by the `type` names you specify.
 
+<a name="pred_cover"></a>
+
 ### Predicting Cover
 
-The `plot_samples()` function predicts the level of cover in each slice of the sampling box using a linear regression fit to the record of sample observations from 2018, 2016 and 2009. The function adds a green bar to the outer edge of the sample box where it predicts full cover, yellow on slices of partial cover, and red on slices of bare ground.  The function also outputs a spreadsheet containing the predicted values, correctly formatted for later use by other tools in this package.  The spreadsheet output can save you labor by automatically scoring easy calls.
+The `plot_samples()` function predicts the level of cover in each slice of the survey box using a linear regression fit to the record of sample observations from 2018, 2016 and 2009. The function adds a green bar to the outer edge of the sample box where it predicts full cover, yellow on slices of partial cover, and red on slices of bare ground.  The function also outputs a spreadsheet containing the predicted values, correctly formatted for later use by other tools in this package.  The spreadsheet output can save you labor by automatically scoring easy calls.
 
 Currently the `plot_samples()` function defaults to using a linear model that expects 4-band imagery (rgbn) as an input.  If you are using 3-band imagery (rgb), then you can tell the function to use a different linear model using the `method` argument.  For 3-band imagery, use the argument `method = 'lm3'`.
 
@@ -112,9 +149,11 @@ plot_samples(in_path = 'S:/maps/OrthoPhotos/Oregon2018',
 <img src="examples/sample_22_2020.png" width = "650">
 <br>
 **Example Sample Plot**
-</center>
+</center> 
 
-The `plot_samples` function prints a .png file into the `out_path` directory for each sampling box in the `polys` object, showing the sampling box superimposed over the aerial imagery, with slices labeled by number (as shown in the example plot above).
+The `plot_samples` function prints a .png file into the `out_path` directory for each survey box in the `polys` object, showing the survey box superimposed over the aerial imagery, with slices labeled by number (as shown in the example plot above).
+
+<a name="scoring_samples"></a>
 
 ## Scoring Samples
 
@@ -159,10 +198,11 @@ write.csv(obs, 'samples_MyYear.csv')
 save(obs, file = 'samples_MyYear.rds')
 ```
 
-If you are using the predicted cover spreadsheet, then as you inspect each site plot, observe whether each slice is assigned the correct cover class.  Where the predicted class is incorrect, you can update the spreadsheet in Excel.  The column names correspond to the slice numbers on the site plot, and the rows of the spreadsheet will be in the order of the sampling boxes fed to the `plot_samples()` function.  So long as you do not have to do too much manual editing, the prediction feature has the potential to save time compared to manually scoring each slice from scratch.
+If you are using the predicted cover spreadsheet, then as you inspect each site plot, observe whether each slice is assigned the correct cover class.  Where the predicted class is incorrect, you can update the spreadsheet in Excel.  The column names correspond to the slice numbers on the site plot, and the rows of the spreadsheet will be in the order of the survey boxes fed to the `plot_samples()` function.  So long as you do not have to do too much manual editing, the prediction feature has the potential to save time compared to manually scoring each slice from scratch.
 
 Note that while you can cut and paste the corrected scores onto the end of the previous observations in Excel, you can also bind them together easily in R using the native function `rbind()`.
 
+<a name="subsetting_sites"></a>
 
 ### Subsetting Sites
 
@@ -216,6 +256,7 @@ sub <- sub[type == 'trib' | type == 'permit']
 sub[, .N, by = .(year, type)]
 ```
 
+<a name="plot_cover"></a>
 
 ## Plot Cover Extent
 
@@ -240,6 +281,8 @@ plot_cover(samples2018[year == 2018 & type != 'trib'], leg_pos = 'topleft')
 **my_cover_plot.png**
 </center>
 
+<a name="plot_change"></a>
+
 ## Plot Cover Change
 
 The function `plot_change(csv, year1, year2)` produces a plot of cover extent change from `year1` to `year2` across samples in `csv`.  Here the function does the subsetting for you in the case of year, but you can still subset `csv` by type.  The optional arguments are the same as for `plot_cover`.
@@ -261,6 +304,8 @@ plot_change(samples2018, 2009, 2016,
 <br>
 **my_change_plot.png**
 </center>
+
+<a name="clean_permits"></a>
 
 ## Clean Permit List
 
@@ -309,12 +354,13 @@ save(perms, file = '/path_to_drive/my_permit_list.rds')
 write.csv(perms, file = '/path_to_drive/my_permit_list.csv')
 ```
 
+<a name="change_tables"></a>
 
 ## Change Tables
 
-The planning staff is concerned with which map taxlots have experienced net cover decrease, especially if the decrease is greater than 10%.  The `build_change_table()` function produces a change table designed for use by the planning staff.  The purpose of this tool is to enable staff to locate where change is occurring, which property owners are involved, and whether any county issued permits may be related.  The change table ranks sampling sites by mean cover change, and includes columns with all MapTaxlot numbers falling within the sampling box and all permits associated with a MapTaxlot on the permit list.
+The planning staff is concerned with which map taxlots have experienced net cover decrease, especially if the decrease is greater than 10%.  The `build_change_table()` function produces a change table designed for use by the planning staff.  The purpose of this tool is to enable staff to locate where change is occurring, which property owners are involved, and whether any county issued permits may be related.  The change table ranks sampling sites by mean cover change, and includes columns with all MapTaxlot numbers falling within the survey box and all permits associated with a MapTaxlot on the permit list.
 
-The full syntax for the function is `build_change_table(csv, year1, year2, polys, lots, permits)`.  The argument `csv` is the record of cover scores for the sampling sites.  The arguments `year1` and `year2` are integers matching values in the `year` column of `csv`.  The argument `polys` is the spatial polygons object of samplings boxes.  The argument `lots` is the polygons object of MapTaxlots, and `permits` is the permit list formatted according to the instructions in the previous section.  The output is a csv file printed to the working directory.
+The full syntax for the function is `build_change_table(csv, year1, year2, polys, lots, permits)`.  The argument `csv` is the record of cover scores for the sampling sites.  The arguments `year1` and `year2` are integers matching values in the `year` column of `csv`.  The argument `polys` is the spatial polygons object of survey boxes.  The argument `lots` is the polygons object of MapTaxlots, and `permits` is the permit list formatted according to the instructions in the previous section.  The output is a csv file printed to the working directory.
 
 ```{r change_table}
 build_change_table(csv = samples2018,
@@ -331,11 +377,13 @@ When a change table indicates that the cover extent has decreased, it is importa
  * If you can identify specific trees or limbs that have been removed, create a slide showing the before and after image with the removal circled to present to planning staff.
   - Try to ascertain on which map taxlot the removal occurred and include the number.
   - Include all permit numbers from the change table column associated with the sample.
- * If no discernible loss has occurred, but changes in camera aspect cause the position of tree canopy relative to the sampling box to move, record as measurement error and disregard.
+ * If no discernible loss has occurred, but changes in camera aspect cause the position of tree canopy relative to the survey box to move, record as measurement error and disregard.
   - We ignore this type of error because it is random (as likely to make cover go up as down) and small relative to sizes of changes we are measuring.
  * If no discernible loss has occurred, but shading effects caused disparate scores between years, correct the shaded record to match the fully visible record and rerun the analysis.
   - If the corrected record is a prior year, include a corrections table for the prior year in your final report.
   
+<a name="comparing_permits_to_random"></a>
+
 ### Comparing Areas with Permits to Random Areas
 
 If cover were to decline in areas where the county has issued permits, the question would naturally arise as to whether permits were a cause.  The county also monitors randomly selected areas in priority riparian corridors.  If cover also decreased in randomly selected areas, it is unlikely permits were the primary cause of decline.  If cover decreased significantly more in permitted areas, then we could not rule out permits as a potential cause.  Whether permits are a plausible cause of cover decline depends on the broader context of how cover is changing in the priority corridor as a whole.
@@ -348,7 +396,7 @@ To compare the difference in mean cover extent between samples of different type
 dt <- samples2018
 
 # use apply to convert each row of score observations
-# into a mean cover extent per sampling box
+# into a mean cover extent per survey box
 dt$mn <- apply(dt[,4:53], 1, function(x) sum(x)/100)
 
 # subset random samples and permit samples for 2018
@@ -361,14 +409,15 @@ t.test(dt_random$mn, dt_permit$mn)
 
 Note the confidence interval associated with the Welch two-sample t-test in your monitoring report.  If the confidence interval overlaps zero, the two sample means are not statistically distinguishable from one another with 95% confidence.
 
+<a name="sampler"></a>
 
-## Sampler
+## Drawing New Survey Boxes
 
-The time will come when you need to draw new sampling boxes to sample new places.  Typically the County will approve new permits and flag those permits that may result in reduction of cover in the priority corridor.  Your bosses may ask you to include newly permitted areas in your sample.  The `sample_streams()` function generates new sampling boxes along the priority corridor within the area of your choice.  
+The time will come when you need to draw new survey boxes to sample new places.  Typically the County will approve new permits and flag those permits that may result in reduction of cover in the priority corridor.  Your bosses may ask you to include newly permitted areas in your sample.  The `sample_streams()` function generates new survey boxes along the priority corridor within the area of your choice.  
 
-The full syntax for the function is `sample_streams(n=100, lots=sf_lots, prc=sf_per, strms=sf_strms)`.  The argument `n` is the number of sampling boxes you want to produce, and defaults to 100.  The argument `prc` is the line file along which the function generates random points.  The default (`sf_per`) is the NHD set of perennial or fish-bearing streams, clipped to the extent of the RR zone, and you should be able to leave the default as is.  
+The full syntax for the function is `sample_streams(n=100, lots=sf_lots, prc=sf_per, strms=sf_strms)`.  The argument `n` is the number of survey boxes you want to produce, and defaults to 100.  The argument `prc` is the line file along which the function generates random points.  The default (`sf_per`) is the NHD set of perennial or fish-bearing streams, clipped to the extent of the RR zone, and you should be able to leave the default as is.  
 
-The argument `strms` defaults to the WSI hydro-enforced drainage layer clipped to the priority corridor (`sf_strms`).  The WSI hydro-enforced drainage layer is more accurate than the NHD dataset, so the function finds the nearest point on the WSI layer to the random point generated on the NHD layer, and draws the sampling box around that point.
+The argument `strms` defaults to the WSI hydro-enforced drainage layer clipped to the priority corridor (`sf_strms`).  The WSI hydro-enforced drainage layer is more accurate than the NHD dataset, so the function finds the nearest point on the WSI layer to the random point generated on the NHD layer, and draws the survey box around that point.
 
 The argument `lots` is the polygon object that specifies the area within which you want to draw samples, and defaults to the whole priority corridor (`sf_lots`).  If you have a list of permitted sites to check, then clip the `sf_lots` object down to only those taxlots you want to check, and specify the location of the resulting object in the `lots` argument.
 
@@ -398,11 +447,83 @@ set.seed(777)
 new_sample <- sample_streams(n = 10, lots = permit_lots)
 ```
 
-### Bad Sampling Boxes
+<a name="vetting"></a>
 
-The sampling tool has known bugs that cause sampling boxes to fail to draw correctly.  I would offer an expected date when these bugs might be resolved, but let's just say I was lucky to get the sampler function working at all.  When you generate a series of sampling boxes, it is possible that many will be good boxes and some will be bad boxes.  My strategy was to create more sampling boxes than I needed, and then to delete bad or unwanted boxes from the resulting spatial object.
+## Vetting Survey Boxes
 
-R recognizes the sampling boxes as spreadsheets with associated spatial data.  Each sampling box is a row of data, and you can delete unwanted rows as shown in the code snippet below.  Note the use of the concatenate function `c()` to delete multiple samples at once.
+There are a chain of assumptions that occur when generating survey boxes.  We expect:
+
+ * The randomly-selected point will occur on a stream path.
+ * The stream path will occur in one of the specified tax lots.
+ * The survey box will extend across 150-ft of stream path, and 50-ft into the riparian zone.  
+ * Survey boxes will have 50 slices per box, with divisions between slices to extend perpendicular from the stream path.
+ * The survey box will follow the higher order stream (main stem) at tributary junctions.  
+
+These assumptions are requirements that must hold for survey boxes to be valid.  The `riparian` package depends upon a suite of complex spatial and data libraries, and my imperfect understanding of how those libraries function and interact.  Hence, one should view with a reasonable amount of suspicion the survey boxes output by the `sample_streams()` function until having had the chance to vet each survey box to ascertain that it meets each basic assumption, or requirement, imposed upon valid survey boxes.
+
+The `inspect_samples()` functions is a tool designed to address the difficulty of verifying whether new samples meet all the validation criteria.  The full syntax of the function is:
+
+```{r, eval=F}
+inspect_samples(
+  samples = my_new_samples, # replace with the name of new samples to vet
+  in_path = '/path_to_imagery/', # replace with your own path to raster imagery
+  out_path = getwd(), # path to output results, defaults to working directory
+  permits = permits_13to18, # replace with cleaned list of active permits
+  lots = sf_lots  # lots within the riparian corridor, can remain as-is
+)
+
+```
+
+<a name="inspecting"></a>
+
+### Process for Inspecting Boxes
+
+When run, `inspect_samples()` will print a series of PNG files to `out_path`.  Each picture will show a survey box from `samples`, as well as any maptaxlots overlain by the survey box, and the adjacent priority riparian corridor.  The figure labeled [Inspection Plot](#inspection) shows an example from 2020.
+
+<a name="inspection"></a>
+<center>
+<img src="examples/inspection_plot.png" width = "650">
+<br>
+**Inspection Plot**
+</center>
+
+For each survey box in samples, the function looks for maptaxlots lying under the box and prints them in a black outline over raster imagery.  The maptaxlot number prints in the center of each taxlot.  Blue numbers indicate the maptaxlot has active county permits, while red numbers indicate no active permits.  The riparian corridor is superimposed over the top of the imagery in translucent blue.  The subject survey box will appear as a clear wire frame within the riparian corridor, while other survey boxes in the list will be red in color. Use the inspection plots to ascertain:
+
+ * If a survey box has the correct form around a valid position on the stream path.
+ * If a survey box overlays a maptaxlot with an active county permit.
+ * If a survey box overlaps another survey box in the sample set.
+
+<a name="verifying_form"></a>
+
+#### Verfiying Form and Position
+
+The sampling tool has known bugs that cause survey boxes to fail to draw correctly.  I would offer an expected date when these bugs might be resolved, but let's just say I was lucky to get the sampler function working at all.  When you generate a series of survey boxes, it is possible that many will be good boxes and some will be [bad boxes](#bad_boxes).  A box that is properly drawn will extend 150-ft along the stream path, and extend 50-ft into the riparian corridor, divided into 25 evenly-spaces slices on either stream bank, with divisions between slices extending perpendicular from the direction of the stream path.  A box that is properly positioned is centered on the stream path within the priority riparian corridor, as delineated in blue on the inspection plots.
+
+<a name="bad_boxes"></a>
+<center>
+<img src="examples/bad_boxes.png" width = "650">
+<br>
+**Bad Boxes**
+</center>
+
+<a name="selecting_active_permits"></a>
+
+#### Selecting Lots With Active Permits
+
+When sampling a subset of taxlots (lots with active permits), compared to the corridor as a whole (randomly-selected lots), the `sample_streams()` function can fail to properly restrict the sampling area to the subset of lots, and unintentionally
+draw samples from unrelated parts of the priority corridor outside the study area of interest (lots without active permits).  This is a known issue that will hopefully be resolved in the near future.
+
+The color of the maptaxlot number on the inspection plot indicates whether the maptaxlot is associated with an active permit.  Blue maptaxlot numbers indicate active permits, while red numbers indicate no active permits.  When sampling lots with active permits, the centerpoint of the survey box (the sampling point) should occur within a lot associated with an active permit, or a blue maptaxlot number.
+
+<a name="overlapping"></a>
+
+#### Overlapping Survey Boxes
+
+Two survey boxes may be valid individually, but if they overlap one another then we cannot use both in the same sample set, because their cover scores are not independent of one another.  The subject survey box has a clear black outline, while additional survey boxes in the list have a red fill.  If a red survey box overlaps the clear black survey box, then there is a conflict with the subject sample, and we can only include one or the other in the analysis.  Standard practice is to retain valid survey boxes in the order produced and discard any subsequent samples that overlap.
+
+To check if new samples (samples with permits) overlap with a pre-existing set of samples (random samples), [append the two sample sets together](#append_samples) before running `inspect_samples()`.  The pre-existing samples will appear as red survey boxes when new survey boxes are the subject of the plot, and you can disregard inspection plots where the pre-existing survey boxes are the subject.
+
+My strategy to deal with invalid boxes generally was to create more survey boxes than I needed, and then to delete bad or invalid boxes from the resulting spatial object.  R recognizes the survey boxes as spreadsheets with associated spatial data.  Each survey box is a row of data, and you can delete unwanted rows as shown in the code snippet below.  Note the use of the concatenate function `c()` to delete multiple samples at once.
 
 ```{r bad_box, eval = F}
 # remove unwanted sample from polygons object
@@ -410,17 +531,13 @@ samp1 <- new_sample[ , -2]  # remove second sample
 samp2 <- new_sample[ , -c(3,7:9)]  # remove samples 3, 7, 8 and 9
 ```
 
-<center>
-<img src="examples/bad_boxes.png" width = "650">
-<br>
-**Bad Boxes**
-</center>
+<a name="append_samples"></a>
 
 ### Appending Samples
 
-When you have a pre-existing set of sampling boxes, you may wish to append additional sampling boxes to the end.  For instance, you may have a set of sampling boxes used for permit-based monitoring in a previous report.  When presented with a list of new permits the county has issued since the last report, you may elect to take a smaller number of samples from the new pool and add these to the pre-existing set.
+When you have a pre-existing set of survey boxes, you may wish to append additional survey boxes to the end.  For instance, you may have a set of survey boxes used for permit-based monitoring in a previous report.  When presented with a list of new permits the county has issued since the last report, you may elect to take a smaller number of samples from the new pool and add these to the pre-existing set.
 
-Since the sampling boxes are represented as lists, you construct a new sampling object by concatenating two lists together using the `c()` function.
+Since the survey boxes are represented as lists, you construct a new sampling object by concatenating two lists together using the `c()` function.
 
 
 ```{r appending_samples, eval = F}
@@ -434,8 +551,9 @@ merged_1 < - c(random_samples, new_sample)
 merged_2 < - c(new_sample, new_sample)
 ```
 
+<a name="export_boxes"></a>
 
-### Exporting Sampling Boxes
+### Exporting Survey Boxes
 
 You can export a polygons object into a shapefile using the `writeOGR()` function from the `rgdal` package.  Since there is a lot of good online documentation for that package, I will present an example of how to export your data using the function in the code snippet below, but I will not explain the nuts and bolts in detail.  Alternatively, you can save your work as a native R object (.rds format).  This is the recommended method if you are storing objects for projects that are in progress, but when you have a finished product consider it best practice to export it to a shapefile, because the county GIS standard is ArcGIS.  If you save it only as a native R object, the rest of the staff may be unable to use it on their software.
 
@@ -456,8 +574,9 @@ load('my_new_sample.rds')
 
 ```
 
+<a name="predicting_cover"></a>
 
-## Predicted Cover
+## Predicted Cover Tools
 
 The `pred_cover()` function predicts the level of vegetative cover using an NDVI-based model.  Over a given spatial polygon, the function predicts the level of cover based upon orthographic imagery, and prints a new raster of predicted cover values to a specified directory `out_path`.
 
@@ -481,7 +600,9 @@ pred_change('E:/Riparian/pred_2016', 'E:/Riparian/pred_2018', 'E:/Riparian/chng_
 
 ```
 
-## Predicted Cover Change
+<a name="predicting_change"></a>
+
+## Predicting Cover Change
 
 The `pred_change()` function predicts the level of change in riparian cover based upon the output of the `pred_cover()` function.  The full syntax is `pred_change(year1_path, year2_path, out_path)`.  The argument `year1_path` is a character string specifying a directory path to the rasters produced by `pred_cover()` for year 1, and the argument `year2_path` is a character string specifying a directory path to the rasters produced by `pred_cover()` for year 2.  The argument `out_path` specifies the directory to which the function will print rasters with values of predicted change in cover.
 

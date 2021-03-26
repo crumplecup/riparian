@@ -4,7 +4,7 @@
 \alias{thumbnails}
 \title{thumbnails}
 \usage{
-thumbnails(in_path, out_path, polys = random_samples)
+thumbnails(in_path, out_path, polys = random_samples, output = "tif")
 }
 \arguments{
 \item{in_path}{is a character vector containing the path to the orthoimagery}
@@ -12,6 +12,8 @@ thumbnails(in_path, out_path, polys = random_samples)
 \item{out_path}{is a character vector specifying the output directory for the plots}
 
 \item{polys}{is a SpatialPolygonsDataFrame object (the sample boxes shapefile)}
+
+\item{output}{specifies type of output, 'tif' or 'png'}
 }
 \value{
 saves rasters of extent `polys` to `out_path`
@@ -21,4 +23,9 @@ gets list of raster names from `in_path`
 searches for rasters in extent of `polys`
 mosaics rasters in extent together and crops to extent
 saves raster in `out_path`
+Output options:
+}
+\details{
+* 'tif' makes a raster slightly larger than the target extent.
+ * 'png' superimposes the polygon object and riparian buffer over the raster imagery.
 }

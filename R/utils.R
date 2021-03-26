@@ -623,6 +623,76 @@ is_in <- function(pt, box)	{
 
 
 
+#' inspect_samples
+#' 
+#' Prints plots showing the maptaxlots covered by a sampling box.  
+#' 
+#' @param samples is a list of surveying boxes produced by `sample_streams`
+#' @param in_path is a character vector delineating file path to raster imagery.
+#' @param out_path is a character vector delineating a file path to print png output.
+#' @param permits is a permit list with cols c(1, 5) = c(record_no, maptaxlot)
+#' @param lots is a multipolygon sf object representing maptaxlots in the riparian corridor.
+#' @return Prints pngs of maptaxlots covered by sampling boxes for inspection of sample quality.
+#' @export
+inspect_samples <- function(samples, 
+                            in_path,
+                            out_path = getwd(),
+                            permits = permits_13to18, 
+                            lots = sf_lots) {
+  # set samples, lots and buffer to common crs
+  crs_ref <- sf::st_crs(samples)
+  lots <- sf::st_transform(lots, crs_ref)
+  buffer <- sf::st_transform(sf_buff, crs_ref)
+  mtls <- 0
+  perms <- 0
+  for (i in seq_along(samples))  {
+    # for each survey box, subset lots overlain by the box
+    sampled_lots <- suppressWarnings(sf::st_crop(lots, samples[i, ]))
+    sampled_lots <- lots[lots$MapTaxlot %in% sampled_lots$MapTaxlot, ]
+    # make a boundary box to capture all lots surrounding the sample
+    frame <- sf::st_bbox(sampled_lots)
+    # make frame into polygon with same spatial reference
+    frame <- sf::st_as_sfc(frame)
+    sf::st_set_crs(frame, crs_ref)
+    # clip riparian buffer to frame
+    buff <- sf::st_crop(buffer, frame)
+    # find raster imagery filling the frame
+    r <- suppressWarnings(fill_extent(frame, in_path))
+    
+    if (!is.null(r)) {
+      print(paste0('filling ', i))
+      # convert sample, other samples, sampled lots, and buffer to raster crs
+      sample <- sf::st_transform(samples[i, ], sf::st_crs(r))
+      other_samples <- sf::st_transform(samples[-i, ], sf::st_crs(r))
+      sampled_lots <- sf::st_transform(sampled_lots, sf::st_crs(r))
+      buff <- sf::st_transform(buff, sf::st_crs(r))
+      # find centroid of taxlots to position label
+      map_cords <- suppressWarnings(sf::st_coordinates(sf::st_centroid(sampled_lots)))
+      # number of permits associated with each taxlot
+      perms <- unlist(lapply(sampled_lots$MapTaxlot, function(x) sum(permits$maptaxlot %in% x)))
+      # boolean indicating whether the taxlot has active permits
+      perms[perms > 0] <- 1
+      # color ids for permit status
+      perm_ids <- perms + 1
+      # red indicates no permits, blue indicates active permits
+      perm_cols <- get_palette(c('crimson', 'ocean'), 1)
+      # plot results
+      png(file.path(out_path, paste0('sample_', i, '.png')),
+          height = 36, width = 36, units = 'cm', res = 300)
+      raster::plotRGB(r)
+      plot(sampled_lots[ , 1], lwd = 2, col = get_palette('slate', .1), add = T)
+      plot(buff, lwd = 0.25, col = get_palette('ocean', .15), add = T)
+      plot(other_samples, lwd = 0.25, col = get_palette('crimson', .4), add = T)
+      plot(sample[ , 1], lwd = 0.5, col = get_palette('gold', .1), add = T)
+      text(map_cords, labels = sampled_lots$MapTaxlot, cex = 1.25, 
+           col = perm_cols[perm_ids])
+      dev.off()
+    }
+  }
+}
+
+
+
 #' junction
 #' 
 #' Finds adjacent stream lines.
@@ -1452,6 +1522,7 @@ squash <- function(vec)  {
 
 
 
+
 #' touches
 #' 
 #' one touches other
@@ -1476,10 +1547,15 @@ touches <- function(box1, box2) {
 #' searches for rasters in extent of `polys`
 #' mosaics rasters in extent together and crops to extent
 #' saves raster in `out_path`
+#' Output options:
+#' 
+#'  * 'tif' makes a raster slightly larger than the target extent.
+#'  * 'png' superimposes the polygon object and riparian buffer over the raster imagery.
 #'
 #' @param in_path is a character vector containing the path to the orthoimagery
 #' @param out_path is a character vector specifying the output directory for the plots
 #' @param polys is a SpatialPolygonsDataFrame object (the sample boxes shapefile)
+#' @param output specifies type of output, 'tif' or 'png'
 #' @return saves rasters of extent `polys` to `out_path`
 #' @export
 thumbnails <- function(in_path, out_path, polys = random_samples, output = 'tif')  {

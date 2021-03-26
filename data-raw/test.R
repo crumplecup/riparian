@@ -1,3 +1,6 @@
+
+inspect_samples(permit_samples, ortho20, '/home/erik/output/inspect/', permits = perm_sub)
+
 blen <- 10
 bit <- rep(5, blen)
 tbit <- stats::fft(bit) / blen
@@ -16,6 +19,7 @@ plot(abs(itb))
 rec <- data.table::fread('/home/erik/output/df20k_1000.csv')
 recf <- data.table::fread('/home/erik/output/ff20k_1000.csv')
 recg <- data.table::fread('/home/erik/output/fg20k_1000.csv')
+sum(nrow(rec) + nrow(recf) + nrow(recg))
 # AD test
 plot(rec$input, rec$ad, pch = 20, col = get_palette('charcoal'),
      xlab = 'rate', ylab = 'test statistic')
@@ -33,6 +37,18 @@ plot(rec$input, rec$ks, pch = 20, col = get_palette('charcoal'),
      xlab = 'rate', ylab = 'test statistic')
 points(recg$input, recg$ks, col = get_palette('ocean'), pch = 20)
 points(recf$input, recf$ks, col = get_palette('crimson'), pch = 20)
+legend('topright', legend = c('debris flows', 'fines', 'gravels'), 
+       fill = get_palette(c('charcoal', 'crimson', 'ocean'), .8))
+
+# KS test sub
+subd <- rec[rec$ks < .20, ]
+subf <- recf[recf$ks < .20, ]
+subg <- recg[recg$ks < .20, ]
+
+plot(subd$input, subd$ks, pch = 20, col = get_palette('charcoal'),
+     xlab = 'rate', ylab = 'test statistic')
+points(subg$input, subg$ks, col = get_palette('ocean'), pch = 20)
+points(subf$input, subf$ks, col = get_palette('crimson'), pch = 20)
 legend('topright', legend = c('debris flows', 'fines', 'gravels'), 
        fill = get_palette(c('charcoal', 'crimson', 'ocean'), .8))
 
@@ -69,7 +85,10 @@ plot(sf::st_zm(random_samples[33,]))
 
 
 
-load('/home/erik/data/permit_samples_144.rds')
+load('/home/erik/data/permit_samples_144_final.rds')
+load('/home/erik/data/perm_sub.rds')
+perm_lots <- sf_lots[sf_lots$MapTaxlot %in% perm_sub$maptaxlot, ]
+plot(perm_lots[, 1])
 
 ortho20 <- '/media/erik/catacomb/gis/benton20_3in'
 ortho20b <- '/media/crumplecup/catacomb/gis/benton20_9in'
@@ -104,6 +123,12 @@ library(data.table)
 perms <- data.table::fread('/home/erik/data/permits20.csv')
 perm_mtls <- perms$maptaxlot
 perm_lots <- sf_lots[sf_lots$MapTaxlot %in% perm_mtls, ]
+
+perm_mtls <- perm_sub$maptaxlot
+perm_lots <- sf_lots[sf_lots$MapTaxlot %in% perm_mtls, ]
+class(perm_lots)
+thumbnails(ortho20, '/home/erik/output', perm_lots, output = 'png')
+
 
 permit_samples <- sample_streams(3, lots = perm_lots)
 # screen out bad boxes [omitted]
