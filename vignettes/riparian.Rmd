@@ -148,7 +148,7 @@ plot_samples(in_path = 'S:/maps/OrthoPhotos/Oregon2018',
 <center>
 <img src="examples/sample_22_2020.png" width = "650">
 <br>
-**Example Sample Plot**
+**[Example Sample Plot](examples/sample_22_2020.png)**
 </center> 
 
 The `plot_samples` function prints a .png file into the `out_path` directory for each survey box in the `polys` object, showing the survey box superimposed over the aerial imagery, with slices labeled by number (as shown in the example plot above).
@@ -278,7 +278,7 @@ plot_cover(samples2018[year == 2018 & type != 'trib'], leg_pos = 'topleft')
 <center>
 <img src="my_cover_plot.png" width = "650">
 <br>
-**my_cover_plot.png**
+**[my_cover_plot.png](my_cover_plot.png)**
 </center>
 
 <a name="plot_change"></a>
@@ -302,7 +302,7 @@ plot_change(samples2018, 2009, 2016,
 <center>
 <img src="my_change_plot.png" width = "650">
 <br>
-**my_change_plot.png**
+**[my_change_plot.png](my_change_plot.png)**
 </center>
 
 <a name="clean_permits"></a>
@@ -484,7 +484,7 @@ When run, `inspect_samples()` will print a series of PNG files to `out_path`.  E
 <center>
 <img src="examples/inspection_plot.png" width = "650">
 <br>
-**Inspection Plot**
+**[Inspection Plot](examples/inspection_plot.png)**
 </center>
 
 For each survey box in samples, the function looks for maptaxlots lying under the box and prints them in a black outline over raster imagery.  The maptaxlot number prints in the center of each taxlot.  Blue numbers indicate the maptaxlot has active county permits, while red numbers indicate no active permits.  The riparian corridor is superimposed over the top of the imagery in translucent blue.  The subject survey box will appear as a clear wire frame within the riparian corridor, while other survey boxes in the list will be red in color. Use the inspection plots to ascertain:
@@ -503,7 +503,7 @@ The sampling tool has known bugs that cause survey boxes to fail to draw correct
 <center>
 <img src="examples/bad_boxes.png" width = "650">
 <br>
-**Bad Boxes**
+**[Bad Boxes](examples/bad_boxes.png)**
 </center>
 
 <a name="selecting_active_permits"></a>
